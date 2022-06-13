@@ -16,12 +16,15 @@ args = parser.parse_args()
 
 arrayDict = {} #Dictionary intended for moving files later in script
 
-df = pd.DataFrame(columns=['sample_well', 'sample_plate', 'sentrix_ID', 'sentrix_position', 'time', 'array_type', 'gender_donor', 'gender_recipient'])
+df = pd.DataFrame(columns=['sample_id', 'sample_well', 'sample_plate', 'sentrix_ID', 'sentrix_position', 'time', 'array_type', 'gender_donor', 'gender_recipient'])
 for x in range(1, 5): #Number of sheets within excel file 
 	sheet_df =  pd.read_excel(args.excel, sheet_name=x, keep_default_na=True)
 	sheet_df.columns = [col.strip() for col in sheet_df.columns] #Stripping whitespace in column names
+	if x == 4: #Used for the extraction of the sample_id from the excel file 
+		x = 12
+	sample_id = 'SampleID_K' + str(x)
 	for index in sheet_df.index: #iterate through columns
-		row = sheet_df.loc[index, ['Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Time', 'Array_type', 'gender_donor', 'gender_recipient']]
+		row = sheet_df.loc[index, [sample_id, 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Time', 'Array_type', 'gender_donor', 'gender_recipient']]
 		row = list(row)
 		sentrix = str(sheet_df['Sentrix_ID'][index]) + '_' + str(sheet_df['Sentrix_Position'][index])
 		array = sheet_df['Array_type'][index]
