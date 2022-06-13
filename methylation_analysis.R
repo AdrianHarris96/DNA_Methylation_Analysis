@@ -17,6 +17,9 @@ rgSet <- combineArrays(rgSet450k, rgSetEPIC)
 rm(rgSet450k)
 rm(rgSetEPIC)
 
+#Saving set as an RDS file 
+#saveRDS(rgSet, file = "/Users/adrianharris/Desktop/kidney/rgSet.RDS")
+
 #Importing manually-curated sample sheet
 pheno_df <- import('/Users/adrianharris/Desktop/kidney/kidneyTx_methylation.csv')
 
@@ -70,21 +73,26 @@ par(mfrow=c(1,1))
 mtSet <- preprocessRaw(rgSet)
 qc <- getQC(mtSet)
 plotQC(qc)
-?plotQC
+#?plotQC
 qc <- data.frame(qc)
 qc['sample_name'] <- row.names(qc)
 qc <- merge(qc, pheno_df, by = 'sample_name')
-plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5)
+plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
 print(plot)
 densityPlot(mtSet, sampGroups =qc$array_type)
+rm(detP_df)
+rm(mtSet)
+rm(qc)
+rm(detP)
 
 #Normalization
 mtSet <- preprocessNoob(rgSet)
+saveRDS(mtSet, file = "/Users/adrianharris/Desktop/kidney/mtSet.RDS")
 postqc <- getQC(mtSet)
 postqc <- data.frame(postqc)
 postqc['sample_name'] <- row.names(postqc)
 postqc <- merge(postqc, pheno_df, by = 'sample_name')
-plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5)
+plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
 print(plot2)
 densityPlot(mtSet, sampGroups = postqc$array_type)
 
@@ -96,11 +104,10 @@ gmtSet <- mapToGenome(rSet)
 #Predicted Sex 
 predictedSex <- getSex(gmtSet, cutoff = -2)$predictedSex
 
-# #Add column to pheno_df
-# postqc['predicted_sex'] <- predictedSex
-# postqc <- merge(postqc, pheno_df, by = 'sample_name')
-# postqc <- postqc %>% select(c(sample_name, predicted_sex, donor_gender, recipient_gender))
-# write.csv(postqc,"/Users/adrianharris/Desktop/kidneyTx_methylation_predictedSex.csv", row.names = FALSE)
+#Add column to pheno_df
+postqc['predicted_sex'] <- predictedSex
+predictedsex_file <- postqc %>% select(c(sample_name, predicted_sex, gender_donor, gender_recipient))
+write.csv(predictedsex_file,"/Users/adrianharris/Desktop/kidneyTx_methylation_predictedSex.csv", row.names = FALSE)
 
 #Removing probes that include SNPs
 snps <- getSnpInfo(gmtSet)
