@@ -54,15 +54,15 @@ colnames(detP_df) <- c('sample_name', 'p_value_mean')
 detP_df<- detP_df[order(-detP_df$p_value_mean),]
 detP_df<- detP_df[2:nrow(detP_df),]
 detP_df <- merge(detP_df, pheno_df, by = 'sample_name')
-pal <- brewer.pal(3,"Dark2")
+pal <- brewer.pal(4,"Dark2")
 par(mfrow=c(2,1))
 #Plotting 450K barplot 
 barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
-legend("topright", legend=levels(factor(detP_df$time)), fill=pal,
+legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
        cex=0.27, bty = "n", bg="white")
 #Plotting EPIC barplot
 barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
-legend("topright", legend=levels(factor(detP_df$time)), fill=pal,
+legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
        cex=0.27, bty = "n", bg="white")
 
 par(mfrow=c(1,1))
