@@ -83,7 +83,6 @@ densityPlot(mtSet, sampGroups =qc$array_type)
 rm(detP_df)
 rm(mtSet)
 rm(qc)
-rm(detP)
 
 #Normalization
 mtSet <- preprocessNoob(rgSet)
@@ -106,7 +105,7 @@ predictedSex <- getSex(gmtSet, cutoff = -2)$predictedSex
 
 #Add column to pheno_df
 postqc['predicted_sex'] <- predictedSex
-predictedsex_file <- postqc %>% select(c(sample_name, predicted_sex, gender_donor, gender_recipient))
+predictedsex_file <- postqc %>% select(c(sample_id, sample_name, predicted_sex, gender_donor, gender_recipient))
 write.csv(predictedsex_file,"/Users/adrianharris/Desktop/kidneyTx_methylation_predictedSex.csv", row.names = FALSE)
 
 #Removing probes that include SNPs
@@ -115,6 +114,19 @@ gmtSet <- addSnpInfo(gmtSet)
 gr <- granges(gmtSet)
 gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
 #dim(gmtSet)
+
+# Filter unwanted sites 
+# ensure probes are in the same order in the mSetSq and detP objects
+detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
+detP_df <- data.frame(detP)
+
+# remove any probes that have failed in >50% of samples
+keep <- detP < 0.01
+keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
+gmtSet <- gmtSet[keep.probes,]
+#dim(gmtSet)
+
+
 
 #Grab Betas and transpose resulting PCA plot 
 beta <- getBeta(gmtSet)
