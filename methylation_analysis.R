@@ -18,7 +18,7 @@ rm(rgSet450k)
 rm(rgSetEPIC)
 
 #Importing manually-curated sample sheet
-pheno_df <- import('/Users/adrianharris/Desktop/kidney/kidenyTx_methylation.csv')
+pheno_df <- import('/Users/adrianharris/Desktop/kidney/kidneyTx_methylation.csv')
 
 #Adding new column - sample name
 pheno_df['sample_name'] <- 'NA'
@@ -33,7 +33,7 @@ rm(row)
 pheno_df <- pheno_df[,c(2:(ncol(pheno_df)))]
 pheno_df <- pheno_df[,c(ncol(pheno_df),1:(ncol(pheno_df)-1))]
 #pheno_df <- pheno_df[order(pheno_df$sample_name),]
-pheno_df <- pheno_df[!duplicated(pheno_df$sample_name),]
+#pheno_df <- pheno_df[!duplicated(pheno_df$sample_name),]
 
 nrow(subset(pheno_df, array_type == '450K'))
 nrow(subset(pheno_df, array_type == 'EPIC'))
@@ -44,11 +44,11 @@ detP <- data.frame(detP)
 sample_names <- colnames(detP)
 sample_names <- substr(sample_names, 2, nchar(sample_names))
 detPmeans <- colMeans(detP)
-detP_df <- data.frame(matrix(ncol=2, nrow=219))
+detP_df <- data.frame(matrix(ncol=2, nrow=235))
 detP_df['X1'] <- sample_names
 detP_df['X2'] <- detPmeans
 colnames(detP_df) <- c('sample_name', 'p_value_mean')
-
+#write.csv(detP_df,"/Users/adrianharris/Desktop/kidneyTx_p-values.csv", row.names = FALSE)
 
 #Drop the top row before plotting barplot
 detP_df<- detP_df[order(-detP_df$p_value_mean),]
