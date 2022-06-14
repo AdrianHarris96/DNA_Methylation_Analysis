@@ -7,11 +7,12 @@ library(rio)
 library(ggplot2)
 library(tidyverse)
 library(RColorBrewer)
+library(lumi)
 
 #Read data in 
 dir450k <- "/Users/adrianharris/Desktop/kidney/450k_array"
 dirEPIC <- "/Users/adrianharris/Desktop/kidney/EPIC_array"
-rgSet450k <- read.metharray.exp(base=dir450k) #Loading this can be taxing 
+rgSet450k <- read.metharray.exp(base=dir450k, target=pheno_df) #Loading this can be taxing 
 rgSetEPIC <- read.metharray.exp(base=dirEPIC, force=TRUE)
 rgSet <- combineArrays(rgSet450k, rgSetEPIC)
 rm(rgSet450k)
@@ -98,7 +99,7 @@ densityPlot(mtSet, sampGroups = postqc$array_type)
 # Map to Genome
 rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
 gmtSet <- mapToGenome(rSet)
-#dim(gmtSet)
+dim(gmtSet) #Number of probes = 452453
 
 #Predicted Sex 
 predictedSex <- getSex(gmtSet, cutoff = -2)$predictedSex
@@ -113,7 +114,7 @@ snps <- getSnpInfo(gmtSet)
 gmtSet <- addSnpInfo(gmtSet)
 gr <- granges(gmtSet)
 gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
-#dim(gmtSet)
+dim(gmtSet) #Number of probes = 436144 
 
 # Filter unwanted sites 
 # ensure probes are in the same order in the mSetSq and detP objects
@@ -123,26 +124,122 @@ detP_df <- data.frame(detP)
 # remove any probes that have failed in >50% of samples
 keep <- detP < 0.01
 keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
-gmtSet <- gmtSet[keep.probes,]
-#dim(gmtSet)
+gmtSet <- gmtSet[keep.probes,] 
+dim(gmtSet) #Number of probes = 436127 
+
+#Remove probes that located on the X or Y chromosome
+ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
+
+keep <- !(featureNames(gmtSet) %in% ann450k$Name[ann450k$chr %in% 
+                                                   c("chrX","chrY")]) #remove probes that are not of the chrom x or y
+table(keep)
+gmtSet <- gmtSet[keep,]
+dim(gmtSet) #Number of probes = 425716
+
+#Creation of bad probes character and filter gmtSet
+cross.react <- read.csv('/Users/adrianharris/Downloads/illumina450k_filtering/48639-non-specific-probes-Illumina450k.csv', head = T, as.is = T)
+cross.react.probes <- as.character(cross.react$TargetID)
+#Probes identified with potential hybridization issues
+multi.map <- read.csv('/Users/adrianharris/Downloads/illumina450k_filtering/HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt', head = F, as.is = T)
+multi.map.probes <- as.character(multi.map$V1)
+# determine unique probes between the cross-reactive and multi-map probes
+bad.probes <- unique(c(cross.react.probes, multi.map.probes))
+keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
+table(keep)
+gmtSet <- gmtSet[keep,]
+dim(gmtSet) #Number of probes = 392870
+
+#Grab Betas and m_values
+beta_values <- getBeta(gmtSet)
+m_values <- getM(gmtSet)
+
+#Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples�0.05 in all samples
+beta_values_filtered <- as.data.frame(beta_values) 
+dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))
+beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
+#6327 Hypomethylated
+
+#Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
+dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
+beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
+dim(beta_values_filtered)
+#204 hypermethylated
+
+# #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
+# beta_values_case = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
+# pheno_df_case = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
 
 
+#EXCLUDE DCD SAMPLES - Kidney dataset
+beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
+#Removing rows based on the sample_name column in phenotype dataframe
+pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
 
-#Grab Betas and transpose resulting PCA plot 
-beta <- getBeta(gmtSet)
-beta <- data.frame(beta)
-beta <- t(beta)
-beta <- data.frame(beta)
-pca_general <- prcomp(beta, center=TRUE)
+#Convert filter beta dataframe to m_value dataframe
+m_values_case = beta2m(beta_values_case)
+
+
+#Transpose resulting PCA plot 
+transposed_beta <- t(beta_values_case)
+transposed_beta <- data.frame(transposed_beta)
+pca_general <- prcomp(transposed_beta, center=TRUE)
 var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
 scores = as.data.frame(pca_general$x)
 scores['sample_name'] <- row.names(scores)
-
 scores <- merge(scores, pheno_df, by = 'sample_name')
 plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2)) +theme_bw() + geom_point()+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%"))
+plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
 print(plot)
 
+#Filter out the outlier sample - 203504430032_R01C01
+filtered_transposed_beta <- transposed_beta[!((row.names(transposed_beta)) %in% '203504430032_R01C01'),]
+pca_general <- prcomp(filtered_transposed_beta, center=TRUE)
+var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
+scores = as.data.frame(pca_general$x)
+scores['sample_name'] <- row.names(scores)
+scores <- merge(scores, pheno_df, by = 'sample_name')
+plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=time)) +theme_bw() + geom_point(aes(shape=array_type), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
+print(plot)
+
+#Other values you can extract
 M <- getM(gmtSet)
 CN <- getCN(gmtSet)
 
+#Removal of All Variables 
+rm(list = ls())
+rgSet <- readRDS(file = '')
 
+#Differential Methylation Positions 
+?dmpFinder()
+time <- pheno_df$time
+dmp <- dmpFinder(beta_values, pheno = time, type = "categorical")
+head(dmp)
+
+#Differential Methylation - using MEAL 
+rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
+
+#Remove probes measuring SNPs
+gmtSet <- dropMethylationLoci(gmtSet)
+
+#Remove probes with SNPs
+gmtSet <- dropLociWithSnps(gmtSet)
+
+#Remove probes with NAs for betas
+gmtSet <- gmtSet[!apply(getBeta(gmtSet), 1, function(x) any(is.na(x))), ]
+
+#Select a subset of samples
+set.seed(0)
+gmtSet <- gmtSet[sample(nrow(meth), 100000), ]
+
+?runPipeline()
+beta <- data.frame(getBeta(gmtSet))
+beta = t(beta)
+res <- runPipeline(set = transposed_beta, variable_names = pheno_df_case$time)
+resAdj <- runPipeline(set = meth, variable_names = "status", 
+                      covariable_names = "age", analyses = c("DiffMean", "DiffVar"))
+resAdj
+names(resAdj)
+
+#Plotting 
+targetRange <- GRanges("23:13000000-23000000")
+plot(resAdj, rid = "DiffMean", type = "manhattan", highlight = targetRange)
