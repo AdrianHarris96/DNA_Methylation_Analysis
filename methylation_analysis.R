@@ -9,26 +9,14 @@ library(tidyverse)
 library(RColorBrewer)
 library(lumi)
 
-#Read data in 
-dir450k <- "/Users/adrianharris/Desktop/kidney/450k_array"
-dirEPIC <- "/Users/adrianharris/Desktop/kidney/EPIC_array"
-rgSet450k <- read.metharray.exp(base=dir450k, target=pheno_df) #Loading this can be taxing 
-rgSetEPIC <- read.metharray.exp(base=dirEPIC, force=TRUE)
-rgSet <- combineArrays(rgSet450k, rgSetEPIC)
-rm(rgSet450k)
-rm(rgSetEPIC)
-
-#Saving set as an RDS file 
-#saveRDS(rgSet, file = "/Users/adrianharris/Desktop/kidney/rgSet.RDS")
-
 #Importing manually-curated sample sheet
 pheno_df <- import('/Users/adrianharris/Desktop/kidney/kidneyTx_methylation.csv')
 
 #Adding new column - sample name
-pheno_df['sample_name'] <- 'NA'
+pheno_df['Basename'] <- 'NA'
 for (row in 1:nrow(pheno_df)) {
-  sample_name <- paste(pheno_df[row, 'sentrix_ID'], pheno_df[row, 'sentrix_position'], sep="_")
-  pheno_df[row, 'sample_name'] <- sample_name
+  sample_name <- paste(as.numeric(pheno_df[row, 'sentrix_ID']), pheno_df[row, 'sentrix_position'], sep="_")
+  pheno_df[row, 'Basename'] <- sample_name
   rm(sample_name)
 }
 rm(row)
@@ -41,6 +29,23 @@ pheno_df <- pheno_df[,c(ncol(pheno_df),1:(ncol(pheno_df)-1))]
 
 nrow(subset(pheno_df, array_type == '450K'))
 nrow(subset(pheno_df, array_type == 'EPIC'))
+
+#Split into phenotype file 
+pheno450k <- pheno_df[!(pheno_df$array_type == 'EPIC'),]
+phenoEPIC <- pheno_df[!(pheno_df$array_type == '450K'),]
+
+#Read data in 
+dir450k <- "/Users/adrianharris/Desktop/kidney/450k_array"
+dirEPIC <- "/Users/adrianharris/Desktop/kidney/EPIC_array"
+rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
+rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
+rgSet <- combineArrays(rgSet450k, rgSetEPIC)
+#Saving set as an RDS file 
+saveRDS(rgSet450k, file = "/Users/adrianharris/Desktop/kidney/rgSet450k.RDS")
+saveRDS(rgSetEPIC, file = "/Users/adrianharris/Desktop/kidney/rgSetEPIC.RDS")
+saveRDS(rgSet, file = "/Users/adrianharris/Desktop/kidney/rgSet.RDS")
+rm(rgSet450k)
+rm(rgSetEPIC)
 
 #Calculate Detection p-values
 detP <- detectionP(rgSet)
@@ -99,6 +104,7 @@ densityPlot(mtSet, sampGroups = postqc$array_type)
 # Map to Genome
 rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
 gmtSet <- mapToGenome(rSet)
+saveRDS(gmtSet, file = "/Users/adrianharris/Desktop/kidney/gmtSet.RDS")
 dim(gmtSet) #Number of probes = 452453
 
 #Predicted Sex 
@@ -205,10 +211,6 @@ print(plot)
 M <- getM(gmtSet)
 CN <- getCN(gmtSet)
 
-#Removal of All Variables 
-rm(list = ls())
-rgSet <- readRDS(file = '')
-
 #Differential Methylation Positions 
 ?dmpFinder()
 time <- pheno_df$time
@@ -229,17 +231,29 @@ gmtSet <- gmtSet[!apply(getBeta(gmtSet), 1, function(x) any(is.na(x))), ]
 
 #Select a subset of samples
 set.seed(0)
-gmtSet <- gmtSet[sample(nrow(meth), 100000), ]
 
 ?runPipeline()
-beta <- data.frame(getBeta(gmtSet))
-beta = t(beta)
-res <- runPipeline(set = transposed_beta, variable_names = pheno_df_case$time)
-resAdj <- runPipeline(set = meth, variable_names = "status", 
-                      covariable_names = "age", analyses = c("DiffMean", "DiffVar"))
-resAdj
-names(resAdj)
+phenoData <- as.data.frame(pData(gmtSet))
+rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
+set.seed(0) #reproducible results for simulations 
+gmtSet <- gmtSet[sample(nrow(gmtSet), 100000), ]
+featureNames(gmtSet)
 
+table(keep)
+gmtSet <- gmtSet[keep,]
+dim(gmtSet)
+sampleNames <- sampleNames(gmtSet)
+keep <- !(gmtSet@colData$time == 'K3' | gmtSet@colData$time == 'K12')
+gmtSet <- gmtSet@colData[keep,]
+as.data.frame(gmtSet)
+res <- runPipeline(set = gmtSet, variable_names = "time", analyses = c("DiffMean", "DiffVar"))
+design <- model.matrix(~ gmtSet$time)
+res
+names(res)
+?()
+gmtSet <- gmtSet[!(gmtSet$time == "K12" | gmtSet$time == "K3")]
+gmtSet$time
 #Plotting 
 targetRange <- GRanges("23:13000000-23000000")
-plot(resAdj, rid = "DiffMean", type = "manhattan", highlight = targetRange)
+plot(res, rid = "DiffMean", type = "manhattan", highlight = targetRange)
+head(getAssociation(res, "DiffMean"))
