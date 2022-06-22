@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-#Example input: ./sort_array_type.py -x /Users/adrianharris/Desktop/kidney/kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5
+#Example input: ./sort_array_type.py -x /home/amharris/dna_methylation_analysis/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -w /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/ -h /home/amharris/
 
 import pandas as pd
 import argparse as ap
@@ -10,7 +10,8 @@ import shutil
 parser = ap.ArgumentParser()
 parser = ap.ArgumentParser(description='Sort raw files into respective folder according to array type')
 parser.add_argument("-x", "--excel", help="excel sample file", required=True)
-parser.add_argument("-w", "--working", help="working directory", default='/Users/adrianharris/Desktop/kidney/')
+parser.add_argument("-w", "--working", help="working directory", default='/local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/')
+parser.add_argument("-h", "--home", help="home directory", default="/home/amharris/")
 parser.add_argument("-s", "--start", help="starting sheet(#) in excel file", type=int, required=True)
 parser.add_argument("-e", "--end", help="ending sheet(#) in excel file", type=int, required=True)
 args = parser.parse_args()
@@ -52,6 +53,8 @@ f = []
 for filename in os.listdir(args.working):
     f.append(filename)
 
+os.chdir(args.home)
+
 os.makedirs('450k_array')
 os.makedirs('EPIC_array')
 
@@ -60,13 +63,13 @@ for item in list450K:
 	for file in f:
 		if item in file:
 			src = args.working + file
-			dst = args.working + '450k_array/' + file
+			dst = args.home + '450k_array/' + file
 			shutil.copyfile(src, dst)
 
 for item in listEPIC:
 	for file in f:
 		if item in file:
 			src = args.working + file
-			dst = args.working + 'EPIC_array/' + file
+			dst = args.home + 'EPIC_array/' + file
 			shutil.copyfile(src, dst)
 
