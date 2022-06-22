@@ -1,5 +1,6 @@
 #Script for DNA Methylation Analysis
 library(minfi)
+library(IlluminaHumanMethylation450kmanifest)
 library(rio)
 library(ggplot2)
 library(tidyverse)
