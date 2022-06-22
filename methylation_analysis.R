@@ -1,6 +1,4 @@
 #Script for DNA Methylation Analysis
-rm(list = ls())
-dev.off()
 library(minfi)
 library(rio)
 library(ggplot2)
