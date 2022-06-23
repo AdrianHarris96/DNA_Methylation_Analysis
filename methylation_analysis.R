@@ -50,38 +50,44 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   rm(rgSetEPIC)
 }
 
+#Calculate Detection p-values if 
+if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
+  cat('P-values.csv is already exists\n')
+} else {
+  detP <- detectionP(rgSet)
+  detP <- data.frame(detP)
+  sample_names <- colnames(detP)
+  sample_names <- substr(sample_names, 2, nchar(sample_names))
+  detPmeans <- colMeans(detP)
+  detP_df <- data.frame(matrix(ncol=2, nrow=ncol(detP)))
+  detP_df['X1'] <- sample_names
+  detP_df['X2'] <- detPmeans
+  colnames(detP_df) <- c('Basename', 'p_value_mean')
+  write.csv(detP_df, paste(output_dir, "p-values.csv", sep=""), row.names = FALSE)
+  rm(sample_names, detPmeans)
+  
+  #Merging to pheno dataframe for color coding and plot via barplots 
+  detP_df <- merge(detP_df, pheno_df, by = 'Basename')
+  
+  #Plotting 450K barplot 
+  pal <- brewer.pal(4,"Dark2")
+  
+  par(mfrow=c(2,1))
+  jpeg(paste(output_dir, "p_values.csv", sep=""), quality = 75)
+  barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
+  legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
+         cex=0.27, bty = "n", bg="white")
+  
+  #Plotting EPIC barplot
+  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
+  legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
+         cex=0.27, bty = "n", bg="white")
+  
+  rm(detP_df)
+  par(mfrow=c(1,1))
+}
+ 
 q()
-
-#Calculate Detection p-values
-detP <- detectionP(rgSet)
-detP <- data.frame(detP)
-sample_names <- colnames(detP)
-sample_names <- substr(sample_names, 2, nchar(sample_names))
-detPmeans <- colMeans(detP)
-detP_df <- data.frame(matrix(ncol=2, nrow=ncol(detP)))
-detP_df['X1'] <- sample_names
-detP_df['X2'] <- detPmeans
-colnames(detP_df) <- c('Basename', 'p_value_mean')
-write.csv(detP_df,"/Users/adrianharris/Desktop/kidneyTx_p-values.csv", row.names = FALSE)
-rm(sample_names, detPmeans)
-
-#Merging to pheno dataframe for color coding and plot via barplots 
-detP_df <- merge(detP_df, pheno_df, by = 'Basename')
-
-#Plotting 450K barplot 
-pal <- brewer.pal(4,"Dark2")
-par(mfrow=c(2,1))
-barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
-legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
-       cex=0.27, bty = "n", bg="white")
-
-#Plotting EPIC barplot
-barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
-legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
-       cex=0.27, bty = "n", bg="white")
-
-rm(detP_df)
-par(mfrow=c(1,1))
 
 #preprocessing QC and plotting
 mtSet <- preprocessRaw(rgSet)
