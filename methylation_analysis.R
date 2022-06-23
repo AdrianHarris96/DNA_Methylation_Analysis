@@ -73,7 +73,7 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   pal <- brewer.pal(4,"Dark2")
   
   par(mfrow=c(2,1))
-  jpeg(paste(output_dir, "p_values.csv", sep=""), quality = 75)
+  jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 75)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
   legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
          cex=0.27, bty = "n", bg="white")
@@ -84,10 +84,14 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
          cex=0.27, bty = "n", bg="white")
   
   rm(detP_df)
+  dev.off()
   par(mfrow=c(1,1))
 }
- 
+
+print('hey, buddy')
+
 q()
+
 
 #preprocessing QC and plotting
 mtSet <- preprocessRaw(rgSet)
