@@ -50,6 +50,9 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   rm(rgSetEPIC)
 }
 
+#Color Scheme Defined 
+pal <- brewer.pal(4,"Dark2")
+
 #Calculate Detection p-values if 
 if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   cat('P-values.csv is already exists\n')
@@ -70,8 +73,6 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   detP_df <- merge(detP_df, pheno_df, by = 'Basename')
   
   #Plotting 450K barplot 
-  pal <- brewer.pal(4,"Dark2")
-  
   par(mfrow=c(2,1))
   jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 75)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
@@ -109,6 +110,12 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
 }
 
 q()
+
+if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
+  cat('Normalization already performed\n')
+} else {
+  
+}
 
 #Normalization and plotting 
 mtSet <- preprocessNoob(rgSet)
