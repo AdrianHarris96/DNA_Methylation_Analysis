@@ -57,6 +57,7 @@ pal <- brewer.pal(4,"Dark2")
 if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   cat('P-values.csv is already exists\n')
 } else {
+  cat('Performing p-value detection\n')
   detP <- detectionP(rgSet)
   detP <- data.frame(detP)
   sample_names <- colnames(detP)
@@ -92,6 +93,7 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
 if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   cat('Preprocessing already performed\n')
 } else {
+  cat('Performing preprocessing\n')
   #preprocessing QC and plotting
   mtSet <- preprocessRaw(rgSet)
   qc <- getQC(mtSet)
@@ -109,11 +111,10 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   rm(mtSet, qc, plot)
 }
 
-q()
-
 if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   cat('Normalization already performed\n')
 } else {
+  cat('Performing normalization\n')
   #Normalization and plotting 
   mtSet <- preprocessNoob(rgSet)
   saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
