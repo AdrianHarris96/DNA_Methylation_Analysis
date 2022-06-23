@@ -12,7 +12,7 @@ base_dir = args[2]
 output_dir = args[3]
 
 if (file.exists(output_dir)) {
-  cat("Directory already exists")
+  cat("Directory already exists\n")
 } else {
   dir.create(output_dir)
 }
@@ -33,6 +33,15 @@ phenoEPIC <- pheno_df[!(pheno_df$array_type == '450K'),]
 #Specify the directories and read in respective IDAT Files 
 dir450k <- paste(base_dir, "450k_array", sep="")
 dirEPIC <- paste(base_dir, "EPIC_array", sep="")
+
+if (file.exists(paste(output_dir, "rgSet450k.RDS", sep="")) | file.exists(paste(output_dir, "rgSetEPIC.RDS", sep=""))) {
+  cat('it is here')
+} else {
+  cat('it is not here')
+}
+
+q()
+
 #Be sure to change target based on comparison 
 rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
 rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
