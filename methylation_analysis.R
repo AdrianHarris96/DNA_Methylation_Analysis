@@ -111,29 +111,40 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
 
 q()
 
-if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
+if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   cat('Normalization already performed\n')
 } else {
-  
+  #Normalization and plotting 
+  mtSet <- preprocessNoob(rgSet)
+  saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
+  postqc <- getQC(mtSet)
+  postqc <- data.frame(postqc)
+  postqc['Basename'] <- row.names(postqc)
+  postqc <- merge(postqc, pheno_df, by = 'Basename')
+  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 75)
+  plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  print(plot2)
+  dev.off()
+  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 75)
+  densityPlot(mtSet, sampGroups = postqc$array_type)
+  dev.off()
+  rm(postqc, plot2)
 }
 
-#Normalization and plotting 
-mtSet <- preprocessNoob(rgSet)
-saveRDS(mtSet, file = "/Users/adrianharris/Desktop/kidney/mtSet.RDS")
-postqc <- getQC(mtSet)
-postqc <- data.frame(postqc)
-postqc['Basename'] <- row.names(postqc)
-postqc <- merge(postqc, pheno_df, by = 'Basename')
-plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
-print(plot2)
-densityPlot(mtSet, sampGroups = postqc$array_type)
-rm(postqc, plot2)
-
 # Map to Genome
-rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
-gmtSet <- mapToGenome(rSet)
-saveRDS(gmtSet, file = "/Users/adrianharris/Desktop/kidney/gmtSet.RDS")
-dim(gmtSet) #Number of probes = 452453
+if (file.exists(paste(output_dir, "gmtSet.RDS", sep=""))) {
+  cat('Loading Genomic Methyl Set\n')
+  gmtSet <- readRDS(paste(output_dir, "gmtSet.RDS", sep=""))
+  dim(gmtSet) #Number of probes = 452453
+} else {
+  cat('Converting to Genomic Methyl Set\n')
+  rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
+  gmtSet <- mapToGenome(rSet)
+  saveRDS(gmtSet, file = paste(output_dir, "gmtSet.RDS", sep=""))
+  dim(gmtSet) #Number of probes = 452453
+}
+
+q()
 
 #Predicted Sex 
 predictedSex <- getSex(gmtSet, cutoff = -2)
