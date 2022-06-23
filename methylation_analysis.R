@@ -88,22 +88,27 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   par(mfrow=c(1,1))
 }
 
-print('hey, buddy')
+if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
+  cat('Preprocessing already performed\n')
+} else {
+  #preprocessing QC and plotting
+  mtSet <- preprocessRaw(rgSet)
+  qc <- getQC(mtSet)
+  #plotQC(qc)
+  qc <- data.frame(qc)
+  qc['Basename'] <- row.names(qc)
+  qc <- merge(qc, pheno_df, by = 'Basename')
+  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 75)
+  plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  print(plot)
+  dev.off()
+  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 75)
+  densityPlot(mtSet, sampGroups =qc$array_type)
+  dev.off()
+  rm(mtSet, qc, plot)
+}
 
 q()
-
-
-#preprocessing QC and plotting
-mtSet <- preprocessRaw(rgSet)
-qc <- getQC(mtSet)
-#plotQC(qc)
-qc <- data.frame(qc)
-qc['Basename'] <- row.names(qc)
-qc <- merge(qc, pheno_df, by = 'Basename')
-plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
-print(plot)
-densityPlot(mtSet, sampGroups =qc$array_type)
-rm(mtSet, qc, plot)
 
 #Normalization and plotting 
 mtSet <- preprocessNoob(rgSet)
