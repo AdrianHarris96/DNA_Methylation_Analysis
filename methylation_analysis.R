@@ -34,24 +34,21 @@ phenoEPIC <- pheno_df[!(pheno_df$array_type == '450K'),]
 dir450k <- paste(base_dir, "450k_array", sep="")
 dirEPIC <- paste(base_dir, "EPIC_array", sep="")
 
-if (file.exists(paste(output_dir, "rgSet450k.RDS", sep="")) | file.exists(paste(output_dir, "rgSetEPIC.RDS", sep=""))) {
-  cat('it is here')
+if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
+  cat('Loading in rgSet (combined)\n')
+  rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
 } else {
-  cat('it is not here')
+  cat('Generate rgSet\n')
+  rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
+  rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
+  rgSet <- combineArrays(rgSet450k, rgSetEPIC)
+  #Saving set as an RDS file 
+  saveRDS(rgSet450k, file = paste(output_dir, "rgSet450k.RDS", sep=""))
+  saveRDS(rgSetEPIC, file = paste(output_dir, "rgSetEPIC.RDS", sep=""))
+  saveRDS(rgSet, file = paste(output_dir, "rgSet.RDS", sep=""))
+  rm(rgSet450k)
+  rm(rgSetEPIC)
 }
-
-q()
-
-#Be sure to change target based on comparison 
-rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
-rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
-rgSet <- combineArrays(rgSet450k, rgSetEPIC)
-#Saving set as an RDS file 
-saveRDS(rgSet450k, file = paste(output_dir, "rgSet450k.RDS", sep=""))
-saveRDS(rgSetEPIC, file = paste(output_dir, "rgSetEPIC.RDS", sep=""))
-saveRDS(rgSet, file = paste(output_dir, "rgSet.RDS", sep=""))
-rm(rgSet450k)
-rm(rgSetEPIC)
 
 q()
 
