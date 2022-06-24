@@ -111,12 +111,13 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   rm(mtSet, qc, plot)
 }
 
-if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
-  cat('Normalization already performed\n')
-  rm(rgSet)
-  mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
-} else {
+#Normalization
+if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   cat('Performing normalization\n')
+  mtSet <- preprocessNoob(rgSet)
+  rm(rgSet)
+} else {
+  cat('Performing normalization, saving and plotting\n')
   #Normalization and plotting 
   mtSet <- preprocessNoob(rgSet)
   saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
@@ -131,7 +132,7 @@ if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 75)
   densityPlot(mtSet, sampGroups = postqc$array_type)
   dev.off()
-  rm(postqc, plot2)
+  rm(postqc, plot2, rgSet)
 }
 
 # Map to Genome
