@@ -93,7 +93,7 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
 if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   cat('Preprocessing already performed\n')
 } else {
-  cat('Performing preprocessing\n')
+  cat('Performing preprocessing and plotting\n')
   #preprocessing QC and plotting
   mtSet <- preprocessRaw(rgSet)
   qc <- getQC(mtSet)
@@ -117,10 +117,9 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   mtSet <- preprocessNoob(rgSet)
   rm(rgSet)
 } else {
-  cat('Performing normalization, saving and plotting\n')
+  cat('Performing normalization and plotting\n')
   #Normalization and plotting 
   mtSet <- preprocessNoob(rgSet)
-  saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   postqc <- getQC(mtSet)
   postqc <- data.frame(postqc)
   postqc['Basename'] <- row.names(postqc)
@@ -136,17 +135,10 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 }
 
 # Map to Genome
-if (file.exists(paste(output_dir, "gmtSet.RDS", sep=""))) {
-  cat('Loading Genomic Methyl Set\n')
-  gmtSet <- readRDS(file = (paste(output_dir, "gmtSet.RDS", sep="")))
-  dim(gmtSet) #Number of probes = 452453
-} else {
-  cat('Converting to Genomic Methyl Set\n')
-  rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
-  gmtSet <- mapToGenome(rSet)
-  saveRDS(gmtSet, file = paste(output_dir, "gmtSet.RDS", sep=""))
-  dim(gmtSet) #Number of probes = 452453
-}
+cat('Converting to Genomic Methyl Set\n')
+rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
+gmtSet <- mapToGenome(rSet)
+dim(gmtSet) #Number of probes = 452453
 
 q()
 
