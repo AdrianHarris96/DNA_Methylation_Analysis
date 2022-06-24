@@ -138,7 +138,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 # Map to Genome
 if (file.exists(paste(output_dir, "gmtSet.RDS", sep=""))) {
   cat('Loading Genomic Methyl Set\n')
-  gmtSet <- readRDS(paste(output_dir, "gmtSet.RDS", sep=""))
+  gmtSet <- readRDS(file = (paste(output_dir, "gmtSet.RDS", sep="")))
   dim(gmtSet) #Number of probes = 452453
 } else {
   cat('Converting to Genomic Methyl Set\n')
