@@ -195,6 +195,7 @@ m_values <- getM(gmtSet)
 
 #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
 beta_values_filtered <- as.data.frame(beta_values) 
+print(beta_values_filtered)
 dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
 #6327 Hypomethylated
