@@ -113,6 +113,7 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
 
 if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   cat('Normalization already performed\n')
+  rm(rgSet)
   mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
 } else {
   cat('Performing normalization\n')
