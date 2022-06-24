@@ -85,7 +85,7 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
-  rm(detP_df)
+  rm(detP_df, detP)
   dev.off()
   par(mfrow=c(1,1))
 }
@@ -113,6 +113,7 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
 
 if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   cat('Normalization already performed\n')
+  mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
 } else {
   cat('Performing normalization\n')
   #Normalization and plotting 
@@ -147,11 +148,11 @@ if (file.exists(paste(output_dir, "gmtSet.RDS", sep=""))) {
 
 q()
 
-#Predicted Sex 
-predictedSex <- getSex(gmtSet, cutoff = -2)
-gmtSet <- addSex(gmtSet, sex = predictedSex)
-plotSex(gmtSet, id = row.names(predictedSex))
-rm(predictedSex)
+# #Predicted Sex 
+# predictedSex <- getSex(gmtSet, cutoff = -2)
+# gmtSet <- addSex(gmtSet, sex = predictedSex)
+# plotSex(gmtSet, id = row.names(predictedSex))
+# rm(predictedSex)
 
 #Removing probes that include SNPs
 snps <- getSnpInfo(gmtSet)
@@ -163,8 +164,8 @@ rm(snps, gr)
 
 # Filter unwanted sites 
 # ensure probes are in the same order in the mSetSq and detP objects
+detP <- detectionP(rgSet)
 detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
-detP_df <- data.frame(detP)
 
 # remove any probes that have failed in >50% of samples
 keep <- detP < 0.01
@@ -182,6 +183,9 @@ gmtSet <- gmtSet[keep,]
 dim(gmtSet) #Number of probes = 425718
 rm(ann450k, keep)
 
+q()
+
+#-> add to github
 #Creation of bad probes character and filter gmtSet
 cross.react <- read.csv('/Users/adrianharris/Desktop/kidney/illumina450k_filtering/48639-non-specific-probes-Illumina450k.csv', head = T, as.is = T)
 cross.react.probes <- as.character(cross.react$TargetID)
