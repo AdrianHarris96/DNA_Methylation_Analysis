@@ -9,7 +9,8 @@ library(RColorBrewer)
 args=commandArgs(trailingOnly=TRUE)
 pheno_file = args[1]
 base_dir = args[2]
-output_dir = args[3]
+git_dir = args[3]
+output_dir = args[4]
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
@@ -175,10 +176,10 @@ dim(gmtSet) #Number of probes = 425718
 rm(ann450k, keep)
 
 #Creation of bad probes character and filter gmtSet
-cross.react <- read.csv(paste(output_dir, '48639-non-specific-probes-Illumina450k.csv', sep=""), head = T, as.is = T)
+cross.react <- read.csv(paste(git_dir, '48639-non-specific-probes-Illumina450k.csv', sep=""), head = T, as.is = T)
 cross.react.probes <- as.character(cross.react$TargetID)
 #Probes identified with potential hybridization issues
-multi.map <- read.csv(paste(output_dir, 'HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt', sep=""), head = F, as.is = T)
+multi.map <- read.csv(paste(git_dir, 'HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt', sep=""), head = F, as.is = T)
 multi.map.probes <- as.character(multi.map$V1)
 # determine unique probes between the cross-reactive and multi-map probes
 bad.probes <- unique(c(cross.react.probes, multi.map.probes))
