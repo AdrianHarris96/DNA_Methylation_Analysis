@@ -115,7 +115,6 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
 if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   cat('Performing normalization\n')
   mtSet <- preprocessNoob(rgSet)
-  rm(rgSet)
 } else {
   cat('Performing normalization and plotting\n')
   #Normalization and plotting 
@@ -131,7 +130,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 75)
   densityPlot(mtSet, sampGroups = postqc$array_type)
   dev.off()
-  rm(postqc, plot2, rgSet)
+  rm(postqc, plot2)
 }
 
 # Map to Genome
