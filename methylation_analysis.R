@@ -140,8 +140,6 @@ rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
 gmtSet <- mapToGenome(rSet)
 dim(gmtSet) #Number of probes = 452453
 
-q()
-
 # #Predicted Sex 
 # predictedSex <- getSex(gmtSet, cutoff = -2)
 # gmtSet <- addSex(gmtSet, sex = predictedSex)
@@ -177,9 +175,6 @@ gmtSet <- gmtSet[keep,]
 dim(gmtSet) #Number of probes = 425718
 rm(ann450k, keep)
 
-q()
-
-#-> add to github
 #Creation of bad probes character and filter gmtSet
 cross.react <- read.csv('/Users/adrianharris/Desktop/kidney/illumina450k_filtering/48639-non-specific-probes-Illumina450k.csv', head = T, as.is = T)
 cross.react.probes <- as.character(cross.react$TargetID)
@@ -209,6 +204,8 @@ dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
 dim(beta_values_filtered)
 #204 hypermethylated
+
+q()
 
 # #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
 # beta_values_case = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
