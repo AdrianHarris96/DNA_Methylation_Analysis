@@ -12,6 +12,8 @@ base_dir = args[2]
 git_dir = args[3]
 output_dir = args[4]
 
+start_time <- proc.time()
+
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
 } else {
@@ -194,6 +196,7 @@ beta_values <- getBeta(gmtSet)
 m_values <- getM(gmtSet)
 
 #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
+cat('Hypomethylated\n')
 beta_values_filtered <- as.data.frame(beta_values) 
 print(beta_values_filtered)
 dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
@@ -201,17 +204,19 @@ beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05))
 #6327 Hypomethylated
 
 #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
+cat("Hypermethylated\n")
 dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
 dim(beta_values_filtered)
 #204 hypermethylated
+
+print(proc.time() - start_time)
 
 q()
 
 # #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
 # beta_values_case = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
 # pheno_df_case = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
-
 
 #EXCLUDE DCD SAMPLES - Kidney dataset
 beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
@@ -220,7 +225,6 @@ pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "93
 
 #Convert filter beta dataframe to m_value dataframe
 m_values_case = beta2m(beta_values_case)
-
 
 #Transpose resulting PCA plot 
 transposed_beta <- t(beta_values_filtered) #t(beta_values_case)
