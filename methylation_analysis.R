@@ -199,7 +199,6 @@ m_values <- getM(gmtSet)
 
 #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
 beta_values_filtered <- as.data.frame(beta_values) 
-print(beta_values_filtered)
 cat('Hypomethylated\n')
 dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
@@ -214,13 +213,26 @@ dim(beta_values_filtered)
 
 print(proc.time() - start_time)
 
-if (comparison == '1') {
-  print('comparison is 1')
-} else if (comparison == '2') {
-  print('comparison is 2')
+if (comparison == 'K1_Low_K1_High') {
+  pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
+} else if (comparison == 'K2_Low_K2_High') {
+  pheno_df <- pheno_df[(pheno_df$time == 'K2'),]
+} else if (comparison == 'K1_High_K2_High') {
+  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
+} else if (comparison == 'K1_Low_K2_Low') {
+  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'Low')),]
+} else if (comparison == 'K1_High_K2_Low') {
+  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'Low')),]
+} else if (comparison == 'K1_Low_K2_High') {
+  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
 } else {
-  print('comparison is whatever')
+  cat('Comparison request does not exist\n')
+  q()
 }
+
+#Filter beta dataframe using column names for the relevant comparison
+beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+dim(beta_values_filtered)
 
 q()
   
