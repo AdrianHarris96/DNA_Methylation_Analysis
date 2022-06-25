@@ -1,4 +1,4 @@
-,Basename,sample_id,sample_well,sample_plate,sentrix_ID,sentrix_position,time,array_type,gender_donor,gender_recipient,eGFR_1month
+,Basename,sample_id,sample_well,sample_plate,sentrix_ID,sentrix_position,time,array_type,gender_donor,gender_recipient,eGFR
 1,8942300027_R01C02,145_K1,C03,VRM01,8942300027,R01C02,K1,450K,M,M,High
 2,8942300027_R04C02,160_K1,F03,VRM01,8942300027,R04C02,K1,450K,F,M,Low
 3,8942300027_R02C02,178_K1,D03,VRM01,8942300027,R02C02,K1,450K,M,M,High
