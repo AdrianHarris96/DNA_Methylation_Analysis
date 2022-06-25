@@ -214,7 +214,7 @@ dim(beta_values_filtered)
 
 print(proc.time() - start_time)
 
-if (comparsion == '1') {
+if (comparison == '1') {
   print('comparison is 1')
 } else if (comparison == '2') {
   print('comparison is 2')
