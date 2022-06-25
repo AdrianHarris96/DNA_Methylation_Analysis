@@ -116,12 +116,13 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
 
 #Normalization
 if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
-  cat('Performing normalization\n')
-  mtSet <- preprocessNoob(rgSet)
+  cat('Loading normalization\n')
+  mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
 } else {
   cat('Performing normalization and plotting\n')
   #Normalization and plotting 
   mtSet <- preprocessNoob(rgSet)
+  saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   postqc <- getQC(mtSet)
   postqc <- data.frame(postqc)
   postqc['Basename'] <- row.names(postqc)
@@ -196,9 +197,9 @@ beta_values <- getBeta(gmtSet)
 m_values <- getM(gmtSet)
 
 #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
-cat('Hypomethylated\n')
 beta_values_filtered <- as.data.frame(beta_values) 
 print(beta_values_filtered)
+cat('Hypomethylated\n')
 dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
 #6327 Hypomethylated
