@@ -211,8 +211,6 @@ beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95))
 dim(beta_values_filtered)
 #204 hypermethylated
 
-print(proc.time() - start_time)
-
 if (comparison == 'K1_Low_K1_High') {
   pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
 } else if (comparison == 'K2_Low_K2_High') {
@@ -232,7 +230,7 @@ if (comparison == 'K1_Low_K1_High') {
 
 #Filter beta dataframe using column names for the relevant comparison
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
-dim(beta_values_filtered)
+
 
 q()
   
@@ -240,13 +238,13 @@ q()
 # beta_values_case = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
 # pheno_df_case = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
 
-#EXCLUDE DCD SAMPLES - Kidney dataset
-beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
-#Removing rows based on the sample_name column in phenotype dataframe
-pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
-
-#Convert filter beta dataframe to m_value dataframe
-m_values_case = beta2m(beta_values_case)
+# #EXCLUDE DCD SAMPLES - Kidney dataset
+# beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
+# #Removing rows based on the sample_name column in phenotype dataframe
+# pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
+# 
+# #Convert filter beta dataframe to m_value dataframe
+# m_values_case = beta2m(beta_values_case)
 
 #Transpose resulting PCA plot 
 transposed_beta <- t(beta_values_filtered) #t(beta_values_case)
@@ -256,10 +254,15 @@ var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
 scores = as.data.frame(pca_general$x)
 scores['Basename'] <- row.names(scores)
 scores <- merge(scores, pheno_df, by = 'Basename')
-pal <- brewer.pal(4,"Dark2")
-plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=time)) +theme_bw() + geom_point(aes(shape=eGFR_1month), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
+jpeg(paste(comparison, "_PCA.jpeg", sep=""), quality = 75)
+plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
 #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
 print(plot)
+dev.off()
+
+print(proc.time() - start_time)
+
+q()
 
 #Limit S4 object here based on comparisons
 library(MEAL)
