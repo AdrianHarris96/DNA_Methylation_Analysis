@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
 
-#Example input: ./create_sheet.py -x /Users/adrianharris/Desktop/kidney/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -o comp1.csv
+#Example input: ./create_sheet.py -x /Users/adrianharris/Desktop/kidney/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -o comp1.csv -m 
 
 import pandas as pd
 import argparse as ap
 import os
 
 parser = ap.ArgumentParser()
-parser = ap.ArgumentParser(description='Calculate effect dose for each UKBB individual using the matrix')
+parser = ap.ArgumentParser(description='Create sample sheet')
 parser.add_argument("-x", "--excel", help="excel sample file", required=True)
 parser.add_argument("-w", "--working", help="working directory", default='/Users/adrianharris/Desktop/kidney/')
 parser.add_argument("-o", "--output", help="output csv filename", default='methylation.csv')
@@ -15,6 +15,7 @@ parser.add_argument("-s", "--start", help="starting sheet(#) in excel file", typ
 parser.add_argument("-e", "--end", help="ending sheet(#) in excel file", type=int, required=True)
 parser.add_argument("-t1", "--time1", help="time point 1 to extract", default='K1')
 parser.add_argument("-t2", "--time2", help="time point 2 to extract", default='K2')
+parser.add_argument("-m", "--month", help="eGFR month", required=True)
 args = parser.parse_args()
 
 df = pd.DataFrame(columns=['Basename', 'sample_id', 'sample_well', 'sample_plate', 'sentrix_ID', 'sentrix_position', 'time', 'array_type', 'gender_donor', 'gender_recipient', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month', 'DGF_status', 'DCD_status'])
@@ -46,16 +47,28 @@ for x in range(args.start, args.end): #Number of sheets within excel file
 
 df = df[df['time'].notna()] #drop if time is empty
 
-#Drop the other columns and calculate either high or low for eGFR
-df.drop(['eGFR_12month', 'eGFR_24month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
+if args.month == '1':
+	month = 'eGFR_1month'
+	df.drop(['eGFR_12month', 'eGFR_24month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
+elif args.month == '12':
+	month = 'eGFR_12month'
+	df.drop(['eGFR_1month', 'eGFR_24month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
+elif args.month == '24':
+	month = 'eGFR_24month'
+	df.drop(['eGFR_1month', 'eGFR_12month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
+else:
+	print('Month not found')
+	quit()
 
 for index in df.index:
-	if df['eGFR_1month'][index] < 45:
-		df['eGFR_1month'][index] = 'Low'
-	elif df['eGFR_1month'][index] >= 45:
-		df['eGFR_1month'][index] = 'High'
+	if df[month][index] < 45:
+		df[month][index] = 'Low'
+	elif df[month][index] >= 45:
+		df[month][index] = 'High'
 	else:
-		df['eGFR_1month'][index] == 'NaN'
+		df[month][index] == 'NaN'
+
+df.rename(columns={month:'eGFR'}, inplace=True)
 
 os.chdir(args.working)
 print(df)
