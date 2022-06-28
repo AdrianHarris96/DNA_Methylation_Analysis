@@ -13,6 +13,13 @@ git_dir = args[3]
 output_dir = args[4]
 comparison = args[5]
 
+#Local Machine
+pheno_file = '/Users/adrianharris/Desktop/kidney/comp1.csv'
+base_dir = '/Users/adrianharris/Desktop/kidney/'
+git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+output_dir = '/Users/adrianharris/Desktop/kidney/'
+comparison = 'K1_Low_K1_High'
+
 start_time <- proc.time()
 
 if (file.exists(output_dir)) {
@@ -160,6 +167,7 @@ rm(snps, gr)
 
 # Filter unwanted sites 
 # ensure probes are in the same order in the mSetSq and detP objects
+#rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
 detP <- detectionP(rgSet)
 detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
 
@@ -267,6 +275,39 @@ print(proc.time() - start_time)
 
 q()
 
+#Using MEAL 
+
+#Using 
+
+
+sampleNames(gmtSet) #maybe toy around with this
+
+
+#Work with DMRcate 
+library(DMRcate)
+m_values <- getM(gmtSet)
+
+myAnnotation <- cpg.annotate(datatype = "array",  as.matrix(m_values),  annotation=c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"), 
+                             analysis.type = "differential", fdr = 0.05)
+
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_case), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_HI_L1 - LD_LI_L1", arraytype = "450K")
+
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.table(results.ranges, file="DMR_DD_HI_L1-LD_LI_L1.csv", sep=",", row.names=FALSE)
+
+filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
+
+length(filter)
+
+gset.filt <- gmtSet[,filter]
+sampleNames(gset.filt)
+
+
+
 #Limit S4 object here based on comparisons
 library(MEAL)
 
@@ -280,6 +321,16 @@ CN <- getCN(gmtSet)
 time <- pheno_df$time
 dmp <- dmpFinder(beta_values, pheno = time, type = "categorical")
 head(dmp)
+
+#Troubleshooting and Loading - Remove later 
+library(rio)
+pheno_df <- import("/Users/adrianharris/Documents/dna_methylation_analysis/comp1.csv")
+pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
+pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
+mtSet <- readRDS("/Users/adrianharris/Desktop/kidney/mtSet.RDS")
+rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
+gmtSet <- mapToGenome(rSet)
+sampleNames(gmtSet)
 
 #Differential Methylation - using MEAL 
 rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
@@ -310,7 +361,21 @@ sampleNames <- sampleNames(gmtSet)
 keep <- !(gmtSet@colData$time == 'K3' | gmtSet@colData$time == 'K12')
 gmtSet <- gmtSet@colData[keep,]
 as.data.frame(gmtSet)
-res <- runPipeline(set = gmtSet, variable_names = "time", analyses = c("DiffMean", "DiffVar"))
+
+library(MEAL)
+BiocManager::install("ExperimentSubset")
+library(ExperimentSubset)
+subsetColData(gmtSet, pheno_df$Basename)
+
+regions <- runRegionAnalysis(
+  gmtSet,
+  methods = c("blockFinder", "bumphunter", "DMRcate"),
+  coefficient = 2,
+  resultSet = TRUE
+)
+
+res <- runPipeline(set = gset.filt, variable_names = "eGFR", analyses = c("DiffMean", "DiffVar"))
+ncol(gmtSet)
 design <- model.matrix(~ gmtSet$time)
 res
 names(res)
@@ -319,5 +384,6 @@ gmtSet <- gmtSet[!(gmtSet$time == "K12" | gmtSet$time == "K3")]
 gmtSet$time
 #Plotting 
 targetRange <- GRanges("23:13000000-23000000")
-plot(res, rid = "DiffMean", type = "manhattan", highlight = targetRange)
+#plot(res, rid = "DiffMean", type = "manhattan", highlight = targetRange)
+plot(res, rid = "DiffMean", type = "manhattan")
 head(getAssociation(res, "DiffMean"))
