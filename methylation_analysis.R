@@ -86,7 +86,7 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   
   #Plotting 450K barplot 
   par(mfrow=c(2,1))
-  jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 75)
+  jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 90)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
   legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
          cex=0.27, bty = "n", bg="white")
@@ -112,11 +112,11 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   qc <- data.frame(qc)
   qc['Basename'] <- row.names(qc)
   qc <- merge(qc, pheno_df, by = 'Basename')
-  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 75)
+  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 90)
   plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot)
   dev.off()
-  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 75)
+  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 90)
   densityPlot(mtSet, sampGroups =qc$array_type)
   dev.off()
   rm(mtSet, qc, plot)
@@ -135,11 +135,11 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   postqc <- data.frame(postqc)
   postqc['Basename'] <- row.names(postqc)
   postqc <- merge(postqc, pheno_df, by = 'Basename')
-  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 75)
+  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
   plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot2)
   dev.off()
-  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 75)
+  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
   densityPlot(mtSet, sampGroups = postqc$array_type)
   dev.off()
   rm(postqc, plot2)
@@ -203,7 +203,7 @@ rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, kee
 
 #Extract betas and m_values
 beta_values <- getBeta(gmtSet)
-m_values <- getM(gmtSet)
+# m_values <- getM(gmtSet)
 
 #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
 beta_values_filtered <- as.data.frame(beta_values) 
@@ -236,6 +236,15 @@ if (comparison == 'K1_Low_K1_High') {
   q()
 }
 
+m_values = beta2m(beta_values_filtered)
+if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  cat('Skip beta and m_value CSV\n')
+} else {
+  write.csv(beta_values_filtered, paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+  write.csv(m_values, paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+}
+
+
 #Filter beta dataframe using column names for the relevant comparison
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 
@@ -249,9 +258,9 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
 # 
 # #Convert filter beta dataframe to m_value dataframe
-# m_values_case = beta2m(beta_values_case)
+m_values = beta2m(beta_values_filtered)
 
-#Transpose resulting PCA plot 
+#Transpose resulting PCA plot - beta values 
 transposed_beta <- t(beta_values_filtered) #t(beta_values_case)
 transposed_beta <- data.frame(transposed_beta)
 pca_general <- prcomp(transposed_beta, center=TRUE)
@@ -265,125 +274,125 @@ string <- substr(string, 1, 5)
 output <- paste(output_dir, string, sep="")
 output <- paste(output, "_", sep="")
 output <- paste(output, comparison, sep="")
-jpeg(paste(output, "_PCA.jpeg", sep=""), quality = 75)
+output_path <- paste(output, "_betas", sep="")
+jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 90)
 plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
 #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
 print(plot)
 dev.off()
 
+#Transpose resulting PCA plot - m_values
+transposed_m <- t(m_values) 
+transposed_m <- data.frame(transposed_m)
+pca_general <- prcomp(transposed_m, center=TRUE)
+var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
+scores = as.data.frame(pca_general$x)
+scores['Basename'] <- row.names(scores)
+scores <- merge(scores, pheno_df, by = 'Basename')
+string <- unlist(strsplit(pheno_file, "/"))
+string <- rev(string)[1]
+string <- substr(string, 1, 5)
+output <- paste(output_dir, string, sep="")
+output <- paste(output, "_", sep="")
+output <- paste(output, comparison, sep="")
+output_path <- paste(output, "_m", sep="")
+jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 90)
+plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
+#plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
+print(plot)
+dev.off()
+
+#CpGs - DMPs
+filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
+length(filter)
+gset.filt <- gmtSet[,filter]
+
+if (comparison == 'K1_Low_K1_High') {
+  type <- factor(gset.filt@colData$eGFR)
+} else if (comparison == 'K2_Low_K2_High') {
+  type <- factor(gset.filt@colData$eGFR)
+} else if (comparison == 'K1_High_K2_High') {
+  type <- factor(gset.filt@colData$time)
+} else if (comparison == 'K1_Low_K2_Low') {
+  type <- factor(gset.filt@colData$time)
+} else if (comparison == 'K1_High_K2_Low') {
+  type <- factor(gset.filt@colData$time)
+} else {
+  type <- factor(gset.filt@colData$time)
+}
+
+design <- model.matrix(~type)
+
+fit1 <- lmFit(m_values, design)
+fit2 <- eBayes(fit1)
+#summary(decideTests(fit2))
+ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
+ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
+DMPs <- topTable(fit2, genelist=ann450kSub)
+write.csv(DMPs, paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
+#plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
+
+#Manhattan plot using the DMPs
+library(qqman)
+title = output
+col=c("black","grey")
+DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
+DMPs$chr = as.numeric(DMPs$chr)
+DMPs$pos = as.numeric(DMPs$pos)
+jpeg(paste(output, "_manhattan.jpeg", sep=""), quality = 90)
+manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, main=title)
+dev.off()
+
+#Using MEAL 
+library(MEAL)
+#Differential Methylation - using MEAL 
+rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
+
+#Remove probes with NAs for betas
+gmtSet <- gmtSet[!apply(getBeta(gmtSet), 1, function(x) any(is.na(x))), ]
+filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
+length(filter)
+gset.filt <- gmtSet[,filter]
+set.seed(0) #reproducible results for simulations 
+sub_gset.filt <- gset.filt[sample(nrow(gset.filt), 100000), ]
+
+if (comparison == 'K1_Low_K1_High') {
+  var = "eGFR"
+} else if (comparison == 'K2_Low_K2_High') {
+  var = "eGFR"
+} else if (comparison == 'K1_High_K2_High') {
+  var = "time"
+} else if (comparison == 'K1_Low_K2_Low') {
+  var = "time"
+} else if (comparison == 'K1_High_K2_Low') {
+  var = "time"
+} else {
+  var = "time"
+}
+
+res <- runPipeline(set = sub_gset.filt, variable_names = var , analyses = c("DiffMean", "DiffVar"))
+
+plot(res, rid = "DiffMean", type = "manhattan", suggestiveline = NULL, 
+     genomewideline = NULL)
+association <- getAssociation(res, "DiffMean")
+write.csv(association, paste(output, "_MEAL_associations.csv", sep=""), row.names = TRUE)
+
 print(proc.time() - start_time)
 
 q()
 
-#Using MEAL 
+# #Troubleshooting and Loading - Remove later 
+# library(rio)
+# pheno_df <- import("/Users/adrianharris/Documents/dna_methylation_analysis/comp1.csv")
+# pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
+# pheno_df <- pheno_df[!(pheno_df$eGFR == ""),]
+# pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
+# mtSet <- readRDS("/Users/adrianharris/Desktop/kidney/mtSet.RDS")
+# rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
+# gmtSet <- mapToGenome(rSet)
+# sampleNames(gmtSet)
 
-#Using 
-
-
-sampleNames(gmtSet) #maybe toy around with this
-
-
-#Work with DMRcate 
-library(DMRcate)
-m_values <- getM(gmtSet)
-
-myAnnotation <- cpg.annotate(datatype = "array",  as.matrix(m_values),  annotation=c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"), 
-                             analysis.type = "differential", fdr = 0.05)
-
-myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_case), what = "M",
-                             analysis.type = "differential", design = design, 
-                             contrasts = TRUE, cont.matrix = contMatrix, 
-                             coef = "DD_HI_L1 - LD_LI_L1", arraytype = "450K")
-
-DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-results.ranges <- extractRanges(DMRs, genome = "hg19")
-write.table(results.ranges, file="DMR_DD_HI_L1-LD_LI_L1.csv", sep=",", row.names=FALSE)
-
-filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
-
-length(filter)
-
-gset.filt <- gmtSet[,filter]
-sampleNames(gset.filt)
-
-
-
-#Limit S4 object here based on comparisons
-library(MEAL)
-
-
-#Other values you can extract
-M <- getM(gmtSet)
-CN <- getCN(gmtSet)
-
-#Differential Methylation Positions 
-?dmpFinder()
-time <- pheno_df$time
-dmp <- dmpFinder(beta_values, pheno = time, type = "categorical")
-head(dmp)
-
-#Troubleshooting and Loading - Remove later 
-library(rio)
-pheno_df <- import("/Users/adrianharris/Documents/dna_methylation_analysis/comp1.csv")
-pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
-pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
-mtSet <- readRDS("/Users/adrianharris/Desktop/kidney/mtSet.RDS")
-rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
-gmtSet <- mapToGenome(rSet)
-sampleNames(gmtSet)
-
-#Differential Methylation - using MEAL 
-rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
-
-#Remove probes measuring SNPs
-gmtSet <- dropMethylationLoci(gmtSet)
-
-#Remove probes with SNPs
-gmtSet <- dropLociWithSnps(gmtSet)
-
-#Remove probes with NAs for betas
-gmtSet <- gmtSet[!apply(getBeta(gmtSet), 1, function(x) any(is.na(x))), ]
-
-#Select a subset of samples
-set.seed(0)
-
-?runPipeline()
-phenoData <- as.data.frame(pData(gmtSet))
-rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
-set.seed(0) #reproducible results for simulations 
-gmtSet <- gmtSet[sample(nrow(gmtSet), 100000), ]
-featureNames(gmtSet)
-
-table(keep)
-gmtSet <- gmtSet[keep,]
-dim(gmtSet)
-sampleNames <- sampleNames(gmtSet)
-keep <- !(gmtSet@colData$time == 'K3' | gmtSet@colData$time == 'K12')
-gmtSet <- gmtSet@colData[keep,]
-as.data.frame(gmtSet)
-
-library(MEAL)
-BiocManager::install("ExperimentSubset")
-library(ExperimentSubset)
-subsetColData(gmtSet, pheno_df$Basename)
-
-regions <- runRegionAnalysis(
-  gmtSet,
-  methods = c("blockFinder", "bumphunter", "DMRcate"),
-  coefficient = 2,
-  resultSet = TRUE
-)
-
-res <- runPipeline(set = gset.filt, variable_names = "eGFR", analyses = c("DiffMean", "DiffVar"))
-ncol(gmtSet)
-design <- model.matrix(~ gmtSet$time)
-res
-names(res)
-
-gmtSet <- gmtSet[!(gmtSet$time == "K12" | gmtSet$time == "K3")]
-gmtSet$time
-#Plotting 
-targetRange <- GRanges("23:13000000-23000000")
+#Plotting - Things for MEAL
+#targetRange <- GRanges("23:13000000-23000000")
 #plot(res, rid = "DiffMean", type = "manhattan", highlight = targetRange)
-plot(res, rid = "DiffMean", type = "manhattan")
-head(getAssociation(res, "DiffMean"))
+
