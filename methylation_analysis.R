@@ -261,6 +261,7 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # #Convert filter beta dataframe to m_value dataframe
 m_values = beta2m(beta_values_filtered)
 
+cat("PCA plots - Betas\n")
 #Transpose resulting PCA plot - beta values 
 transposed_beta <- t(beta_values_filtered) #t(beta_values_case)
 transposed_beta <- data.frame(transposed_beta)
@@ -282,6 +283,7 @@ plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_
 print(plot)
 dev.off()
 
+cat("PCA plots - m_values\n")
 #Transpose resulting PCA plot - m_values
 transposed_m <- t(m_values) 
 transposed_m <- data.frame(transposed_m)
@@ -304,6 +306,7 @@ print(plot)
 dev.off()
 
 #CpGs - DMPs
+cat("Identify CpGs\n")
 filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
 length(filter)
 gset.filt <- gmtSet[,filter]
@@ -323,7 +326,7 @@ if (comparison == 'K1_Low_K1_High') {
 }
 
 design <- model.matrix(~type)
-
+library(limma)
 fit1 <- lmFit(m_values, design)
 fit2 <- eBayes(fit1)
 #summary(decideTests(fit2))
@@ -334,6 +337,7 @@ write.csv(DMPs, paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
 #plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
 
 #Manhattan plot using the DMPs
+cat("Generating manhattan plot from DMPs\n")
 library(qqman)
 title = output
 col=c("black","grey")
@@ -346,6 +350,7 @@ dev.off()
 
 #Using MEAL 
 library(MEAL)
+cat("Using MEAL to generate manhattan plot\n")
 #Differential Methylation - using MEAL 
 rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
 
