@@ -373,8 +373,11 @@ if (comparison == 'K1_Low_K1_High') {
 
 res <- runPipeline(set = sub_gset.filt, variable_names = var , analyses = c("DiffMean", "DiffVar"))
 
+jpeg(paste(output, "_MEAL_manhattan.jpeg", sep=""), quality = 90)
 plot(res, rid = "DiffMean", type = "manhattan", suggestiveline = NULL, 
      genomewideline = NULL)
+dev.off()
+
 association <- getAssociation(res, "DiffMean")
 write.csv(association, paste(output, "_MEAL_associations.csv", sep=""), row.names = TRUE)
 
