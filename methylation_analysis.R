@@ -13,12 +13,12 @@ git_dir = args[3]
 output_dir = args[4]
 comparison = args[5]
 
-#Local Machine
-pheno_file = '/Users/adrianharris/Desktop/kidney/comp1.csv'
-base_dir = '/Users/adrianharris/Desktop/kidney/'
-git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-output_dir = '/Users/adrianharris/Desktop/kidney/'
-comparison = 'K1_Low_K1_High'
+# #Local Machine
+# pheno_file = '/Users/adrianharris/Desktop/kidney/comp1.csv'
+# base_dir = '/Users/adrianharris/Desktop/kidney/'
+# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+# output_dir = '/Users/adrianharris/Desktop/kidney/'
+# comparison = 'K1_Low_K1_High'
 
 start_time <- proc.time()
 
