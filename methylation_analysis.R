@@ -258,6 +258,7 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
 # 
 # #Convert filter beta dataframe to m_value dataframe
+library(lumi)
 m_values = beta2m(beta_values_filtered)
 
 #Transpose resulting PCA plot - beta values 
