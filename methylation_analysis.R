@@ -13,14 +13,12 @@ git_dir = args[3]
 output_dir = args[4]
 comparison = args[5]
 
-# #Local Machine
-# pheno_file = '/Users/adrianharris/Desktop/kidney/comp1.csv'
+#Local Machine
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/comp3.csv'
 # base_dir = '/Users/adrianharris/Desktop/kidney/'
 # git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
 # output_dir = '/Users/adrianharris/Desktop/kidney/'
 # comparison = 'K1_Low_K1_High'
-
-start_time <- proc.time()
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
@@ -78,7 +76,7 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   detP_df['X1'] <- sample_names
   detP_df['X2'] <- detPmeans
   colnames(detP_df) <- c('Basename', 'p_value_mean')
-  write.csv(detP_df, paste(output_dir, "p-values.csv", sep=""), row.names = FALSE)
+  write.csv(detP_df, file = paste(output_dir, "p-values.csv", sep=""), row.names = FALSE)
   rm(sample_names, detPmeans)
   
   #Merging to pheno dataframe for color coding and plot via barplots 
@@ -210,19 +208,19 @@ beta_values_filtered <- as.data.frame(beta_values)
 cat('Hypomethylated\n')
 dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
-#6327 Hypomethylated
+#33419 Hypomethylated
 
 #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
 cat("Hypermethylated\n")
 dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
 dim(beta_values_filtered)
-#204 hypermethylated
+#3091 hypermethylated
 
 if (comparison == 'K1_Low_K1_High') {
-  pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
+  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K1' & pheno_df$eGFR == 'High')),]
 } else if (comparison == 'K2_Low_K2_High') {
-  pheno_df <- pheno_df[(pheno_df$time == 'K2'),]
+  pheno_df <- pheno_df[((pheno_df$time == 'K2' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
 } else if (comparison == 'K1_High_K2_High') {
   pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
 } else if (comparison == 'K1_Low_K2_Low') {
@@ -241,13 +239,13 @@ m_values = beta2m(beta_values_filtered)
 if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
   cat('Skip beta and m_value CSV\n')
 } else {
-  write.csv(beta_values_filtered, paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
-  write.csv(m_values, paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
-
 
 #Filter beta dataframe using column names for the relevant comparison
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+dim(beta_values_filtered)
 
 # #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
 # beta_values_case = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
@@ -261,6 +259,19 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # #Convert filter beta dataframe to m_value dataframe
 m_values = beta2m(beta_values_filtered)
 
+#String parsing for later output 
+cat("String parsing\n")
+string <- unlist(strsplit(pheno_file, "/"))
+string <- rev(string)[1]
+string <- substr(string, 1, 5)
+if (string == "comp1") {
+  string <- "eGFR_1month"
+} else if (string == "comp2") {
+  string <- "eGFR_12month"
+} else if (string == "comp3") {
+  string <- "eGFR_24month"
+}
+
 cat("PCA plots - Betas\n")
 #Transpose resulting PCA plot - beta values 
 transposed_beta <- t(beta_values_filtered) #t(beta_values_case)
@@ -270,15 +281,12 @@ var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
 scores = as.data.frame(pca_general$x)
 scores['Basename'] <- row.names(scores)
 scores <- merge(scores, pheno_df, by = 'Basename')
-string <- unlist(strsplit(pheno_file, "/"))
-string <- rev(string)[1]
-string <- substr(string, 1, 5)
 output <- paste(output_dir, string, sep="")
 output <- paste(output, "_", sep="")
 output <- paste(output, comparison, sep="")
 output_path <- paste(output, "_betas", sep="")
 jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 90)
-plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
+plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(output_path, "_PCA", sep=""))
 #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
 print(plot)
 dev.off()
@@ -292,116 +300,101 @@ var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
 scores = as.data.frame(pca_general$x)
 scores['Basename'] <- row.names(scores)
 scores <- merge(scores, pheno_df, by = 'Basename')
-string <- unlist(strsplit(pheno_file, "/"))
-string <- rev(string)[1]
-string <- substr(string, 1, 5)
 output <- paste(output_dir, string, sep="")
 output <- paste(output, "_", sep="")
 output <- paste(output, comparison, sep="")
 output_path <- paste(output, "_m", sep="")
 jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 90)
-plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal)
+plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(output_path, "_PCA", sep=""))
 #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
 print(plot)
 dev.off()
 
 #CpGs - DMPs
 cat("Identify CpGs\n")
-filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
-length(filter)
-gset.filt <- gmtSet[,filter]
-
 if (comparison == 'K1_Low_K1_High') {
-  type <- factor(gset.filt@colData$eGFR)
+  var <- pheno_df$eGFR
+  cols <- c("High", "Low")
 } else if (comparison == 'K2_Low_K2_High') {
-  type <- factor(gset.filt@colData$eGFR)
+  var <- pheno_df$eGFR
+  cols <- c("High", "Low")
 } else if (comparison == 'K1_High_K2_High') {
-  type <- factor(gset.filt@colData$time)
+  var <- pheno_df$time
+  cols <- c("K2", "K1")
 } else if (comparison == 'K1_Low_K2_Low') {
-  type <- factor(gset.filt@colData$time)
+  var <- pheno_df$time
+  cols <- c("K2", "K1")
 } else if (comparison == 'K1_High_K2_Low') {
-  type <- factor(gset.filt@colData$time)
+  var <- pheno_df$time
+  cols <- c("K2", "K1")
 } else {
-  type <- factor(gset.filt@colData$time)
+  var <- pheno_df$time
+  cols <- c("K2", "K1")
 }
 
-design <- model.matrix(~type)
-library(limma)
-fit1 <- lmFit(m_values, design)
-fit2 <- eBayes(fit1)
-#summary(decideTests(fit2))
+library(ChAMP)
+myDMP <- champ.DMP(beta = beta_values_filtered, pheno=var, adjPVal = 0.05,
+                   adjust.method = "BH", arraytype = "450K")
+myDMP <- data.frame(myDMP)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
+ann450kSub <- ann450k[match(rownames(myDMP),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
+myDMP <- merge(myDMP,ann450kSub,by="row.names",all.x=TRUE)
+myDMP <- data.frame(myDMP)
+write.csv(myDMP, file = paste(output, "_DMPs_sig-ChAMP.csv", sep=""), row.names = TRUE)
+
+library(limma)
+condition <- factor(var)
+design <- model.matrix(~0+condition, data=pheno_df)
+colnames(design) <- cols
+fit1 <- lmFit(beta_values_filtered, design)
+
+if (comparison == 'K1_Low_K1_High') {
+  contMatrix <- makeContrasts(Low-High, levels=design)
+} else if (comparison == 'K2_Low_K2_High') {
+  contMatrix <- makeContrasts(Low-High, levels=design)
+} else if (comparison == 'K1_High_K2_High') {
+  contMatrix <- makeContrasts(K1-K2, levels=design)
+} else if (comparison == 'K1_Low_K2_Low') {
+  contMatrix <- makeContrasts(K1-K2, levels=design)
+} else if (comparison == 'K1_High_K2_Low') {
+  contMatrix <- makeContrasts(K1-K2, levels=design)
+} else {
+  contMatrix <- makeContrasts(K1-K2, levels=design)
+}
+
+#contMatrix
+
+fit2 <- contrasts.fit(fit1, contMatrix)
+fit2 <- eBayes(fit2)
+
+#summary(decideTests(fit2))
 ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
-DMPs <- topTable(fit2, genelist=ann450kSub)
-write.csv(DMPs, paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
+DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
+DMPs_sig <- DMPs[which(DMPs$adj.P.Val < 0.05),]
+write.csv(DMPs, file = paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
+write.csv(DMPs, file = paste(output, "_DMPs_sig.csv", sep=""), row.names = TRUE)
 #plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
 
 #Manhattan plot using the DMPs
 cat("Generating manhattan plot from DMPs\n")
 library(qqman)
-title = output
+title <- paste(output, " (Adj. P-val)", sep="")
 col=c("black","grey")
 DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
 DMPs$chr = as.numeric(DMPs$chr)
 DMPs$pos = as.numeric(DMPs$pos)
 jpeg(paste(output, "_manhattan.jpeg", sep=""), quality = 90)
-manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, main=title)
+manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
 dev.off()
 
-#Using MEAL 
-library(MEAL)
-cat("Using MEAL to generate manhattan plot\n")
-#Differential Methylation - using MEAL 
-rowData(gmtSet) <- getAnnotation(gmtSet)[, -c(1:3)]
+myAnnotation <- cpg.annotate(object = as.matrix(m_values), datatype = "array", what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix,
+                             coef = "Low - High", arraytype = "450K")
 
-#Remove probes with NAs for betas
-gmtSet <- gmtSet[!apply(getBeta(gmtSet), 1, function(x) any(is.na(x))), ]
-filter <- colnames(gmtSet)[(gmtSet@colData$Basename %in% pheno_df$Basename)]
-length(filter)
-gset.filt <- gmtSet[,filter]
-set.seed(0) #reproducible results for simulations 
-sub_gset.filt <- gset.filt[sample(nrow(gset.filt), 100000), ]
-
-if (comparison == 'K1_Low_K1_High') {
-  var = "eGFR"
-} else if (comparison == 'K2_Low_K2_High') {
-  var = "eGFR"
-} else if (comparison == 'K1_High_K2_High') {
-  var = "time"
-} else if (comparison == 'K1_Low_K2_Low') {
-  var = "time"
-} else if (comparison == 'K1_High_K2_Low') {
-  var = "time"
-} else {
-  var = "time"
-}
-
-res <- runPipeline(set = sub_gset.filt, variable_names = var , analyses = c("DiffMean", "DiffVar"))
-
-jpeg(paste(output, "_MEAL_manhattan.jpeg", sep=""), quality = 90)
-plot(res, rid = "DiffMean", type = "manhattan", suggestiveline = NULL, 
-     genomewideline = NULL)
-dev.off()
-
-association <- getAssociation(res, "DiffMean")
-write.csv(association, paste(output, "_MEAL_associations.csv", sep=""), row.names = TRUE)
-
-print(proc.time() - start_time)
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
 
 q()
-
-# #Troubleshooting and Loading - Remove later 
-# library(rio)
-# pheno_df <- import("/Users/adrianharris/Documents/dna_methylation_analysis/comp1.csv")
-# pheno_df <- pheno_df[(pheno_df$time == 'K1'),]
-# pheno_df <- pheno_df[!(pheno_df$eGFR == ""),]
-# pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
-# mtSet <- readRDS("/Users/adrianharris/Desktop/kidney/mtSet.RDS")
-# rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
-# gmtSet <- mapToGenome(rSet)
-# sampleNames(gmtSet)
-
-#Plotting - Things for MEAL
-#targetRange <- GRanges("23:13000000-23000000")
-#plot(res, rid = "DiffMean", type = "manhattan", highlight = targetRange)
 
