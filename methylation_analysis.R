@@ -213,9 +213,10 @@ beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05))
 #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
 cat("Hypermethylated\n")
 dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
+#3091 hypermethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
 dim(beta_values_filtered)
-#3091 hypermethylated
+
 
 if (comparison == 'K1_Low_K1_High') {
   pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K1' & pheno_df$eGFR == 'High')),]
@@ -313,28 +314,29 @@ dev.off()
 #CpGs - DMPs
 cat("Identify CpGs\n")
 library(ChAMP)
+myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjust.method = "BH", arraytype = "450K") #adjPVal = 0.05
 if (comparison == 'K1_Low_K1_High') {
-  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjust.method = "BH", arraytype = "450K")
   condition <- factor(pheno_df$eGFR)
   cols <- c("High", "Low")
 } else if (comparison == 'K2_Low_K2_High') {
-  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjust.method = "BH", arraytype = "450K")
   condition <- factor(pheno_df$eGFR)
   cols <- c("High", "Low")
 } else if (comparison == 'K1_High_K2_High') {
-  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjust.method = "BH", arraytype = "450K")
   condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 } else if (comparison == 'K1_Low_K2_Low') {
-  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjust.method = "BH", arraytype = "450K")
   condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 } else if (comparison == 'K1_High_K2_Low') {
-  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjust.method = "BH", arraytype = "450K")
   condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 } else {
-  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjust.method = "BH", arraytype = "450K")
   condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 }
@@ -344,7 +346,7 @@ ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450kSub <- ann450k[match(rownames(myDMP),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
 myDMP <- merge(myDMP,ann450kSub,by="row.names",all.x=TRUE)
 myDMP <- data.frame(myDMP)
-write.csv(myDMP, file = paste(output, "_DMPs_sig-ChAMP.csv", sep=""), row.names = TRUE)
+write.csv(myDMP, file = paste(output, "_DMPs-ChAMP.csv", sep=""), row.names = TRUE)
 
 library(limma)
 design <- model.matrix(~0+condition, data=pheno_df)
