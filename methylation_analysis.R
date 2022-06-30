@@ -370,6 +370,7 @@ write.csv(DMPs, file = paste(output, "_DMPs_sig.csv", sep=""), row.names = TRUE)
 #Manhattan plot using the DMPs
 cat("Generating manhattan plot from DMPs\n")
 library(qqman)
+library(DMRcate)
 title <- paste(output, " (Adj. P-val)", sep="")
 col=c("black","grey")
 DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
