@@ -312,29 +312,33 @@ dev.off()
 
 #CpGs - DMPs
 cat("Identify CpGs\n")
+library(ChAMP)
 if (comparison == 'K1_Low_K1_High') {
-  var <- pheno_df$eGFR
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  condition <- factor(pheno_df$eGFR)
   cols <- c("High", "Low")
 } else if (comparison == 'K2_Low_K2_High') {
-  var <- pheno_df$eGFR
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$eGFR, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  condition <- factor(pheno_df$eGFR)
   cols <- c("High", "Low")
 } else if (comparison == 'K1_High_K2_High') {
-  var <- pheno_df$time
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 } else if (comparison == 'K1_Low_K2_Low') {
-  var <- pheno_df$time
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 } else if (comparison == 'K1_High_K2_Low') {
-  var <- pheno_df$time
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 } else {
-  var <- pheno_df$time
+  myDMP <- champ.DMP(beta = beta_values_filtered, pheno=pheno_df$time, adjPVal = 0.05, adjust.method = "BH", arraytype = "450K")
+  condition <- factor(pheno_df$time)
   cols <- c("K2", "K1")
 }
 
-library(ChAMP)
-myDMP <- champ.DMP(beta = beta_values_filtered, pheno=var, adjPVal = 0.05,
-                   adjust.method = "BH", arraytype = "450K")
 myDMP <- data.frame(myDMP)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450kSub <- ann450k[match(rownames(myDMP),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
@@ -343,7 +347,6 @@ myDMP <- data.frame(myDMP)
 write.csv(myDMP, file = paste(output, "_DMPs_sig-ChAMP.csv", sep=""), row.names = TRUE)
 
 library(limma)
-condition <- factor(var)
 design <- model.matrix(~0+condition, data=pheno_df)
 colnames(design) <- cols
 fit1 <- lmFit(beta_values_filtered, design)
