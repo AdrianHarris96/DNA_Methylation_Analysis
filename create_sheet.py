@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-#Example input: ./create_sheet.py -x /Users/adrianharris/Desktop/kidney/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -o comp1.csv -m 
+#Example input: ./create_sheet.py -x /Users/adrianharris/Desktop/kidney/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -o eGFR_1month_sample_sheet.csv -m 24 -d /Users/adrianharris/Documents/dna_methylation_analysis/
 
 import pandas as pd
 import argparse as ap
@@ -9,7 +9,7 @@ import os
 parser = ap.ArgumentParser()
 parser = ap.ArgumentParser(description='Create sample sheet')
 parser.add_argument("-x", "--excel", help="excel sample file", required=True)
-parser.add_argument("-w", "--working", help="working directory", default='/Users/adrianharris/Desktop/kidney/')
+parser.add_argument("-d", "--out_dir", help="output directory", default='/Users/adrianharris/Desktop/kidney/')
 parser.add_argument("-o", "--output", help="output csv filename", default='methylation.csv')
 parser.add_argument("-s", "--start", help="starting sheet(#) in excel file", type=int, required=True)
 parser.add_argument("-e", "--end", help="ending sheet(#) in excel file", type=int, required=True)
@@ -43,33 +43,38 @@ for x in range(args.start, args.end): #Number of sheets within excel file
 		else:
 			pass
 
-#print(arrayDict)
-
 df = df[df['time'].notna()] #drop if time is empty
 
+monthList = ['eGFR_1month', 'eGFR_12month', 'eGFR_24month']
+
+for month in monthList:
+	for index in df.index:
+		if df[month][index] < 45:
+			df[month][index] = 'Low'
+		elif df[month][index] >= 45:
+			df[month][index] = 'High'
+		else:
+			df[month][index] == ''
+
+#Dropping out rows with any blanks 
+full_df = df[df['eGFR_24month'].notna()] 
+full_df = full_df[full_df['eGFR_12month'].notna()] 
+full_df = full_df[full_df['eGFR_1month'].notna()] 
+
+os.chdir(args.out_dir) #Move to output_directory
+full_df.to_csv('kidney_sample_sheet.csv') #csv with all information - samples with eGFR info across all timepoints
+
 if args.month == '1':
-	month = 'eGFR_1month'
+	df.rename(columns={'eGFR_1month':'eGFR'}, inplace=True)
 	df.drop(['eGFR_12month', 'eGFR_24month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
 elif args.month == '12':
-	month = 'eGFR_12month'
+	df.rename(columns={'eGFR_12month':'eGFR'}, inplace=True)
 	df.drop(['eGFR_1month', 'eGFR_24month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
 elif args.month == '24':
-	month = 'eGFR_24month'
+	df.rename(columns={'eGFR_24month':'eGFR'}, inplace=True)
 	df.drop(['eGFR_1month', 'eGFR_12month', 'DGF_status', 'DCD_status'], axis=1, inplace=True)
 else:
 	print('Month not found')
 	quit()
 
-for index in df.index:
-	if df[month][index] < 45:
-		df[month][index] = 'Low'
-	elif df[month][index] >= 45:
-		df[month][index] = 'High'
-	else:
-		df[month][index] == 'NaN'
-
-df.rename(columns={month:'eGFR'}, inplace=True)
-
-os.chdir(args.working)
-print(df)
 df.to_csv(args.output)
