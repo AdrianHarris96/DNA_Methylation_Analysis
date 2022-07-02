@@ -44,7 +44,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   dirEPIC <- paste(base_dir, "EPIC_array", sep="")
   
   #Generation or Loading of rgSet
-  if (file.exists(paste(output_dir, "m_values", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
     cat('Skipping rgSet Loading')
   } else if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
     cat('Loading in rgSet (combined)\n')
@@ -63,7 +63,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   }
  
   #Generation or Loading of mtSet
-  if (file.exists(paste(output_dir, "m_values", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
     cat('Skipping normalizaion')
   }else if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
     cat('Loading normalization\n')
@@ -193,7 +193,7 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   scores <- as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
   scores <- merge(scores, pheno, by = 'Basename')
-  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR, label=sample_id)) +theme_bw() + geom_point(alpha=0.5, size=3) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(title) + geom_text(hjust=0, vjust=0)
+  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR, label=sample_id)) +theme_bw() + geom_point(alpha=0.5, size=3) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(title) + geom_text(check_overlap=TRUE, nudge_x = 0.25, nudge_y = 0.25)
   print(plot)
   return("Plotting")
 }
