@@ -40,6 +40,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   pheno450k <- pheno_df[!(pheno_df$array_type == 'EPIC'),]
   phenoEPIC <- pheno_df[!(pheno_df$array_type == '450K'),]
   
+  print(base_dir)
   #Specify the directories and read in respective IDAT Files 
   dir450k <- paste(base_dir, "450k_array", sep="")
   dirEPIC <- paste(base_dir, "EPIC_array", sep="")
