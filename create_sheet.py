@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-#Example input: ./create_sheet.py -x /Users/adrianharris/Desktop/kidney/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -o eGFR_1month_sample_sheet.csv -m 24 -d /Users/adrianharris/Documents/dna_methylation_analysis/
+#Example input: ./create_sheet.py -x /Users/adrianharris/Desktop/kidney/samples\ annotation.xlsx -s 0 -e 2 -o eGFR_1month_sample_sheet.csv -m 1 -d /Users/adrianharris/Documents/dna_methylation_analysis/
 
 import pandas as pd
 import argparse as ap
@@ -18,23 +18,20 @@ parser.add_argument("-t2", "--time2", help="time point 2 to extract", default='K
 parser.add_argument("-m", "--month", help="eGFR month", required=True)
 args = parser.parse_args()
 
-df = pd.DataFrame(columns=['Basename', 'sample_id', 'sample_well', 'sample_plate', 'sentrix_ID', 'sentrix_position', 'time', 'array_type', 'gender_donor', 'gender_recipient', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month', 'DGF_status', 'DCD_status'])
+df = pd.DataFrame(columns=['Basename', 'sample_id', 'sample_well', 'sample_plate', 'sentrix_ID', 'sentrix_position', 'time', 'array_type', 'donor_age', 'donor_gender', 'donor_race', 'recipient_age', 'recipient_gender', 'recipient_race', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month', 'DGF_status', 'DCD_status'])
 for x in range(args.start, args.end): #Number of sheets within excel file 
 	sheet_df =  pd.read_excel(args.excel, sheet_name=x, keep_default_na=True)
 	sheet_df.columns = [col.strip() for col in sheet_df.columns] #Stripping whitespace in column names
-	if x == 4: #This needed to be changed before creating the sample_id
-		x = 12
-	sample_id = 'SampleID_K' + str(x)
 	for index in sheet_df.index: #iterate through columns
 		if (sheet_df['Time'][index] == args.time1) or (sheet_df['Time'][index] == args.time2): #Only append to df if either time point is present 
 			basename = str(sheet_df['Sentrix_ID'][index]) + '_' + str(sheet_df['Sentrix_Position'][index])
 			try:
-				row = sheet_df.loc[index, [sample_id, 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Time', 'Array_type', 'gender_donor', 'gender_recipient', 'eGFR_1mo', 'eGFR_12mo', 'eGFR_24mo', 'DGF=1, non-DGF=0', 'DCD (yes/no)']]
+				row = sheet_df.loc[index, ['Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Time', 'Array type', 'Donor Age', 'Donor Gender', 'Donor Race', 'Recipient Age', 'Recipient Gender', 'Recipient Race', 'GFR 1mo', 'eGFR/12', 'eGFR/24', 'DGF=1, non-DGF=0', 'DCD (yes/no)']]
 				row = list(row)
 				row.insert(0, basename)
 				df.loc[len(df) + 1,] = row #adding to df
 			except:
-				row = sheet_df.loc[index, [sample_id, 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Time', 'Array_type', 'gender_donor', 'gender_recipient', 'eGFR_1mo', 'eGFR_12mo', 'eGFR_24mo']]
+				row = sheet_df.loc[index, ['Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Time', 'Array type', 'Donor Age', 'Donor Gender', 'Donor Race', 'Recipient Age', 'Recipient Gender', 'Recipient Race', 'GFR 1mo', 'eGFR/12', 'eGFR/24']]
 				row = list(row)
 				row.extend(['NaN', 'NaN'])
 				row.insert(0, basename)
