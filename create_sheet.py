@@ -56,7 +56,8 @@ for month in monthList:
 #Dropping out rows with any blanks 
 full_df = df[df['eGFR_24month'].notna()] 
 full_df = full_df[full_df['eGFR_12month'].notna()] 
-full_df = full_df[full_df['eGFR_1month'].notna()] 
+full_df = full_df[full_df['eGFR_1month'].notna()]
+full_df.drop_duplicates(inplace=True)
 
 os.chdir(args.out_dir) #Move to output_directory
 full_df.to_csv('kidney_sample_sheet.csv') #csv with all information - samples with eGFR info across all timepoints
@@ -73,5 +74,7 @@ elif args.month == '24':
 else:
 	print('Month not found')
 	quit()
+
+df.drop_duplicates(inplace=True)
 
 df.to_csv(args.output)
