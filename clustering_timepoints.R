@@ -155,11 +155,10 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   }
   
   typeList <- c('450K', 'EPIC', 'Combined')
-  typeList <- c('450K')
   for (array in typeList) {
     clustering(array, pheno_df, 'K1', m_values, pheno_file)
-    #clustering(array, pheno_df, 'K2', m_values, pheno_file)
-    #clustering(array, pheno_df, 'K1&K2', m_values, pheno_file)
+    clustering(array, pheno_df, 'K2', m_values, pheno_file)
+    clustering(array, pheno_df, 'K1&K2', m_values, pheno_file)
     dev.off()
   }
   return(paste("Done with plotting for file: ", pheno_file, sep=""))
