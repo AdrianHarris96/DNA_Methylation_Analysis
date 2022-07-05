@@ -157,14 +157,14 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   for (array in typeList) {
     clustering(array, pheno_df, 'K1', m_values, pheno_file)
     clustering(array, pheno_df, 'K2', m_values, pheno_file)
-    clustering(array, pheno_df, 'BOTH', m_values, pheno_file)
+    clustering(array, pheno_df, 'K1&K2', m_values, pheno_file)
   }
   return(paste("Done with plotting for file: ", pheno_file, sep=""))
 }
 
 clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   #Filter beta dataframe using column names for the relevant comparison
-  if (timepoint == 'BOTH') {
+  if (timepoint == 'K1&K2') {
     pheno <- pheno[!(pheno$eGFR == ""),]
   } else {
     pheno <- pheno[(pheno$time == timepoint),]
@@ -198,10 +198,20 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   scores['Basename'] <- row.names(scores)
   scores <- merge(scores, pheno, by = 'Basename')
   plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
-  plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
-
-  library(gridExtra)
-  grid.arrange(plot, plot2, ncol=1)
+  if (length(unique(scores$donor_gender)) == 3) {
+    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
+  } else {
+    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  }
+  
+  if (timepoint == 'K1&K2') {
+    plot3 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=time)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - K1 vs K2", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+    library(gridExtra)
+    grid.arrange(plot, plot2, plot3, ncol=1)
+  } else {
+    library(gridExtra)
+    grid.arrange(plot, plot2, ncol=1)
+  }
   
   #Classical MDS
   #title <- paste(title, "_MDS", sep="_")
@@ -233,7 +243,6 @@ calculate_betas(pheno_file = opt$sample,
                 base_dir =opt$base_dir, 
                 git_dir = opt$git_dir, 
                 output_dir = opt$out_dir)
-
 dev.off()
 
 
