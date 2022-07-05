@@ -191,8 +191,11 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
   scores <- as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
-  scores$donor_age[is.na(scores$donor_age)] <- 0 #Change all unknowns to 0
   scores <- merge(scores, pheno, by = 'Basename')
+  #Converting NAs to 0 in donor_age
+  vec <- scores$donor_age
+  vec[is.na(vec)] <- 0
+  scores$donor_age <- vec
   plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=array_type)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
   if (length(unique(scores$donor_gender)) == 3) {
     plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
@@ -265,11 +268,18 @@ if (file.exists(opt$out_dir)) {
   dir.create(opt$out_dir)
 }
 
+
 pdf(file = paste(opt$out_dir, "out.pdf", sep=""))
 calculate_betas(pheno_file = opt$sample, 
                 base_dir =opt$base_dir, 
                 git_dir = opt$git_dir, 
                 output_dir = opt$out_dir)
+
+# pdf(file = paste('/Users/adrianharris/Desktop/test_kidney/', "out.pdf", sep=""))
+# calculate_betas(pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/kidney_sample_sheet.csv', 
+#                 base_dir ='/Users/adrianharris/Desktop/kidney/', 
+#                 git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/', 
+#                 output_dir = '/Users/adrianharris/Desktop/test_kidney/')
 
 dev.off()
 
