@@ -189,39 +189,54 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   title <- paste(title, string, sep="_")
   
   #PCA - m_values 
-  title <- paste(title, "_PCA", sep="_")
+  # title <- paste(title, "_PCA", sep="_")
+  # transposed_m <- t(m_df) 
+  # transposed_m <- data.frame(transposed_m)
+  # pca_general <- prcomp(transposed_m, center=TRUE)
+  # var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
+  # scores <- as.data.frame(pca_general$x)
+  # scores['Basename'] <- row.names(scores)
+  # scores <- merge(scores, pheno, by = 'Basename')
+  # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  # if (length(unique(scores$donor_gender)) == 3) {
+  #   plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
+  # } else {
+  #   plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  # }
+  # 
+  # if (timepoint == 'K1&K2') {
+  #   plot3 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=time)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - K1 vs K2", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  #   library(gridExtra)
+  #   grid.arrange(plot, plot2, plot3, ncol=1)
+  # } else {
+  #   library(gridExtra)
+  #   grid.arrange(plot, plot2, ncol=1)
+  # }
+  
+  #Classical MDS
+  title <- paste(title, "_MDS", sep="_")
   transposed_m <- t(m_df) 
   transposed_m <- data.frame(transposed_m)
-  pca_general <- prcomp(transposed_m, center=TRUE)
-  var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
-  scores <- as.data.frame(pca_general$x)
-  scores['Basename'] <- row.names(scores)
-  scores <- merge(scores, pheno, by = 'Basename')
-  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
-  if (length(unique(scores$donor_gender)) == 3) {
-    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
+  d <- dist(transposed_m) # euclidean distances between the rows
+  fit <- cmdscale(d,eig=TRUE, k=2)
+  fit <- data.frame(fit$points)
+  fit['Basename'] <- row.names(fit)
+  fit <- merge(fit, pheno, by = 'Basename')
+  plot <- ggplot(data=fit, mapping = aes(x = X1, y = X2, color=eGFR)) + geom_point(size=3, alpha=0.5) + labs(x="Coordinate 1", y="Coordinate 2") + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  if (length(unique(fit$donor_gender)) == 3) {
+    plot2 <- ggplot(data=fit, mapping = aes(x = X1, y = X2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x="Coordinate 1", y="Coordinate 2") + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
   } else {
-    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+    plot2 <- ggplot(data=fit, mapping = aes(x = X1, y = X2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x="Coordinate 1", y="Coordinate 2") + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
   }
   
   if (timepoint == 'K1&K2') {
-    plot3 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=time)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - K1 vs K2", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+    plot3 <- ggplot(data=fit, mapping = aes(x = X1, y = X2, color=time)) + geom_point(size=3, alpha=0.5) + labs(x="Coordinate 1", y="Coordinate 2") + ggtitle(paste(title, " - K1 vs K2", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
     library(gridExtra)
     grid.arrange(plot, plot2, plot3, ncol=1)
   } else {
     library(gridExtra)
     grid.arrange(plot, plot2, ncol=1)
   }
-  
-  #Classical MDS
-  #title <- paste(title, "_MDS", sep="_")
-  # d <- dist(transposed_m) # euclidean distances between the rows
-  # fit <- cmdscale(d,eig=TRUE, k=2)
-  # fit <- data.frame(fit$points)
-  # fit['Basename'] <- row.names(fit)
-  # fit <- merge(fit, pheno, by = 'Basename')
-  # plot <- ggplot(data=fit, mapping = aes(x = X1, y = X2, color=eGFR)) +theme_bw() + geom_point(alpha=0.5, size=3) + labs(x="Coordinate 1", y="Coordinate 2") + scale_color_manual(values=pal) + ggtitle(title) + geom_text_repel(aes(label = sample_id))
-  # print(plot)
   return("Plotting")
 }
 
