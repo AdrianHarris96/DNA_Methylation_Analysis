@@ -1,6 +1,6 @@
 #!/home/amharris/.conda/envs/methylation_env/bin/R Rscript
 
-#Example input: Rscript clustering_timepoints.R -s /home/amharris/dna_methylation_analysis/eGFR_1month_sample_sheet.csv -b /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/ -g /home/amharris/dna_methylation_analysis/ -o /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/clustering_out/
+#Example input: Rscript clustering_timepoints.R -s /home/amharris/dna_methylation_analysis/eGFR_1month_sample_sheet.csv -b /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/ -c /home/amharris/dna_methylation_analysis/ -o /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/clustering_out/
 library(minfi)
 library(rio)
 library(ggplot2)
@@ -14,7 +14,7 @@ option_list = list(
               help="sample sheet CSV"),
   make_option(c("-b", "--base_dir"), type="character", default=NULL, 
               help="base directory with IDAT files"),
-  make_option(c("-g", "--git_dir"), type="character", default=NULL, 
+  make_option(c("-c", "--git_dir"), type="character", default=NULL, 
               help="git directory with script"),
   make_option(c("-o", "--out_dir"), type="character", default=NULL, 
               help="directory to output")
