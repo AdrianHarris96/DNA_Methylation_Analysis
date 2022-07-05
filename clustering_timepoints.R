@@ -1,31 +1,32 @@
-#Clustering timepoints
-rm(list = ls())
+#!/home/amharris/.conda/envs/methylation_env/bin/R Rscript
+
+#Example input: Rscript clustering_timepoints.R -s /home/amharris/dna_methylation_analysis/eGFR_1month_sample_sheet.csv -b /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/ -g /home/amharris/dna_methylation_analysis/ -o /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/clustering_out/
 library(minfi)
 library(rio)
 library(ggplot2)
 library(tidyverse)
 library(RColorBrewer)
 library(lumi)
+library(optparse)
 
-#Example input: Rscript methylation_analysis.R <pheno_file> <base_dir> <output_dir>
-# args=commandArgs(trailingOnly=TRUE)
-# pheno_file = args[1]
-# base_dir = args[2]
-# git_df = args[3]
-# output_dir = args[4]
+option_list = list(
+  make_option(c("-s", "--sample"), type="character", default=NULL, 
+              help="sample sheet CSV"),
+  make_option(c("-b", "--base_dir"), type="character", default=NULL, 
+              help="base directory with IDAT files"),
+  make_option(c("-g", "--git_dir"), type="character", default=NULL, 
+              help="git directory with script"),
+  make_option(c("-o", "--out_dir"), type="character", default=NULL, 
+              help="directory to output")
+);
 
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
 
 #Color Scheme Defined 
 pal <- brewer.pal(4,"Dark2")
 
 calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
-  #Check if output directory exists
-  if (file.exists(output_dir)) {
-    cat("Directory already exists\n")
-  } else {
-    dir.create(output_dir)
-  }
-  
   #Importing manually-curated sample sheet
   pheno_df <- import(pheno_file)
   
@@ -45,7 +46,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   
   #Generation or Loading of rgSet
   if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
-    cat('Skipping rgSet Loading')
+    cat('Skipping rgSet Loading\n')
   } else if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
     cat('Loading in rgSet (combined)\n')
     rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
@@ -64,7 +65,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
  
   #Generation or Loading of mtSet
   if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
-    cat('Skipping normalizaion')
+    cat('Skipping normalizaion\n')
   }else if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
     cat('Loading normalization\n')
     mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
@@ -76,10 +77,11 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   }
   
   # Map to Genome
-  cat('Converting to Genomic Methyl Set\n')
   if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+    cat('Load m-values\n')
     m_values <- import(paste(output_dir, "m_values.csv", sep=""))
   } else {
+    cat('Converting to Genomic Methyl Set\n')
     rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
     gmtSet <- mapToGenome(rSet)
     dim(gmtSet) #Number of probes = 452453
@@ -154,7 +156,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   for (array in typeList) {
     clustering(array, pheno_df, 'K1', m_values, pheno_file)
     clustering(array, pheno_df, 'K2', m_values, pheno_file)
-    #clustering(array, pheno_df, 'BOTH', m_values, pheno_file)
+    clustering(array, pheno_df, 'BOTH', m_values, pheno_file)
   }
   return(paste("Done with plotting for file: ", pheno_file, sep=""))
 }
@@ -175,7 +177,7 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   }
   
   m_df <- m_df[,(colnames(m_df) %in% pheno$Basename)]
-  print(dim(m_df))
+  #print(dim(m_df))
 
   #Parsing name
   string <- unlist(strsplit(pheno_file, "/"))
@@ -185,7 +187,8 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   title <- paste(timepoint, type, sep="_")
   title <- paste(title, string, sep="_")
   
-  #PCA - Betas
+  #PCA - m_values 
+  title <- paste(title, "_PCA", sep="_")
   transposed_m <- t(m_df) 
   transposed_m <- data.frame(transposed_m)
   pca_general <- prcomp(transposed_m, center=TRUE)
@@ -193,17 +196,43 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   scores <- as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
   scores <- merge(scores, pheno, by = 'Basename')
-  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR, label=sample_id)) +theme_bw() + geom_point(alpha=0.5, size=3) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(title) + geom_text(check_overlap=TRUE, nudge_x = 0.25, nudge_y = 0.25)
-  print(plot)
+  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 3, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
+
+  library(gridExtra)
+  grid.arrange(plot, plot2, ncol=1)
+  
+  #Classical MDS
+  #title <- paste(title, "_MDS", sep="_")
+  # d <- dist(transposed_m) # euclidean distances between the rows
+  # fit <- cmdscale(d,eig=TRUE, k=2)
+  # fit <- data.frame(fit$points)
+  # fit['Basename'] <- row.names(fit)
+  # fit <- merge(fit, pheno, by = 'Basename')
+  # plot <- ggplot(data=fit, mapping = aes(x = X1, y = X2, color=eGFR)) +theme_bw() + geom_point(alpha=0.5, size=3) + labs(x="Coordinate 1", y="Coordinate 2") + scale_color_manual(values=pal) + ggtitle(title) + geom_text_repel(aes(label = sample_id))
+  # print(plot)
   return("Plotting")
 }
 
-calculate_betas(pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/eGFR_1month_sample_sheet.csv', 
-                base_dir ='/Users/adrianharris/Desktop/kidney/', 
-                git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/', 
-                output_dir = '/Users/adrianharris/Desktop/test_kidney/')
+#Check if output directory exists
+if (file.exists(opt$out_dir)) {
+  cat("Directory already exists\n")
+} else {
+  dir.create(opt$out_dir)
+}
 
-#pdf(file = paste(output_dir, ""), width = 4, height = 4)
-#Number of files 
-nrow(subset(pheno_df, time == 'K1')) #144
-nrow(subset(pheno_df, time == 'K2')) #48
+pdf_name <- unlist(strsplit(opt$sample, "/"))
+pdf_name <- rev(pdf_name)[1]
+pdf_name <- unlist(strsplit(pdf_name, "_"))
+pdf_name <- paste(pdf_name[1], pdf_name[2], sep="_")
+pdf_name <- paste(pdf_name, ".pdf", sep="")
+
+pdf(file = paste(opt$out_dir, pdf_name, sep=""))
+calculate_betas(pheno_file = opt$sample, 
+                base_dir =opt$base_dir, 
+                git_dir = opt$git_dir, 
+                output_dir = opt$out_dir)
+
+dev.off()
+
+
