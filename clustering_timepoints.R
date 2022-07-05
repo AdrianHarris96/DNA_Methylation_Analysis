@@ -191,6 +191,7 @@ clustering <- function(type, pheno, timepoint, m_df, pheno_file) {
   var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
   scores <- as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
+  scores$donor_age[is.na(scores$donor_age)] <- 0 #Change all unknowns to 0
   scores <- merge(scores, pheno, by = 'Basename')
   plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=array_type)) + geom_point(size=3, alpha=0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(title) + geom_text(aes(label = sample_id), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
   if (length(unique(scores$donor_gender)) == 3) {
