@@ -339,7 +339,6 @@ if (file.exists(paste(output_dir, "detlabeta.jpeg", sep=""))) {
 if (file.exists(paste(output_dir, "dendro.jpeg", sep=""))) {
   cat('Skip dendrogram\n')
 } else {
-  library(tidyverse)
   jpeg(paste(output_dir, "dendro.jpeg", sep=""), quality = 90, width = 960, height = 480)
   beta <- beta_values_filtered[1:20000,]
   beta_t <- t(beta)
