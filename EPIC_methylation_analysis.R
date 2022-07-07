@@ -16,10 +16,10 @@ git_dir = args[3]
 output_dir = args[4]
 
 #Local Machine
-pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
-base_dir = '/Users/adrianharris/Desktop/kidney/'
-git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-output_dir = '/Users/adrianharris/Desktop/epic_kidney/'
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
+# base_dir = '/Users/adrianharris/Desktop/kidney/'
+# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+# output_dir = '/Users/adrianharris/Desktop/epic_kidney/'
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
@@ -137,7 +137,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Converting to Genomic Methyl Set\n')
   rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
   gmtSet <- mapToGenome(rSet)
-  dim(gmtSet) #Number of probes = 452453
+  print(dim(gmtSet)) #Number of probes = 452453
   
   # #Predicted Sex 
   # predictedSex <- getSex(gmtSet, cutoff = -2)
@@ -150,7 +150,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   gmtSet <- addSnpInfo(gmtSet)
   gr <- granges(gmtSet)
   gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
-  dim(gmtSet) #Number of probes = 436144
+  print(dim(gmtSet)) #Number of probes = 436144
   rm(snps, gr)
   
   # Filter unwanted sites 
@@ -163,7 +163,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   keep <- detP < 0.01
   keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
   gmtSet <- gmtSet[keep.probes,] 
-  dim(gmtSet) #Number of probes = 436128
+  print(dim(gmtSet)) #Number of probes = 436128
   rm(keep.probes)
   
   #Remove probes that located on the X or Y chromosome
@@ -172,7 +172,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   keep <- !(featureNames(gmtSet) %in% annEPIC$Name[annEPIC$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
   table(keep)
   gmtSet <- gmtSet[keep,]
-  dim(gmtSet) #Number of probes = 425718
+  print(dim(gmtSet)) #Number of probes = 425718
   rm(annEPIC, keep)
   
   #Creation of bad probes character and filter gmtSet
@@ -186,7 +186,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
   table(keep)
   gmtSet <- gmtSet[keep,]
-  dim(gmtSet) #Number of probes = 392871
+  print(dim(gmtSet)) #Number of probes = 392871
   rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
   
   #Extract betas and m_values
@@ -196,13 +196,13 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
   beta_values_filtered <- as.data.frame(beta_values) 
   cat('Hypomethylated\n')
-  dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
+  print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
   #33419 Hypomethylated
   
   #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
   cat("Hypermethylated\n")
-  dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
+  print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
   #3091 hypermethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
   dim(beta_values_filtered)
@@ -249,7 +249,7 @@ clustering <- function(pheno, month, comparison, betas) {
   # pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
   
   #betas <- betas[1:20000, ] #Used for troubleshooting
-  m_values <- beta2m(betas)
+  #m_values <- beta2m(betas)
   
   cat("PCA plots - Betas\n")
   #Transpose resulting PCA plot - beta values 
@@ -340,7 +340,7 @@ if (file.exists(paste(output_dir, "dendro.jpeg", sep=""))) {
   cat('Skip dendrogram\n')
 } else {
   jpeg(paste(output_dir, "dendro.jpeg", sep=""), quality = 90, width = 960, height = 480)
-  beta <- beta_values_filtered[1:20000,]
+  beta <- beta_values_filtered #beta_values_filtered[1:20000,]
   beta_t <- t(beta)
   mod_pheno <- pheno_df
   row.names(mod_pheno) <- mod_pheno$Basename
