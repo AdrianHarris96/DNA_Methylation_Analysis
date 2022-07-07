@@ -54,7 +54,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
   } else {
     cat('Generate rgSet\n')
-    rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
+    #rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
     rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
     rgSet <- combineArrays(rgSet450k, rgSetEPIC)
     #Saving set as an RDS file 
@@ -154,6 +154,8 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     rm(beta_values_filtered)
   }
   
+  library(ChAMP)
+  m_values <- champ.runCombat(beta=m_values, pd=pheno_df, variablename="array_type", logitTrans=FALSE)
   typeList <- c('450K', 'EPIC', 'Combined')
   for (array in typeList) {
     clustering(array, pheno_df, 'K1', m_values, pheno_file)
@@ -269,7 +271,7 @@ if (file.exists(opt$out_dir)) {
 }
 
 
-pdf(file = paste(opt$out_dir, "out.pdf", sep=""))
+pdf(file = paste(opt$out_dir, "out_combat.pdf", sep=""))
 calculate_betas(pheno_file = opt$sample, 
                 base_dir =opt$base_dir, 
                 git_dir = opt$git_dir, 
