@@ -53,15 +53,4 @@ paired_df.drop(columns='sample_id', inplace=True) #Drop the old sample_id column
 paired_df = paired_df.rename({'new_sample_id' : 'sample_id'}, axis='columns') #rename the 'new_sample_id' to 'sample_id' for continuity
 #print(paired_df)
 
-monthList = ['eGFR_1month', 'eGFR_12month', 'eGFR_24month']
-
-for month in monthList:
-	for index in df.index:
-		if df[month][index] < 45:
-			df[month][index] = 'Low'
-		elif df[month][index] >= 45:
-			df[month][index] = 'High'
-		else:
-			df[month][index] == ''
-			
 paired_df.to_csv('/Users/adrianharris/Desktop/paired_kidney_sample_sheet.csv', index = False)
