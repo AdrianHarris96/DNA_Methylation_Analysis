@@ -283,4 +283,39 @@ calculate_betas(pheno_file = opt$sample,
 
 dev.off()
 
+#hierarchical clustering
+# rm(list=ls())
+# library(rio)
+# output_dir = '/Users/adrianharris/Desktop/test_kidney/'
+# m_values <- import(paste(output_dir, "m_values.csv", sep=""))
+# beta_values <- import(paste(output_dir, "beta_values.csv", sep=""))
+# row.names(beta_values) <- beta_values$V1
+# beta_values <- beta_values[, 2:ncol(beta_values)]
+
+# pheno_df <- import('/Users/adrianharris/Documents/dna_methylation_analysis/kidney_sample_sheet.csv')
+# pheno_df <- pheno_df[!(pheno_df$Basename == '203504430032_R01C01' | pheno_df$Basename == '203504430032_R02C01'),]
+# phenoK1 <- pheno_df[(pheno_df$time == 'K1'),]
+# phenoK2 <- pheno_df[(pheno_df$time == 'K2'),]
+# 
+# K1 <- phenoK1$Basename
+# K2 <- phenoK2$Basename
+# 
+# beta_k1 <- beta_values[, colnames(beta_values) %in% K1]
+# beta_k2 <- beta_values[, colnames(beta_values) %in% K2]
+# 
+# beta_k1$mean <- rowMeans(beta_k1)
+# beta_k2$mean <- rowMeans(beta_k2)
+# 
+# df <- data.frame(matrix(ncol=2, nrow=356361))
+# colnames(df) <- c('k1', 'k2')
+# df$k1 <- beta_k1$mean
+# df$k2 <- beta_k2$mean
+# 
+# library(ggplot2)
+# plot <- ggplot(data=df, mapping = aes(x = k1, y = k2)) + geom_point(size=1, alpha = 0.5) + labs(x="average beta for K1", y="average beta for k2")
+# print(plot)
+# 
+# 
+# clusters <- hclust(dist(m_values))
+
 
