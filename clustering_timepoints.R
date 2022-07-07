@@ -47,7 +47,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   dirEPIC <- paste(base_dir, "EPIC_array", sep="")
   
   #Generation or Loading of rgSet
-  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values2.csv", sep=""))) {
     cat('Skipping rgSet Loading\n')
   } else if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
     cat('Loading in rgSet (combined)\n')
@@ -66,7 +66,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   }
  
   #Generation or Loading of mtSet
-  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values2.csv", sep=""))) {
     cat('Skipping normalizaion\n')
   }else if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
     cat('Loading normalization\n')
