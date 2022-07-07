@@ -54,7 +54,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
   } else {
     cat('Generate rgSet\n')
-    #rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
+    rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
     rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
     rgSet <- combineArrays(rgSet450k, rgSetEPIC)
     #Saving set as an RDS file 
@@ -79,7 +79,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   }
   
   # Map to Genome
-  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values2.csv", sep=""))) {
     cat('Load m-values\n')
     m_values <- import(paste(output_dir, "m_values.csv", sep=""))
   } else {
@@ -133,6 +133,8 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     
     #Extract betas and m_values
     beta_values <- getBeta(gmtSet)
+    library(ChAMP)
+    beta_values <- champ.runCombat(beta=beta_values, pd=pData(gmtSet), variablename="array_type", logitTrans=TRUE)
     
     #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
     beta_values_filtered <- as.data.frame(beta_values) 
@@ -149,13 +151,11 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
     dim(beta_values_filtered) #Final dimensions = 356361
     m_values <- beta2m(beta_values_filtered)
-    write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
-    write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+    write.csv(beta_values_filtered, file = paste(output_dir, "beta_values2.csv", sep=""), row.names = TRUE)
+    write.csv(m_values, file = paste(output_dir, "m_values2.csv", sep=""), row.names = TRUE)
     rm(beta_values_filtered)
   }
   
-  library(ChAMP)
-  m_values <- champ.runCombat(beta=m_values, pd=pheno_df, variablename="array_type", logitTrans=FALSE)
   typeList <- c('450K', 'EPIC', 'Combined')
   for (array in typeList) {
     clustering(array, pheno_df, 'K1', m_values, pheno_file)
