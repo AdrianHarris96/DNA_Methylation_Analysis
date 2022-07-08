@@ -32,6 +32,7 @@ pheno_df <- import(pheno_file)
 
 #Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
 pheno_df <- pheno_df[!(pheno_df$Basename == '203504430032_R01C01' | pheno_df$Basename == '203504430032_R02C01'),]
+pheno_df <- pheno_df[!(pheno_df$sample_id == 'KUT4_K2' | pheno_df$sample_id == 'KUT4_K1'),]
 
 nrow(subset(pheno_df, array_type == 'EPIC'))
 
@@ -301,7 +302,7 @@ clustering <- function(pheno, month, comparison, betas) {
 }
 
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
-  cat('Skip beta CSV\n')
+  cat('Skip writing beta to CSV\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
   row.names(beta_values_filtered) <- beta_values_filtered$V1
   beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
@@ -310,49 +311,69 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 } 
 
-if (file.exists(paste(output_dir, "detlabeta.jpeg", sep=""))) {
-  cat('Skip plotting deltabeta')
-} else {
-  phenoK1 <- pheno_df[(pheno_df$time == 'K1'),]
-  phenoK2 <- pheno_df[(pheno_df$time == 'K2'),]
+generate_dendro <- function(beta, pheno, timepoint){
+  beta_t <- data.frame(t(beta))
+  row.names(pheno) <- pheno$Basename
+  if (timepoint == 'K1') {
+    pheno <- pheno[(pheno$time == 'K1'),]
+  } else if (timepoint == 'K2') {
+    pheno <- pheno[(pheno$time == 'K2'),]
+  } else {
+    cat("Skip filtering down")
+  }
   
-  K1 <- phenoK1$Basename
-  K2 <- phenoK2$Basename
+  pheno <- pheno %>% select(c('sample_id', 'donor_age', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month'))
   
-  beta_k1 <- beta_values_filtered[, colnames(beta_values_filtered) %in% K1]
-  beta_k2 <- beta_values_filtered[, colnames(beta_values_filtered) %in% K2]
+  final_beta <- merge(pheno, beta_t, by='row.names')
   
-  beta_k1$mean <- rowMeans(beta_k1)
-  beta_k2$mean <- rowMeans(beta_k2)
+  #changing the row.names accordingly 
+  final_beta['sample_id_age'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  final_beta['sample_id_eGFR1'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  final_beta['sample_id_eGFR12'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  final_beta['sample_id_eGFR24'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   
-  df <- data.frame(matrix(ncol=2, nrow=722048))
-  colnames(df) <- c('k1', 'k2')
-  df$k1 <- beta_k1$mean
-  df$k2 <- beta_k2$mean
+  for (row in 1:nrow(final_beta)) {
+    age <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_age'], sep = " ")
+    eGFR1 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_1month'], sep = " ")
+    eGFR12 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_12month'], sep = " ")
+    eGFR24 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_24month'], sep = " ")
+    final_beta[row, 'sample_id_age'] <- age
+    final_beta[row, 'sample_id_eGFR1'] <- eGFR1
+    final_beta[row, 'sample_id_eGFR12'] <- eGFR12
+    final_beta[row, 'sample_id_eGFR24'] <- eGFR24
+  }
   
-  jpeg(paste(output_dir, "detlabeta.jpeg", sep=""), quality = 90)
-  plot <- ggplot(data=df, mapping = aes(x = k1, y = k2)) + geom_point(size=1, alpha = 0.5) + labs(x="average beta for K1", y="average beta for K2")
-  print(plot)
+  dendro_out <- paste(timepoint, "dendrograms.pdf", sep=" ")
+  pdf(file = paste(output_dir, dendro_out, sep=""))
+  row.names(final_beta) <- final_beta$sample_id_age
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
+  plot(clusters, xlab = "Sample ID and Donor Age", main= paste(timepoint, "- age Dendrogram", sep = " "))
+  
+  row.names(final_beta) <- final_beta$sample_id_eGFR1
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
+  plot(clusters, xlab = "Sample ID and 1month eGFR Status", main= paste(timepoint, "- eGFR 1month Dendrogram", sep = " "))
+  
+  row.names(final_beta) <- final_beta$sample_id_eGFR12
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
+  plot(clusters, xlab = "Sample ID and 12month eGFR Status", main= paste(timepoint, "- eGFR 12month Dendrogram", sep = " "))
+  
+  row.names(final_beta) <- final_beta$sample_id_eGFR24
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
+  plot(clusters, xlab = "Sample ID and 24month eGFR Status", main= paste(timepoint, "- eGFR 24month Dendrogram", sep = " "))
+  
   dev.off()
 }
 
-if (file.exists(paste(output_dir, "dendro.jpeg", sep=""))) {
-  cat('Skip dendrogram\n')
-} else {
-  jpeg(paste(output_dir, "dendro.jpeg", sep=""), quality = 90, width = 960, height = 480)
-  beta <- beta_values_filtered #beta_values_filtered[1:20000,]
-  beta_t <- t(beta)
-  mod_pheno <- pheno_df
-  row.names(mod_pheno) <- mod_pheno$Basename
-  mod_pheno <- mod_pheno %>% select(c('sample_id'))
-  beta_t <- merge(mod_pheno, beta_t, by='row.names', all = TRUE)
-  row.names(beta_t) <- beta_t$sample_id
-  beta_t <- beta_t[, 3:ncol(beta_t)]
-  clusters <- hclust(dist(beta_t))
-  plot(clusters)
-  dev.off()
+timeList <- c('K1', 'K2', 'K1-K2')
+for (time in timeList) {
+  generate_dendro(beta_values_filtered, pheno_df, time)
 }
 
+q()
 
 eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 #eGFR_List <- c('eGFR_1month')
