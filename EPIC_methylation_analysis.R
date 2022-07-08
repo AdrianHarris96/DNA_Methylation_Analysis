@@ -347,8 +347,8 @@ generate_dendro <- function(beta, pheno, timepoint){
     final_beta[row, 'sample_id_eGFR24'] <- eGFR24
   }
   
-  dendro_out <- paste(timepoint, "dendrograms.pdf", sep=" ")
-  pdf(file = paste(output_dir, dendro_out, sep=""))
+  dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
+  pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
   row.names(final_beta) <- final_beta$sample_id_age
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
   plot(clusters, xlab = "Sample ID and Donor Age", main= paste(timepoint, "- age Dendrogram", sep = " "))
@@ -368,7 +368,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-timeList <- c('K1', 'K2', 'K1-K2')
+timeList <- c('K1-K2')
 for (time in timeList) {
   generate_dendro(beta_values_filtered, pheno_df, time)
 }
