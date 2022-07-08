@@ -7,6 +7,7 @@ library(tidyverse)
 library(RColorBrewer)
 library(lumi)
 library(limma)
+library(dendextend)
 
 #Example input: Rscript methylation_analysis.R <pheno_file> <base_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -351,19 +352,27 @@ generate_dendro <- function(beta, pheno, timepoint){
   pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
   row.names(final_beta) <- final_beta$sample_id_age
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  plot(clusters, xlab = "Sample ID and Donor Age", main= paste(timepoint, "- age Dendrogram", sep = " "))
+  dend <- as.dendrogram(clusters)
+  dend <- set(dend, "labels_cex", 0.3)
+  plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_id_eGFR1
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  plot(clusters, xlab = "Sample ID and 1month eGFR Status", main= paste(timepoint, "- eGFR 1month Dendrogram", sep = " "))
+  dend <- as.dendrogram(clusters)
+  dend <- set(dend, "labels_cex", 0.3)
+  plot(dend, xlab = "Sample ID and 1month eGFR Status", ylab="Height", main= paste(timepoint, "- eGFR 1month Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_id_eGFR12
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  plot(clusters, xlab = "Sample ID and 12month eGFR Status", main= paste(timepoint, "- eGFR 12month Dendrogram", sep = " "))
+  dend <- as.dendrogram(clusters)
+  dend <- set(dend, "labels_cex", 0.3)
+  plot(dend, xlab = "Sample ID and 12month eGFR Status", ylab="Height",  main= paste(timepoint, "- eGFR 12month Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_id_eGFR24
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  plot(clusters, xlab = "Sample ID and 24month eGFR Status", main= paste(timepoint, "- eGFR 24month Dendrogram", sep = " "))
+  dend <- as.dendrogram(clusters)
+  dend <- set(dend, "labels_cex", 0.3)
+  plot(dend, xlab = "Sample ID and 24month eGFR Status", ylab="Height", main= paste(timepoint, "- eGFR 24month Dendrogram", sep = " "))
   
   dev.off()
 }
