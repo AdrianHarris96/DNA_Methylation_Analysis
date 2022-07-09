@@ -24,12 +24,13 @@ echo "$out_dir is the output directory"
 file_list=()
 for FILE in $base_dir/*;
 do 
-	extension="${FILE##*/}"
-	#echo "$extension"
-	echo "${extension/*}"
-	#if [[ $extension == *"CGT"* ]]; then
-		#file_list+="$FILE/$extension.fa "
-	#fi
+	sample="${FILE##*/}"
+	echo "$sample"
+	for DATA in sample;
+	do 
+		raw="${DATA##*/}"
+		echo "$raw"
+	done
 done
 
 #Move files from deep into base directory to the output directory
