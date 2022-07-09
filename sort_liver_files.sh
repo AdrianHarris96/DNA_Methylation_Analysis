@@ -25,8 +25,7 @@ file_list=()
 for FILE in $base_dir/*;
 do 
 	sample="${FILE##*/}"
-	echo "$sample"
-	for DATA in sample;
+	for DATA in $sample/*;
 	do 
 		raw="${DATA##*/}"
 		echo "$raw"
