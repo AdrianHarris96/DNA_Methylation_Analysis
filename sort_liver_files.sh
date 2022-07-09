@@ -25,7 +25,8 @@ file_list=()
 for FILE in $base_dir/*;
 do 
 	extension="${FILE##*/}"
-	echo "$extension"
+	#echo "$extension"
+	echo "${extension/*}"
 	#if [[ $extension == *"CGT"* ]]; then
 		#file_list+="$FILE/$extension.fa "
 	#fi
