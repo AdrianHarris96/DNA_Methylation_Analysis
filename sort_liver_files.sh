@@ -22,11 +22,9 @@ echo "$out_dir is the output directory"
 
 #Append files from file directory to file list
 file_list=()
-for FILE in $base_dir/*;
+for dir in $base_dir/*/;
 do 
-	EXTENSION="${FILE##*/}"
-	cd  $FILE$EXTENSION
-	ls
+	printf '%s\n' "$dir"
 done
 
 #Move files from deep into base directory to the output directory
