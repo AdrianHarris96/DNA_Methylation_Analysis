@@ -22,9 +22,12 @@ echo "$out_dir is the output directory"
 
 #Append files from file directory to file list
 file_list=()
-for dir in $base_dir/*/;
+for dir in $base_dir/*;
 do 
-	printf '%s\n' "$dir"
+	for data in $dir*;
+	do 
+		echo $data
+	done
 done
 
 #Move files from deep into base directory to the output directory
