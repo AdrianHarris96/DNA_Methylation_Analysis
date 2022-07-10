@@ -27,7 +27,7 @@ do
 	for data in $dir/*;
 	do 
 		if [[ $data == *".idat" ]]; then
-			file_list+=$data
+			file_list+="$data "
 		fi
 	done
 done
