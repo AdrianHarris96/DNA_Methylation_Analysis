@@ -27,22 +27,15 @@ do
 	for data in $dir/*;
 	do 
 		if [[ $data == *".idat" ]]; then
-			file_list+="$data "
+			file_list+=($data)
 		fi
 	done
 done
 
-#echo $file_list
-files="${file_list[@]}"
-files=${reads::-1} #Removal of last space
+echo $file_list
 
 #Move files from deep into base directory to the output directory
-OIFS=$IFS
-IFS=" "
-
-for x in $files;
+for value in "${file_list[@]}";
 do
-    echo "$x"
+     echo $value
 done
-
-IFS=$OIFS
