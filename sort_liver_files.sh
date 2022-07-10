@@ -24,7 +24,7 @@ echo "$out_dir is the output directory"
 file_list=()
 for dir in $base_dir/*;
 do 
-	dir="$dir" `echo $dir | tr ' ' '\ '` ;
+	dir=echo "$dir" | tr [:space:] '\ '
 	for data in "$dir";
 	do 
 		if [[ $data == *".idat" ]]; then
