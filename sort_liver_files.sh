@@ -42,7 +42,7 @@ IFS=" "
 
 for x in $files;
 do
-    echo "[$x]"
+    echo "$x"
 done
 
 IFS=$OIFS
