@@ -33,7 +33,6 @@ do
 done
 
 echo $file_list
-len = expr length $file_list
-echo $len
+echo "${#file_list[@]}"
 
 #Move files from deep into base directory to the output directory
