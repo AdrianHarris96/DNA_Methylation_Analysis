@@ -24,7 +24,8 @@ echo "$out_dir is the output directory"
 file_list=()
 for dir in $base_dir/*;
 do 
-	dir=`echo $dir | sed -e 's/ /\ /g'`
+	new_dir=`echo $dir | sed -e 's/ /\ /g'`
+	echo $new_dir
 	for data in "$dir";
 	do 
 		if [[ $data == *".idat" ]]; then
