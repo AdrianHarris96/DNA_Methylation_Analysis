@@ -25,19 +25,16 @@ dir_list=()
 for dir in $base_dir/*;
 do 
 	new_dir=`echo $dir | sed -e 's/ /\ /g'`
-	echo $new_dir
 	dir_list+=($new_dir)
 done
 
 file_list=()
 for dir in $dir_list;
 do
-	for data in $dir/*;
-	do
-		if [[ $data == *".idat" ]]; then
-			file_list+=($data)
-		fi
-	done 
+	raw=${dir/*}
+	if [[ $raw == *".idat" ]]; then
+		file_list+=($raw)
+	fi
 done
 
 echo $dir_list
