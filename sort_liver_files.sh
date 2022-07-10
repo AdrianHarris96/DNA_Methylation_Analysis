@@ -26,8 +26,12 @@ for dir in $base_dir/*;
 do 
 	for data in $dir/*;
 	do 
-		echo $data
+		if [[ $data == *".idat" ]]; then
+			file_list+=$data
+		fi
 	done
 done
+
+echo file_list
 
 #Move files from deep into base directory to the output directory
