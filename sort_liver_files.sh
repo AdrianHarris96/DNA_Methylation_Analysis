@@ -26,7 +26,7 @@ for dir in $base_dir/*;
 do 
 	new_dir=`echo $dir | sed -e 's/ /\ /g'`
 	echo $new_dir
-	for data in "$dir";
+	for data in "$new_dir";
 	do 
 		if [[ $data == *".idat" ]]; then
 			file_list+=($data)
