@@ -25,11 +25,8 @@ file_list=()
 for FILE in $base_dir/*;
 do 
 	EXTENSION="${FILE##*/}"
-	for RAW in $EXTENSION/*;
-	do 
-		DATA="${RAW##*/}"
-		echo $DATA
-	done
+	cd  $FILE$EXTENSION
+	ls
 done
 
 #Move files from deep into base directory to the output directory
