@@ -25,11 +25,8 @@ file_list=()
 for FILE in $base_dir/*;
 do 
 	sample="${FILE##*/}"
-	for DATA in $sample/*;
-	do 
-		raw="${DATA##*/}"
-		echo "$raw"
-	done
+	cd $sample 
+	ls
 done
 
 #Move files from deep into base directory to the output directory
