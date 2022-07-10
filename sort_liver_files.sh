@@ -24,9 +24,7 @@ echo "$out_dir is the output directory"
 file_list=()
 for FILE in $base_dir/*;
 do 
-	sample="${FILE##*/}"
-	cd $sample 
-	ls
+	echo $FILE
 done
 
 #Move files from deep into base directory to the output directory
