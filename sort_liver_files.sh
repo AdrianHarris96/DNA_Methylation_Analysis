@@ -33,6 +33,10 @@ do
 done
 
 echo $file_list
-echo "${#file_list[@]}"
+tLen=${#file_list[@]}
 
 #Move files from deep into base directory to the output directory
+for (( i=0; i<${tLen}; i++ ));
+do
+  echo ${file_list[$i]}
+done
