@@ -25,7 +25,7 @@ file_list=()
 for FILE in $base_dir/*;
 do 
 	EXTENSION="${FILE##*/}"
-	cd $EXTENSION
+	cd $FILE/$EXTENSION
 	ls
 done
 
