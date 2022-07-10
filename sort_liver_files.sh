@@ -24,7 +24,7 @@ echo "$out_dir is the output directory"
 file_list=()
 for dir in $base_dir/*;
 do 
-	for data in $dir*;
+	for data in $dir/*;
 	do 
 		echo $data
 	done
