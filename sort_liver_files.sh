@@ -21,17 +21,23 @@ echo "$base_dir is the base directory"
 echo "$out_dir is the output directory"
 
 #Append files from file directory to file list
-file_list=()
+dir_list=()
 for dir in $base_dir/*;
 do 
 	new_dir=`echo $dir | sed -e 's/ /\ /g'`
 	echo $new_dir
-	for data in "$new_dir";
-	do 
+	dir_list+=($new_dir)
+done
+
+file_list=()
+for dir in $dir_list;
+do
+	for data in $dir/*;
+	do
 		if [[ $data == *".idat" ]]; then
 			file_list+=($data)
 		fi
-	done
+	done 
 done
 
 echo $file_list
