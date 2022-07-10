@@ -32,11 +32,17 @@ do
 	done
 done
 
-echo $file_list
-tLen=${#file_list[@]}
+#echo $file_list
+files="${file_list[@]}"
+files=${reads::-1} #Removal of last space
 
 #Move files from deep into base directory to the output directory
-for (( i=0; i<${tLen}; i++ ));
+OIFS=$IFS
+IFS=" "
+
+for x in $files;
 do
-  echo ${file_list[$i]}
+    echo "[$x]"
 done
+
+IFS=$OIFS
