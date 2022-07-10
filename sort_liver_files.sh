@@ -22,9 +22,9 @@ echo "$out_dir is the output directory"
 
 #Append files from file directory to file list
 file_list=()
-for dir in $base_dir/*;
+for dir in "$base_dir/*";
 do 
-	for data in $dir/*;
+	for data in "$dir/*";
 	do 
 		if [[ $data == *".idat" ]]; then
 			file_list+=($data)
@@ -32,7 +32,7 @@ do
 	done
 done
 
-$echo $file_list
+echo $file_list
 
 #Move files from deep into base directory to the output directory
 for value in "${file_list[@]}";
