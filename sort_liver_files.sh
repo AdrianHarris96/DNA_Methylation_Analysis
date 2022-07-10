@@ -32,12 +32,12 @@ do
 	done
 done
 
-echo $file_list
+$echo $file_list
 
 mkdir $out_dir
 
 #Move files from deep into base directory to the output directory
 for value in "${file_list[@]}";
 do
-     mv $value $out_dir
+     cp $value $out_dir
 done
