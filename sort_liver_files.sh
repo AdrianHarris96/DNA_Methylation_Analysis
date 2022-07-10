@@ -24,7 +24,8 @@ echo "$out_dir is the output directory"
 file_list=()
 for FILE in $base_dir/*;
 do 
-	echo $FILE
+	EXTENSION="${FILE##*/}"
+	echo $EXTENSION
 done
 
 #Move files from deep into base directory to the output directory
