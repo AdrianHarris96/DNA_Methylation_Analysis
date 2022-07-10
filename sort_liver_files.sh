@@ -22,8 +22,9 @@ echo "$out_dir is the output directory"
 
 #Append files from file directory to file list
 file_list=()
-for dir in "$base_dir";
+for dir in $base_dir/*;
 do 
+	dir="$dir" `echo $dir | tr ' ' '\ '` ;
 	for data in "$dir";
 	do 
 		if [[ $data == *".idat" ]]; then
