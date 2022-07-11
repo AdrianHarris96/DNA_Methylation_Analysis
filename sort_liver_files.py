@@ -19,7 +19,7 @@ os.chdir(args.base_dir)
 #Append to dir_list
 dir_list = []
 for directory in os.listdir(args.base_dir):
-	directory = os.path.join(arg.base_dir, directory)
+	directory = os.path.join(args.base_dir, directory)
 	dir_list.append(directory)
 
 #Iterate through directories
