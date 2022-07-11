@@ -44,17 +44,17 @@ for file in file_list:
 	if "450K" in src:
 		extension = file.split("/")
 		extension = extension[-1]
-		dst = args.out_dir + '450k_array/' extension
+		dst = args.out_dir + '450k_array/' + extension
 		shutil.copyfile(src, dst)
 	elif "EPIC" in src:
 		extension = file.split("/")
 		extension = extension[-1]
-		dst = args.out_dir + 'EPIC_array/' extension
+		dst = args.out_dir + 'EPIC_array/' + extension
 		shutil.copyfile(src, dst)
 	else:
 		extension = file.split("/")
 		extension = extension[-1]
-		dst = args.out_dir + 'control/' extension
+		dst = args.out_dir + 'control/' + extension
 		shutil.copyfile(src, dst)
 	
 
