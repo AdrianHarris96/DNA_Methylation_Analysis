@@ -30,6 +30,7 @@ pheno_df <- import(pheno_file)
 
 #Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
 pheno_df <- pheno_df[!(pheno_df$sample_group == 'control' | pheno_df$sample_group == 'Control'),]
+pheno_df <- pheno_df[!(pheno_df$Basename == '203751390020_R08C01' | pheno_df$Basename == '203751390020_R01C01'),]
 
 nrow(subset(pheno_df, array_type == '450K'))
 nrow(subset(pheno_df, array_type == 'EPIC'))
