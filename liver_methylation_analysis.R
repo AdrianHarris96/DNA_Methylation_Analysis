@@ -143,13 +143,11 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   rm(postqc, plot2)
 }
 
-q()
-
 # Map to Genome
 cat('Converting to Genomic Methyl Set\n')
 rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
 gmtSet <- mapToGenome(rSet)
-dim(gmtSet) #Number of probes = 452453
+print(dim(gmtSet))
 
 # #Predicted Sex 
 # predictedSex <- getSex(gmtSet, cutoff = -2)
@@ -162,7 +160,7 @@ snps <- getSnpInfo(gmtSet)
 gmtSet <- addSnpInfo(gmtSet)
 gr <- granges(gmtSet)
 gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
-dim(gmtSet) #Number of probes = 436144
+print(dim(gmtSet))
 rm(snps, gr)
 
 # Filter unwanted sites 
@@ -175,7 +173,7 @@ detP <- detP[match(featureNames(gmtSet),rownames(detP)),]
 keep <- detP < 0.01
 keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
 gmtSet <- gmtSet[keep.probes,] 
-dim(gmtSet) #Number of probes = 436128
+print(dim(gmtSet))
 rm(keep.probes)
 
 #Remove probes that located on the X or Y chromosome
@@ -184,7 +182,7 @@ ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 keep <- !(featureNames(gmtSet) %in% ann450k$Name[ann450k$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
 table(keep)
 gmtSet <- gmtSet[keep,]
-dim(gmtSet) #Number of probes = 425718
+print(dim(gmtSet))
 rm(ann450k, keep)
 
 #Creation of bad probes character and filter gmtSet
@@ -198,7 +196,7 @@ bad.probes <- unique(c(cross.react.probes, multi.map.probes))
 keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
 table(keep)
 gmtSet <- gmtSet[keep,]
-dim(gmtSet) #Number of probes = 392871
+print(dim(gmtSet))
 rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
 
 #Extract betas and m_values
@@ -208,17 +206,19 @@ beta_values <- getBeta(gmtSet)
 #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
 beta_values_filtered <- as.data.frame(beta_values) 
 cat('Hypomethylated\n')
-dim(filter_all(beta_values_filtered, all_vars(. < 0.05))) #Number of hypomethylated
+print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
-#33419 Hypomethylated
+
 
 #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
 cat("Hypermethylated\n")
-dim(filter_all(beta_values_filtered, all_vars(. > 0.95)))
+print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
 #3091 hypermethylated
 beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
-dim(beta_values_filtered)
+cat("Final Dimensions\n")
+print(dim(beta_values_filtered))
 
+q()
 
 if (comparison == 'K1_Low_K1_High') {
   pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K1' & pheno_df$eGFR == 'High')),]
