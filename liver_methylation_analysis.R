@@ -85,12 +85,12 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   #Plotting 450K barplot 
   par(mfrow=c(2,1))
   jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 90)
-  barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
+  barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$sample_group)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
   legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
   #Plotting EPIC barplot
-  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
+  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$sample_group)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
   legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
@@ -111,7 +111,7 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   qc['Basename'] <- row.names(qc)
   qc <- merge(qc, pheno_df, by = 'Basename')
   jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 90)
-  plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=sample_group)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot)
   dev.off()
   jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 90)
@@ -134,7 +134,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   postqc['Basename'] <- row.names(postqc)
   postqc <- merge(postqc, pheno_df, by = 'Basename')
   jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
-  plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=sample_group)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot2)
   dev.off()
   jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
