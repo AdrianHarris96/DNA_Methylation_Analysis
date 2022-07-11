@@ -30,17 +30,14 @@ for direct in dir_list:
 			data = os.path.join(direct, data)
 			file_list.append(data)
 
-print(dir_list)
-print('\n')
-print(file_list)
+
+#print(file_list)
 
 #Copying to output directory
-#for item in list450K:
-	#for file in f:
-		#if item in file:
-			#src = args.working + file
-			#dst = args.directory + '450k_array/' + file
-			#shutil.copyfile(src, dst)
+for file in file_list:
+	src =file
+	dst = args.out_dir
+	shutil.copyfile(src, dst)
 
 
 
