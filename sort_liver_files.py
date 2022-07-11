@@ -34,9 +34,12 @@ for direct in dir_list:
 #print(file_list)
 os.chdir(args.out_dir)
 
-os.makedirs('control')
-os.makedirs('450k_array')
-os.makedirs('EPIC_array')
+if os.path.isdir(args.out_dir + 'control/') and os.path.isdir(args.out_dir + '450k_array/') and os.path.isdir(args.out_dir + 'EPIC_array/'):
+	print('Skip making directories')
+else:
+	os.makedirs('control')
+	os.makedirs('450k_array')
+	os.makedirs('EPIC_array')
 
 #Copying to output directory
 for file in file_list:
