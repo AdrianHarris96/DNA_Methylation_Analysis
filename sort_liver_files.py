@@ -19,6 +19,7 @@ os.chdir(args.base_dir)
 #Append to dir_list
 dir_list = []
 for directory in os.listdir(args.base_dir):
+	directory = os.path.join(arg.base_dir, directory)
     dir_list.append(directory)
 
 #Iterate through directories
@@ -26,13 +27,14 @@ file_list = []
 for direct in dir_list:
 	for data in os.listdir(direct):
 		if ".idat" in data:
+			data = os.path.join(direct, data)
 			file_list.append(data)
 
 print(dir_list)
 print('\n')
 print(file_list)
 
-#Moving to corresponding directory based on array_type
+#Copying to output directory
 #for item in list450K:
 	#for file in f:
 		#if item in file:
