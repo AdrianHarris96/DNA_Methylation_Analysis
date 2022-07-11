@@ -86,12 +86,12 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   par(mfrow=c(2,1))
   jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 90)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$sample_group)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
-  legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
+  legend("topleft", legend=levels(factor(detP_df$sample_group)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
   #Plotting EPIC barplot
   barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$sample_group)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
-  legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
+  legend("topleft", legend=levels(factor(detP_df$sample_group)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
   rm(detP_df, detP)
