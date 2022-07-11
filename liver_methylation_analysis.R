@@ -85,13 +85,13 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   #Plotting 450K barplot 
   par(mfrow=c(2,1))
   jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 90)
-  barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$sample_group)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
-  legend("topleft", legend=levels(factor(detP_df$sample_group)), fill=pal,
+  barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
+  legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
   #Plotting EPIC barplot
-  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$sample_group)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
-  legend("topleft", legend=levels(factor(detP_df$sample_group)), fill=pal,
+  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
+  legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
   rm(detP_df, detP)
@@ -111,7 +111,7 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   qc['Basename'] <- row.names(qc)
   qc <- merge(qc, pheno_df, by = 'Basename')
   jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 90)
-  plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=sample_group)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=collection)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot)
   dev.off()
   jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 90)
@@ -134,7 +134,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   postqc['Basename'] <- row.names(postqc)
   postqc <- merge(postqc, pheno_df, by = 'Basename')
   jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
-  plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=sample_group)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=collection)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot2)
   dev.off()
   jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
@@ -146,7 +146,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 # Map to Genome
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Loading beta_values')
-  beta_values_filtered <- import(paste(output_dir, "m_values.csv", sep=""))
+  beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
 } else {
   cat('Converting to Genomic Methyl Set\n')
   rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
@@ -222,6 +222,77 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat("Final Dimensions\n")
   print(dim(beta_values_filtered))
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+}
+
+generate_dendro <- function(beta, pheno, timepoint){
+  beta_t <- data.frame(t(beta))
+  row.names(pheno) <- pheno$Basename
+  if (timepoint == 'L1') {
+    pheno <- pheno[(pheno$collection == 'L1'),]
+  } else if (timepoint == 'L2') {
+    pheno <- pheno[(pheno$collection == 'L2'),]
+  } else {
+    cat("Skip filtering down")
+  }
+  
+  pheno <- pheno %>% select(c('sample_id', 'donor_age', 'donor_type', 'sample_group'))
+  
+  final_beta <- merge(pheno, beta_t, by='row.names')
+  
+  #changing the row.names accordingly 
+  final_beta['sample_id_age'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  final_beta['sample_id_donor'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  final_beta['sample_id_group'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  
+  for (row in 1:nrow(final_beta)) {
+    age <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_age'], sep = " ")
+    donor <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_type'], sep = " ")
+    if (final_beta[row, 'sample_group'] == 'High Injury') {
+      injury <- 'High'
+    } else {
+      injury <- 'Low'
+    }
+    group <- paste(final_beta[row, 'sample_id'], injury, sep = " ")
+    final_beta[row, 'sample_id_age'] <- age
+    final_beta[row, 'sample_id_donor'] <- donor
+    final_beta[row, 'sample_id_group'] <- group
+  }
+  
+  dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
+  pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
+  row.names(final_beta) <- final_beta$sample_id_age
+  clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
+  dend <- as.dendrogram(clusters)
+  if (timepoint == 'L1-L2'){
+    dend <- set(dend, "labels_cex", 0.4)
+  }
+  plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
+  
+  row.names(final_beta) <- final_beta$sample_id_donor
+  clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
+  dend <- as.dendrogram(clusters)
+  if (timepoint == 'L1-L2'){
+    dend <- set(dend, "labels_cex", 0.4)
+  }
+  plot(dend, xlab = "Sample ID and Donor Status", ylab="Height", main= paste(timepoint, "- Donor Status Dendrogram", sep = " "))
+  
+  row.names(final_beta) <- final_beta$sample_id_group
+  clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
+  dend <- as.dendrogram(clusters)
+  if (timepoint == 'L1-L2'){
+    dend <- set(dend, "labels_cex", 0.4)
+  }
+  plot(dend, xlab = "Sample ID and Injury Status", ylab="Height", main= paste(timepoint, "- Injury Status Dendrogram", sep = " "))
+  
+  dev.off()
+}
+
+timeList <- c('L1', 'L2', 'L1-L2')
+for (time in timeList) {
+  generate_dendro(beta_values_filtered, pheno_df, time)
 }
 
 q()
