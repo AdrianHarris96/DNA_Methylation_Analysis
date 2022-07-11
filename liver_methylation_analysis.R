@@ -268,25 +268,19 @@ generate_dendro <- function(beta, pheno, timepoint){
   row.names(final_beta) <- final_beta$sample_name_age
   clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
-  if (timepoint == 'L1-L2'){
-    dend <- set(dend, "labels_cex", 0.4)
-  }
+  dend <- set(dend, "labels_cex", 0.4)
   plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_name_donor
   clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
-  if (timepoint == 'L1-L2'){
-    dend <- set(dend, "labels_cex", 0.4)
-  }
+  dend <- set(dend, "labels_cex", 0.4)
   plot(dend, xlab = "Sample ID and Donor Status", ylab="Height", main= paste(timepoint, "- Donor Status Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_name_group
   clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
-  if (timepoint == 'L1-L2'){
-    dend <- set(dend, "labels_cex", 0.4)
-  }
+  dend <- set(dend, "labels_cex", 0.4)
   plot(dend, xlab = "Sample ID and Injury Status", ylab="Height", main= paste(timepoint, "- Injury Status Dendrogram", sep = " "))
   
   dev.off()
