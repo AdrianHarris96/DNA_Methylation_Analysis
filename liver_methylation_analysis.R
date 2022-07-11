@@ -144,79 +144,85 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 }
 
 # Map to Genome
-cat('Converting to Genomic Methyl Set\n')
-rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
-gmtSet <- mapToGenome(rSet)
-print(dim(gmtSet))
-
-# #Predicted Sex 
-# predictedSex <- getSex(gmtSet, cutoff = -2)
-# gmtSet <- addSex(gmtSet, sex = predictedSex)
-# plotSex(gmtSet, id = row.names(predictedSex))
-# rm(predictedSex)
-
-#Removing probes that include SNPs
-snps <- getSnpInfo(gmtSet)
-gmtSet <- addSnpInfo(gmtSet)
-gr <- granges(gmtSet)
-gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
-print(dim(gmtSet))
-rm(snps, gr)
-
-# Filter unwanted sites 
-# ensure probes are in the same order in the mSetSq and detP objects
-#rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
-detP <- detectionP(rgSet)
-detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
-
-# remove any probes that have failed in >50% of samples
-keep <- detP < 0.01
-keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
-gmtSet <- gmtSet[keep.probes,] 
-print(dim(gmtSet))
-rm(keep.probes)
-
-#Remove probes that located on the X or Y chromosome
-ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
-
-keep <- !(featureNames(gmtSet) %in% ann450k$Name[ann450k$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
-table(keep)
-gmtSet <- gmtSet[keep,]
-print(dim(gmtSet))
-rm(ann450k, keep)
-
-#Creation of bad probes character and filter gmtSet
-cross.react <- read.csv(paste(git_dir, '48639-non-specific-probes-Illumina450k.csv', sep=""), head = T, as.is = T)
-cross.react.probes <- as.character(cross.react$TargetID)
-#Probes identified with potential hybridization issues
-multi.map <- read.csv(paste(git_dir, 'HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt', sep=""), head = F, as.is = T)
-multi.map.probes <- as.character(multi.map$V1)
-# determine unique probes between the cross-reactive and multi-map probes
-bad.probes <- unique(c(cross.react.probes, multi.map.probes))
-keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
-table(keep)
-gmtSet <- gmtSet[keep,]
-print(dim(gmtSet))
-rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
-
-#Extract betas and m_values
-beta_values <- getBeta(gmtSet)
-# m_values <- getM(gmtSet)
-
-#Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
-beta_values_filtered <- as.data.frame(beta_values) 
-cat('Hypomethylated\n')
-print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
-beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
-
-
-#Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
-cat("Hypermethylated\n")
-print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
-#3091 hypermethylated
-beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
-cat("Final Dimensions\n")
-print(dim(beta_values_filtered))
+if (file.exists(paste(output_dir, "beta_values.csv", sep="")) {
+  cat('Loading beta_values')
+  beta_values_filtered <- import(paste(output_dir, "m_values.csv", sep=""))
+} else {
+  cat('Converting to Genomic Methyl Set\n')
+  rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
+  gmtSet <- mapToGenome(rSet)
+  print(dim(gmtSet))
+  
+  # #Predicted Sex 
+  # predictedSex <- getSex(gmtSet, cutoff = -2)
+  # gmtSet <- addSex(gmtSet, sex = predictedSex)
+  # plotSex(gmtSet, id = row.names(predictedSex))
+  # rm(predictedSex)
+  
+  #Removing probes that include SNPs
+  snps <- getSnpInfo(gmtSet)
+  gmtSet <- addSnpInfo(gmtSet)
+  gr <- granges(gmtSet)
+  gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
+  print(dim(gmtSet))
+  rm(snps, gr)
+  
+  # Filter unwanted sites 
+  # ensure probes are in the same order in the mSetSq and detP objects
+  #rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
+  detP <- detectionP(rgSet)
+  detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
+  
+  # remove any probes that have failed in >50% of samples
+  keep <- detP < 0.01
+  keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
+  gmtSet <- gmtSet[keep.probes,] 
+  print(dim(gmtSet))
+  rm(keep.probes)
+  
+  #Remove probes that located on the X or Y chromosome
+  ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
+  
+  keep <- !(featureNames(gmtSet) %in% ann450k$Name[ann450k$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
+  table(keep)
+  gmtSet <- gmtSet[keep,]
+  print(dim(gmtSet))
+  rm(ann450k, keep)
+  
+  #Creation of bad probes character and filter gmtSet
+  cross.react <- read.csv(paste(git_dir, '48639-non-specific-probes-Illumina450k.csv', sep=""), head = T, as.is = T)
+  cross.react.probes <- as.character(cross.react$TargetID)
+  #Probes identified with potential hybridization issues
+  multi.map <- read.csv(paste(git_dir, 'HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt', sep=""), head = F, as.is = T)
+  multi.map.probes <- as.character(multi.map$V1)
+  # determine unique probes between the cross-reactive and multi-map probes
+  bad.probes <- unique(c(cross.react.probes, multi.map.probes))
+  keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
+  table(keep)
+  gmtSet <- gmtSet[keep,]
+  print(dim(gmtSet))
+  rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
+  
+  #Extract betas and m_values
+  beta_values <- getBeta(gmtSet)
+  # m_values <- getM(gmtSet)
+  
+  #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
+  beta_values_filtered <- as.data.frame(beta_values) 
+  cat('Hypomethylated\n')
+  print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
+  beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
+  
+  
+  #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
+  cat("Hypermethylated\n")
+  print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
+  #3091 hypermethylated
+  beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
+  cat("Final Dimensions\n")
+  print(dim(beta_values_filtered))
+  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+}
 
 q()
 
