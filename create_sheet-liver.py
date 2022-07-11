@@ -18,7 +18,8 @@ df = pd.DataFrame(columns=['Basename', 'sample_name', 'donor_type', 'donor_age',
 sheet_df =  pd.read_excel(args.excel, sheet_name=0, keep_default_na=True)
 sheet_df.columns = [col.strip() for col in sheet_df.columns] #Stripping whitespace in column names
 for index in sheet_df.index: #iterate through columns
-	basename = str(sheet_df['Sentrix_ID'][index])[:-2] + '_' + str(sheet_df['Sentrix_Position'][index])
+	sent = int(sheet_df['Sentrix_ID'][index])
+	basename = str(sent) + '_' + str(sheet_df['Sentrix_Position'][index])
 	row = sheet_df.loc[index, ['Sample_Name', 'Donor type', 'Donor age', 'Donor gender', 'Donor race', 'Sample_Well', 'Sample_Plate', 'Sample_Group', 'Sentrix_ID', 'array type', 'Sentrix_Position']]
 	row = list(row)
 	row.insert(0, basename)
@@ -26,6 +27,43 @@ for index in sheet_df.index: #iterate through columns
 
 df.drop_duplicates(inplace=True)
 
+#Create new column for L1 and L2 
+df['collection'] = 'NA'
+for index in df.index:
+	if 'L1' in df['sample_name'][index]:
+		df['collection'][index] = 'L1'
+	else:
+		df['collection'][index] = 'L2'
+
+#Loading donor_type_dict
+donor_type_dict = {}
+for index in df.index:
+	if df['donor_type'][index] == 'DD' or df['donor_type'][index] == 'DCD' or df['donor_type'][index] == 'LD':
+		sample = df['sample_name'][index]
+		if ' ' in sample:
+			key = sample.split(' ')[0]
+			key = key.strip()
+		if 'L' in sample:
+			key = sample.split('L')[0]
+			key = key.strip()
+		donor_type_dict[key] = [df['donor_type'][index], df['donor_age'][index], df['donor_gender'][index], df['donor_race'][index]]
+	else:
+		pass
+
+#Filling attributes in the donor_type column
+for index in df.index:
+	if df['collection'][index] == 'L2':
+		key = df['sample_name'][index][0:4]
+		if key in donor_type_dict.keys():
+			df['donor_type'][index] = donor_type_dict[key][0]
+			df['donor_age'][index] = donor_type_dict[key][1]
+			df['donor_gender'][index] = donor_type_dict[key][2]
+			df['donor_race'][index] = donor_type_dict[key][3]
+		else:
+			pass
+	else:
+		pass
 os.chdir(args.out_dir) #Move to output_directory
 
+#print(df)
 df.to_csv(args.output)
