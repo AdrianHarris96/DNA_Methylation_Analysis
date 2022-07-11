@@ -235,35 +235,35 @@ generate_dendro <- function(beta, pheno, timepoint){
     cat("Skip filtering down")
   }
   
-  pheno <- pheno %>% select(c('sample_id', 'donor_age', 'donor_type', 'sample_group'))
+  pheno <- pheno %>% select(c('sample_name', 'donor_age', 'donor_type', 'sample_group'))
   
   final_beta <- merge(pheno, beta_t, by='row.names')
   
   #changing the row.names accordingly 
-  final_beta['sample_id_age'] <- 'na'
+  final_beta['sample_name_age'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
-  final_beta['sample_id_donor'] <- 'na'
+  final_beta['sample_name_donor'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
-  final_beta['sample_id_group'] <- 'na'
+  final_beta['sample_name_group'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   
   for (row in 1:nrow(final_beta)) {
-    age <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_age'], sep = " ")
-    donor <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_type'], sep = " ")
+    age <- paste(final_beta[row, 'sample_name'], final_beta[row, 'donor_age'], sep = " ")
+    donor <- paste(final_beta[row, 'sample_name'], final_beta[row, 'donor_type'], sep = " ")
     if (final_beta[row, 'sample_group'] == 'High Injury') {
       injury <- 'High'
     } else {
       injury <- 'Low'
     }
-    group <- paste(final_beta[row, 'sample_id'], injury, sep = " ")
-    final_beta[row, 'sample_id_age'] <- age
-    final_beta[row, 'sample_id_donor'] <- donor
-    final_beta[row, 'sample_id_group'] <- group
+    group <- paste(final_beta[row, 'sample_name'], injury, sep = " ")
+    final_beta[row, 'sample_name_age'] <- age
+    final_beta[row, 'sample_name_donor'] <- donor
+    final_beta[row, 'sample_name_group'] <- group
   }
   
   dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
   pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
-  row.names(final_beta) <- final_beta$sample_id_age
+  row.names(final_beta) <- final_beta$sample_name_age
   clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   if (timepoint == 'L1-L2'){
@@ -271,7 +271,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   }
   plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
   
-  row.names(final_beta) <- final_beta$sample_id_donor
+  row.names(final_beta) <- final_beta$sample_name_donor
   clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   if (timepoint == 'L1-L2'){
@@ -279,7 +279,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   }
   plot(dend, xlab = "Sample ID and Donor Status", ylab="Height", main= paste(timepoint, "- Donor Status Dendrogram", sep = " "))
   
-  row.names(final_beta) <- final_beta$sample_id_group
+  row.names(final_beta) <- final_beta$sample_name_group
   clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   if (timepoint == 'L1-L2'){
