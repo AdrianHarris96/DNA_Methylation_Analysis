@@ -144,7 +144,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 }
 
 # Map to Genome
-if (file.exists(paste(output_dir, "beta_values.csv", sep="")) {
+if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Loading beta_values')
   beta_values_filtered <- import(paste(output_dir, "m_values.csv", sep=""))
 } else {
