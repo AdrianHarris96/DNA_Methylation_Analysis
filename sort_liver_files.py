@@ -20,7 +20,7 @@ os.chdir(args.base_dir)
 dir_list = []
 for directory in os.listdir(args.base_dir):
 	directory = os.path.join(arg.base_dir, directory)
-    dir_list.append(directory)
+	dir_list.append(directory)
 
 #Iterate through directories
 file_list = []
