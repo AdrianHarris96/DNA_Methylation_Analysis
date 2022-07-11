@@ -4,6 +4,7 @@ library(rio)
 library(ggplot2)
 library(tidyverse)
 library(RColorBrewer)
+library(dendextend)
 
 #Example input: Rscript liver_methylation_analysis.R <pheno_file> <base_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -145,7 +146,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 
 # Map to Genome
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
-  cat('Loading beta_values')
+  cat('Loading beta_values\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
 } else {
   cat('Converting to Genomic Methyl Set\n')
@@ -225,6 +226,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
 }
 
 generate_dendro <- function(beta, pheno, timepoint){
+  cat('Generating dendrograms\n')
   beta_t <- data.frame(t(beta))
   row.names(pheno) <- pheno$Basename
   if (timepoint == 'L1') {
