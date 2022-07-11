@@ -237,7 +237,7 @@ generate_dendro <- function(beta, pheno, timepoint){
     cat("Skip filtering down")
   }
   
-  pheno <- pheno %>% select(c('sample_name', 'donor_age', 'donor_type', 'sample_group'))
+  pheno <- pheno %>% select(c('sample_name', 'donor_age', 'donor_type', 'sample_group', 'array_type'))
   
   final_beta <- merge(pheno, beta_t, by='row.names')
   
@@ -247,6 +247,8 @@ generate_dendro <- function(beta, pheno, timepoint){
   final_beta['sample_name_donor'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   final_beta['sample_name_group'] <- 'na'
+  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  final_beta['sample_name_array'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   
   for (row in 1:nrow(final_beta)) {
@@ -258,30 +260,38 @@ generate_dendro <- function(beta, pheno, timepoint){
       injury <- 'Low'
     }
     group <- paste(final_beta[row, 'sample_name'], injury, sep = " ")
+    array <- paste(final_beta[row, 'sample_name'], final_beta[row, 'array_type'], sep = " ")
     final_beta[row, 'sample_name_age'] <- age
     final_beta[row, 'sample_name_donor'] <- donor
     final_beta[row, 'sample_name_group'] <- group
+    final_beta[row, 'sample_name_array'] <- array
   }
   
   dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
   pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
   row.names(final_beta) <- final_beta$sample_name_age
-  clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   dend <- set(dend, "labels_cex", 0.4)
-  plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
+  plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- Donor Age Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_name_donor
-  clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   dend <- set(dend, "labels_cex", 0.4)
   plot(dend, xlab = "Sample ID and Donor Status", ylab="Height", main= paste(timepoint, "- Donor Status Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_name_group
-  clusters <- hclust(dist(final_beta[, 9:ncol(final_beta)]))
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   dend <- set(dend, "labels_cex", 0.4)
   plot(dend, xlab = "Sample ID and Injury Status", ylab="Height", main= paste(timepoint, "- Injury Status Dendrogram", sep = " "))
+  
+  row.names(final_beta) <- final_beta$sample_name_array
+  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
+  dend <- as.dendrogram(clusters)
+  dend <- set(dend, "labels_cex", 0.4)
+  plot(dend, xlab = "Sample ID and Injury Status", ylab="Height", main= paste(timepoint, "- Array Type Dendrogram", sep = " "))
   
   dev.off()
 }
