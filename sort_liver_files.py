@@ -37,7 +37,7 @@ for direct in dir_list:
 for file in file_list:
 	src = file
 	extension = file.split("/")
-	extension = extenion[-1]
+	extension = extension[-1]
 	dst = args.out_dir + extension
 	shutil.copyfile(src, dst)
 
