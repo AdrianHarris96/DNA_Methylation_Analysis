@@ -35,8 +35,10 @@ for direct in dir_list:
 
 #Copying to output directory
 for file in file_list:
-	src =file
-	dst = args.out_dir
+	src = file
+	extension = file.split("/")
+	extension = extenion[-1]
+	dst = args.out_dir + extension
 	shutil.copyfile(src, dst)
 
 
