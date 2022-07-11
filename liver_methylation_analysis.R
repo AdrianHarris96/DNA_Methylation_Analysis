@@ -234,7 +234,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   } else if (timepoint == 'L2') {
     pheno <- pheno[(pheno$collection == 'L2'),]
   } else {
-    cat("Skip filtering down")
+    cat("Skip filtering down\n")
   }
   
   pheno <- pheno %>% select(c('sample_name', 'donor_age', 'donor_type', 'sample_group', 'array_type'))
@@ -291,7 +291,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   dend <- set(dend, "labels_cex", 0.4)
-  plot(dend, xlab = "Sample ID and Injury Status", ylab="Height", main= paste(timepoint, "- Array Type Dendrogram", sep = " "))
+  plot(dend, xlab = "Sample ID and Array Type", ylab="Height", main= paste(timepoint, "- Array Type Dendrogram", sep = " "))
   
   dev.off()
 }
