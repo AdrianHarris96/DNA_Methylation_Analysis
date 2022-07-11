@@ -32,14 +32,31 @@ for direct in dir_list:
 
 
 #print(file_list)
+os.chdir(args.out_dir)
+
+os.makedirs('control')
+os.makedirs('450k_array')
+os.makedirs('EPIC_array')
 
 #Copying to output directory
 for file in file_list:
 	src = file
-	extension = file.split("/")
-	extension = extension[-1]
-	dst = args.out_dir + extension
-	shutil.copyfile(src, dst)
+	if "450K" in src:
+		extension = file.split("/")
+		extension = extension[-1]
+		dst = args.out_dir + '450k_array/' extension
+		shutil.copyfile(src, dst)
+	elif "EPIC" in src:
+		extension = file.split("/")
+		extension = extension[-1]
+		dst = args.out_dir + 'EPIC_array/' extension
+		shutil.copyfile(src, dst)
+	else:
+		extension = file.split("/")
+		extension = extension[-1]
+		dst = args.out_dir + 'control/' extension
+		shutil.copyfile(src, dst)
+	
 
 
 
