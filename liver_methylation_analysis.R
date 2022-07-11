@@ -59,8 +59,6 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   rm(rgSetEPIC)
 }
 
-q()
-
 #Color Scheme Defined 
 pal <- brewer.pal(4,"Dark2")
 
@@ -144,6 +142,8 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   dev.off()
   rm(postqc, plot2)
 }
+
+q()
 
 # Map to Genome
 cat('Converting to Genomic Methyl Set\n')
