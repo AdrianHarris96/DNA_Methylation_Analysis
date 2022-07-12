@@ -132,7 +132,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
     
     #Extract betas and m_values
-    #beta_values <- getBeta(gmtSet)
+    beta_values <- getBeta(gmtSet)
     #library(ChAMP)
     #beta_values <- champ.runCombat(beta=beta_values, pd=pData(gmtSet), variablename="array_type", logitTrans=TRUE)
     
