@@ -211,6 +211,8 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   m_values = beta2m(beta_values_filtered)
 }
 
+q()
+
 clustering <- function(pheno, month, comparison, betas) {
   #Drop other columns and rename eGFR_month -> eGFR
   if (month == 'eGFR_1month') {
