@@ -313,10 +313,10 @@ clustering <- function(pheno, month, comparison, betas) {
 
 #eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 eGFR_List <- c('eGFR_1month')
-#comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-comp_List <- c('Low_High')
+comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
+#comp_List <- c('Low_High')
 
-pdf(file = paste(output_dir, "Low-High.pdf", sep=""))
+pdf(file = paste(output_dir, "eGFR1month_comparisons.pdf", sep=""))
 for (comp in comp_List) {
   for (outcome in eGFR_List) {
     clustering(pheno_df, outcome, comp, beta_values_filtered)
@@ -397,8 +397,8 @@ generate_dendro <- function(beta, pheno, timepoint){
 
 #eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 eGFR_List <- c('eGFR_1month')
-#comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-comp_List <- c('Low_High')
+comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
+#comp_List <- c('Low_High')
 
 library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
@@ -461,7 +461,7 @@ for (comp in comp_List) {
     beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
     
     cat("Identify DMPs\n")
-    design <- model.matrix(~0+condition, data=pheno)
+    design <- model.matrix(~0+condition, data=pheno)  
     print(design)
     colnames(design) <- cols
     fit1 <- lmFit(beta_values_condition, design)
@@ -518,10 +518,9 @@ for (comp in comp_List) {
     # results.ranges <- extractRanges(DMRs, genome = "hg19")
     # write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
     
-    eGFR <- pheno$eGFR
-    dmp <- dmpFinder(beta_values_condition, pheno = eGFR, type = "categorical")
-    write.csv(dmp, file = paste(output, "_dmpFinderResults.csv", sep=""), row.names = TRUE)
-    rm(pheno, beta_values_condition, annEPICSub)
+    # dmp <- dmpFinder(beta_values_condition, pheno = condition, type = "categorical")
+    # write.csv(dmp, file = paste(output, "_dmpFinderResults.csv", sep=""), row.names = TRUE)
+    # rm(pheno, beta_values_condition, annEPICSub)
   }
 }
 
