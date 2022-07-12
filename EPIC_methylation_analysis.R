@@ -377,15 +377,13 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-timeList <- c('K1-K2')
-for (time in timeList) {
-  generate_dendro(beta_values_filtered, pheno_df, time)
-}
+# timeList <- c('K1-K2')
+# for (time in timeList) {
+#   generate_dendro(beta_values_filtered, pheno_df, time)
+# }
 
-q()
-
-eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-#eGFR_List <- c('eGFR_1month')
+#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+eGFR_List <- c('eGFR_1month')
 comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
 #comp_List <- c('K1_Low_K1_High')
 
@@ -397,8 +395,8 @@ for (comp in comp_List) {
 }
 dev.off()
 
-eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-#eGFR_List <- c('eGFR_1month')
+#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+eGFR_List <- c('eGFR_1month')
 comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
 #comp_List <- c('K1_Low_K1_High')
 
