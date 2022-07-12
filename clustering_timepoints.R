@@ -47,7 +47,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   dirEPIC <- paste(base_dir, "EPIC_array", sep="")
   
   #Generation or Loading of rgSet
-  if (file.exists(paste(output_dir, "m_values2.csv", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
     cat('Skipping rgSet Loading\n')
   } else if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
     cat('Loading in rgSet (combined)\n')
@@ -66,7 +66,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   }
  
   #Generation or Loading of mtSet
-  if (file.exists(paste(output_dir, "m_values2.csv", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
     cat('Skipping normalizaion\n')
   }else if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
     cat('Loading normalization\n')
@@ -74,12 +74,12 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   } else {
     cat('Performing normalization\n')
     #Normalization and plotting 
-    mtSet <- preprocessNoob(rgSet)
+    mtSet <- preprocessSWAN(rgSet)
     saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   }
   
   # Map to Genome
-  if (file.exists(paste(output_dir, "m_values2.csv", sep=""))) {
+  if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
     cat('Load m-values\n')
     m_values <- import(paste(output_dir, "m_values.csv", sep=""))
   } else {
@@ -132,9 +132,9 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
     
     #Extract betas and m_values
-    beta_values <- getBeta(gmtSet)
-    library(ChAMP)
-    beta_values <- champ.runCombat(beta=beta_values, pd=pData(gmtSet), variablename="array_type", logitTrans=TRUE)
+    #beta_values <- getBeta(gmtSet)
+    #library(ChAMP)
+    #beta_values <- champ.runCombat(beta=beta_values, pd=pData(gmtSet), variablename="array_type", logitTrans=TRUE)
     
     #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
     beta_values_filtered <- as.data.frame(beta_values) 
@@ -152,7 +152,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     dim(beta_values_filtered) #Final dimensions = 356361
     m_values <- beta2m(beta_values_filtered)
     write.csv(beta_values_filtered, file = paste(output_dir, "beta_values2.csv", sep=""), row.names = TRUE)
-    write.csv(m_values, file = paste(output_dir, "m_values2.csv", sep=""), row.names = TRUE)
+    write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
     rm(beta_values_filtered)
   }
   
@@ -271,7 +271,7 @@ if (file.exists(opt$out_dir)) {
 }
 
 
-pdf(file = paste(opt$out_dir, "out_combat.pdf", sep=""))
+pdf(file = paste(opt$out_dir, "SWANclustering.pdf", sep=""))
 calculate_betas(pheno_file = opt$sample, 
                 base_dir =opt$base_dir, 
                 git_dir = opt$git_dir, 
