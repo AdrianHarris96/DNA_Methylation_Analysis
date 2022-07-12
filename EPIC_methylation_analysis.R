@@ -238,7 +238,6 @@ clustering <- function(pheno, month, comparison, betas) {
     pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
   } else {
     cat('Comparison request does not exist\n')
-    q()
   }
   
   #Filter beta dataframe using column names for the relevant comparison
@@ -384,21 +383,22 @@ generate_dendro <- function(beta, pheno, timepoint){
 
 #eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 eGFR_List <- c('eGFR_1month')
-comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-#comp_List <- c('K1_Low_K1_High')
+#comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
+comp_List <- c('Low_High')
 
-pdf(file = paste(output_dir, "out.pdf", sep=""))
+pdf(file = paste(output_dir, "High-Low.pdf", sep=""))
 for (comp in comp_List) {
   for (outcome in eGFR_List) {
     clustering(pheno_df, outcome, comp, beta_values_filtered)
   }
 }
+
 dev.off()
 
 #eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 eGFR_List <- c('eGFR_1month')
-comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-#comp_List <- c('K1_Low_K1_High')
+#comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
+comp_List <- c('Low_High')
 
 library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
@@ -431,7 +431,6 @@ for (comp in comp_List) {
       pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
     } else {
       cat('Comparison request does not exist\n')
-      q()
     }
     
     if (comp == 'K1_Low_K1_High') {
@@ -449,6 +448,9 @@ for (comp in comp_List) {
     } else if (comp == 'K1_High_K2_Low') {
       condition <- factor(pheno$time)
       cols <- c("K2", "K1")
+    } else if (comp == 'Low_High') {
+      condition <- factor(pheno$eGFR)
+      cols <- c("High", "Low")
     } else {
       condition <- factor(pheno$time)
       cols <- c("K2", "K1")
