@@ -476,8 +476,10 @@ for (comp in comp_List) {
       contMatrix <- makeContrasts(K1-K2, levels=design)
     } else if (comp == 'K1_High_K2_Low') {
       contMatrix <- makeContrasts(K1-K2, levels=design)
-    } else {
+    } else if (comp == 'K1_Low_K2_High'){
       contMatrix <- makeContrasts(K1-K2, levels=design)
+    } else {
+      contMatrix <- makeContrasts(Low-High, levels=design)
     }
     
     #contMatrix
