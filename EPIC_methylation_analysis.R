@@ -518,8 +518,8 @@ for (comp in comp_List) {
     # results.ranges <- extractRanges(DMRs, genome = "hg19")
     # write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
     
-    age <- pheno$donor_age
-    dmp <- dmpFinder(beta_values_condition, pheno = age, type = "continuous")
+    eGFR <- pheno$eGFR
+    dmp <- dmpFinder(beta_values_condition, pheno = eGFR, type = "categorical")
     write.csv(dmp, file = paste(output, "_dmpFinderResults.csv", sep=""), row.names = TRUE)
     rm(pheno, beta_values_condition, annEPICSub)
   }
