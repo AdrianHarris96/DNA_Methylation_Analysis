@@ -4,6 +4,9 @@ import pandas as pd
 import os
 
 df = pd.read_csv('/Users/adrianharris/Documents/dna_methylation_analysis/kidney_sample_sheet.csv') #Load in sample sheet (csv) with all samples
+#df = df[df['eGFR_1month'].notna()] #Used to get paired samples with eGFR information
+print(df)
+
 df = df.iloc[: , 1:] #Drop "unamed" sample 
 
 new_sample_df = pd.DataFrame(columns = ['Basename', 'new_sample_id']) #Creation of a new dataframe
@@ -51,6 +54,6 @@ for index in df.index:
 paired_df.drop(columns='sample_id', inplace=True) #Drop the old sample_id column
 
 paired_df = paired_df.rename({'new_sample_id' : 'sample_id'}, axis='columns') #rename the 'new_sample_id' to 'sample_id' for continuity
-#print(paired_df)
+print(paired_df)
 
-paired_df.to_csv('/Users/adrianharris/Desktop/paired_kidney_sample_sheet.csv', index = False)
+paired_df.to_csv('/Users/adrianharris/Desktop/eGFR_1month_paired_kidney_sample_sheet.csv', index = False)
