@@ -211,6 +211,16 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   m_values = beta2m(beta_values_filtered)
 }
 
+if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
+  cat('Skip writing beta to CSV\n')
+  beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
+  row.names(beta_values_filtered) <- beta_values_filtered$V1
+  beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
+} else {
+  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+} 
+
 q()
 
 clustering <- function(pheno, month, comparison, betas) {
@@ -303,15 +313,19 @@ clustering <- function(pheno, month, comparison, betas) {
   return('Clustering\n')
 }
 
-if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
-  cat('Skip writing beta to CSV\n')
-  beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
-  row.names(beta_values_filtered) <- beta_values_filtered$V1
-  beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
-} else {
-  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
-  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
-} 
+#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+eGFR_List <- c('eGFR_1month')
+#comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
+comp_List <- c('Low_High')
+
+pdf(file = paste(output_dir, "High-Low.pdf", sep=""))
+for (comp in comp_List) {
+  for (outcome in eGFR_List) {
+    clustering(pheno_df, outcome, comp, beta_values_filtered)
+  }
+}
+
+dev.off()
 
 generate_dendro <- function(beta, pheno, timepoint){
   beta_t <- data.frame(t(beta))
@@ -382,20 +396,6 @@ generate_dendro <- function(beta, pheno, timepoint){
 # for (time in timeList) {
 #   generate_dendro(beta_values_filtered, pheno_df, time)
 # }
-
-#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-eGFR_List <- c('eGFR_1month')
-#comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-comp_List <- c('Low_High')
-
-pdf(file = paste(output_dir, "High-Low.pdf", sep=""))
-for (comp in comp_List) {
-  for (outcome in eGFR_List) {
-    clustering(pheno_df, outcome, comp, beta_values_filtered)
-  }
-}
-
-dev.off()
 
 #eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 eGFR_List <- c('eGFR_1month')
