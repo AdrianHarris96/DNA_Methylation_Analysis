@@ -60,7 +60,7 @@ pal <- brewer.pal(4,"Dark2")
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Skipping p-value step\n')
 } else if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
-  cat('P-values.csv is already exists\n')
+  cat('P-values.csv already exists\n')
 } else {
   cat('Performing p-value detection\n')
   detP <- detectionP(rgSet)
@@ -221,8 +221,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 } 
 
-q()
-
 clustering <- function(pheno, month, comparison, betas) {
   #Drop other columns and rename eGFR_month -> eGFR
   if (month == 'eGFR_1month') {
@@ -318,7 +316,7 @@ eGFR_List <- c('eGFR_1month')
 #comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
 comp_List <- c('Low_High')
 
-pdf(file = paste(output_dir, "High-Low.pdf", sep=""))
+pdf(file = paste(output_dir, "Low-High.pdf", sep=""))
 for (comp in comp_List) {
   for (outcome in eGFR_List) {
     clustering(pheno_df, outcome, comp, beta_values_filtered)
@@ -517,6 +515,10 @@ for (comp in comp_List) {
     # DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
     # results.ranges <- extractRanges(DMRs, genome = "hg19")
     # write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
+    
+    age <- pheno$donor_age
+    dmp <- dmpFinder(beta_values_condition, pheno = age, type = "continuous")
+    write.csv(dmp, file = paste(output, "_dmpFinderResults.csv", sep=""), row.names = TRUE)
     rm(pheno, beta_values_condition, annEPICSub)
   }
 }
