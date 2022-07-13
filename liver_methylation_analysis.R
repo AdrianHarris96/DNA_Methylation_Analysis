@@ -222,7 +222,25 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
   cat("Final Dimensions\n")
   print(dim(beta_values_filtered))
+  
+  #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
+  beta_values_filered = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
+  pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
+  
+  # #EXCLUDE DCD SAMPLES - Kidney dataset
+  # beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
+  # #Removing rows based on the sample_name column in phenotype dataframe
+  # pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+}
+
+#Writing beta and m-values to CSV
+m_values = beta2m(beta_values_filtered)
+if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  cat('Skip beta and m_value CSV\n')
+} else {
+  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
+  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
 
 generate_dendro <- function(beta, pheno, timepoint){
@@ -296,183 +314,247 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-timeList <- c('L1', 'L2', 'L1-L2')
-for (time in timeList) {
-  generate_dendro(beta_values_filtered, pheno_df, time)
+# timeList <- c('L1', 'L2', 'L1-L2')
+# for (time in timeList) {
+#   generate_dendro(beta_values_filtered, pheno_df, time)
+# }
+
+clustering <- function(pheno, condition1, condition2, betas) {
+  if (condition1 == "DD_HI_L1") {
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+  } else if (condition1 == "DD_HI_L2"){
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+  } else if (condition1 == "DD_LI_L1") {
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition1 == "DD_LI_L2") {
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else if (condition1 == "LD_LI_L1") {
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition1 == "LD_LI_L2") {
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else {
+    cat('Comparison does not exist\n')
+  }
+  
+  if (condition2 == "DD_HI_L1") {
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+  } else if (condition2 == "DD_HI_L2"){
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+  } else if (condition2 == "DD_LI_L1") {
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition2 == "DD_LI_L2") {
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else if (condition2 == "LD_LI_L1") {
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition2 == "LD_LI_L2") {
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else {
+    cat('Comparison does not exist\n')
+  }
+  
+  #Joining pheno1 and pheno2 
+  pheno <- rbind(pheno1, pheno2)
+  
+  #Filter beta dataframe using column names for the relevant comparison
+  beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
+  
+  cat("PCA plots - Betas\n")
+  #Transpose resulting PCA plot - beta values 
+  transposed_beta <- t(betas)
+  transposed_beta <- data.frame(transposed_beta)
+  pca_general <- prcomp(transposed_beta, center=TRUE)
+  var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
+  scores = as.data.frame(pca_general$x)
+  scores['Basename'] <- row.names(scores)
+  scores <- merge(scores, pheno, by = 'Basename')
+  output <- paste(condition1, condition2, sep="-")
+  title <- paste(output, "_betas", sep="")
+  output_path <- paste(output_dir, title, sep="")
+  #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
+  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=sample_group)) +theme_bw() + geom_point(aes(shape=collection), alpha=0.5, size=2) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
+  #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
+  print(plot)
+  #dev.off()
+  #Converting NAs to 0 in donor_age
+  vec <- scores$donor_age
+  vec[is.na(vec)] <- 0
+  scores$donor_age <- vec
+  
+  if (length(unique(scores$donor_type)) == 3) {
+    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_type)) + geom_point(size = 2, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " _PCA - donor type and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
+  } else {
+    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_type)) + geom_point(size = 2, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " -PCA - donor type and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
+  }
+  print(plot2)
+  
+  # cat("PCA plots - m_values\n")
+  # #Transpose resulting PCA plot - m_values
+  # transposed_m <- t(m_values) 
+  # transposed_m <- data.frame(transposed_m)
+  # pca_general <- prcomp(transposed_m, center=TRUE)
+  # var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
+  # scores = as.data.frame(pca_general$x)
+  # scores['Basename'] <- row.names(scores)
+  # scores <- merge(scores, pheno, by = 'Basename')
+  # title <- paste(output, "_m", sep="")
+  # output_path <- paste(output_dir, title, sep="")
+  # #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
+  # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
+  # #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
+  # print(plot)
+  # #dev.off()
+  return('Clustering\n')
 }
 
-q()
-
-if (comparison == 'K1_Low_K1_High') {
-  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K1' & pheno_df$eGFR == 'High')),]
-} else if (comparison == 'K2_Low_K2_High') {
-  pheno_df <- pheno_df[((pheno_df$time == 'K2' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
-} else if (comparison == 'K1_High_K2_High') {
-  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
-} else if (comparison == 'K1_Low_K2_Low') {
-  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'Low')),]
-} else if (comparison == 'K1_High_K2_Low') {
-  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'High') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'Low')),]
-} else if (comparison == 'K1_Low_K2_High') {
-  pheno_df <- pheno_df[((pheno_df$time == 'K1' & pheno_df$eGFR == 'Low') | (pheno_df$time == 'K2' & pheno_df$eGFR == 'High')),]
-} else {
-  cat('Comparison request does not exist\n')
-  q()
-}
+clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
+clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
 library(lumi)
+
+comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
+
+#Convert filter beta dataframe to m_value dataframe
 m_values = beta2m(beta_values_filtered)
-if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
-  cat('Skip beta and m_value CSV\n')
-} else {
-  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
-  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
-}
-
-#Filter beta dataframe using column names for the relevant comparison
-beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
-dim(beta_values_filtered)
-
-# #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
-# beta_values_case = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
-# pheno_df_case = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
-
-# #EXCLUDE DCD SAMPLES - Kidney dataset
-# beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
-# #Removing rows based on the sample_name column in phenotype dataframe
-# pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
-# 
-# #Convert filter beta dataframe to m_value dataframe
-m_values = beta2m(beta_values_filtered)
-
-#String parsing for later output 
-cat("String parsing\n")
-string <- unlist(strsplit(pheno_file, "/"))
-string <- rev(string)[1]
-string <- substr(string, 1, 5)
-if (string == "comp1") {
-  string <- "eGFR_1month"
-} else if (string == "comp2") {
-  string <- "eGFR_12month"
-} else if (string == "comp3") {
-  string <- "eGFR_24month"
-}
-
-cat("PCA plots - Betas\n")
-#Transpose resulting PCA plot - beta values 
-transposed_beta <- t(beta_values_filtered) #t(beta_values_case)
-transposed_beta <- data.frame(transposed_beta)
-pca_general <- prcomp(transposed_beta, center=TRUE)
-var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
-scores = as.data.frame(pca_general$x)
-scores['Basename'] <- row.names(scores)
-scores <- merge(scores, pheno_df, by = 'Basename')
-output <- paste(output_dir, string, sep="")
-output <- paste(output, "_", sep="")
-output <- paste(output, comparison, sep="")
-output_path <- paste(output, "_betas", sep="")
-jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 90)
-plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(output_path, "_PCA", sep=""))
-#plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
-print(plot)
-dev.off()
-
-cat("PCA plots - m_values\n")
-#Transpose resulting PCA plot - m_values
-transposed_m <- t(m_values) 
-transposed_m <- data.frame(transposed_m)
-pca_general <- prcomp(transposed_m, center=TRUE)
-var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
-scores = as.data.frame(pca_general$x)
-scores['Basename'] <- row.names(scores)
-scores <- merge(scores, pheno_df, by = 'Basename')
-output <- paste(output_dir, string, sep="")
-output <- paste(output, "_", sep="")
-output <- paste(output, comparison, sep="")
-output_path <- paste(output, "_m", sep="")
-jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 90)
-plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(output_path, "_PCA", sep=""))
-#plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
-print(plot)
-dev.off()
-
-#CpGs - DMPs
-cat("Identify CpGs\n")
-if (comparison == 'K1_Low_K1_High') {
-  condition <- factor(pheno_df$eGFR)
-  cols <- c("High", "Low")
-} else if (comparison == 'K2_Low_K2_High') {
-  condition <- factor(pheno_df$eGFR)
-  cols <- c("High", "Low")
-} else if (comparison == 'K1_High_K2_High') {
-  condition <- factor(pheno_df$time)
-  cols <- c("K2", "K1")
-} else if (comparison == 'K1_Low_K2_Low') {
-  condition <- factor(pheno_df$time)
-  cols <- c("K2", "K1")
-} else if (comparison == 'K1_High_K2_Low') {
-  condition <- factor(pheno_df$time)
-  cols <- c("K2", "K1")
-} else {
-  condition <- factor(pheno_df$time)
-  cols <- c("K2", "K1")
-}
 
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 
-library(limma)
-design <- model.matrix(~0+condition, data=pheno_df)
-colnames(design) <- cols
-fit1 <- lmFit(beta_values_filtered, design)
-
-if (comparison == 'K1_Low_K1_High') {
-  contMatrix <- makeContrasts(Low-High, levels=design)
-} else if (comparison == 'K2_Low_K2_High') {
-  contMatrix <- makeContrasts(Low-High, levels=design)
-} else if (comparison == 'K1_High_K2_High') {
-  contMatrix <- makeContrasts(K1-K2, levels=design)
-} else if (comparison == 'K1_Low_K2_Low') {
-  contMatrix <- makeContrasts(K1-K2, levels=design)
-} else if (comparison == 'K1_High_K2_Low') {
-  contMatrix <- makeContrasts(K1-K2, levels=design)
-} else {
-  contMatrix <- makeContrasts(K1-K2, levels=design)
+for (comp in comparisons) {
+  cond <- unlist(strsplit(comp, "-"))
+  condition1 <- cond[1]
+  condition2 <- cond[2]
+  
+  cat("Identify CpGs\n")
+  if (condition1 == "DD_HI_L1") {
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+  } else if (condition1 == "DD_HI_L2"){
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+  } else if (condition1 == "DD_LI_L1") {
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition1 == "DD_LI_L2") {
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else if (condition1 == "LD_LI_L1") {
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition1 == "LD_LI_L2") {
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else {
+    cat('Comparison does not exist\n')
+  }
+  
+  if (condition2 == "DD_HI_L1") {
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+  } else if (condition2 == "DD_HI_L2"){
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+  } else if (condition2 == "DD_LI_L1") {
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition2 == "DD_LI_L2") {
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else if (condition2 == "LD_LI_L1") {
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+  } else if (condition2 == "LD_LI_L2") {
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+  } else {
+    cat('Comparison does not exist\n')
+  }
+  
+  pheno <- rbind(pheno1, pheno2)
+  
+  if (comp == 'DD_HI_L1-DD_HI_L2') {
+    condition <- factor(pheno$collection)
+    cols <- c("L1", "L2")
+  } else if (comp == 'DD_HI_L1-DD_LI_L1') {
+    condition <- factor(pheno$sample_group)
+    cols <- c("Low Injury", "High Injury")
+  } else if (comp == 'DD_HI_L1-LD_LI_L1') {
+    condition <- factor(pheno$sample_group)
+    cols <- c("Low Injury", "High Injury")
+  } else if (comp == 'DD_HI_L2-DD_LI_L2') {
+    condition <- factor(pheno$sample_group)
+    cols <- c("Low Injury", "High Injury")
+  } else if (comp == 'DD_HI_L2-LD_LI_L2') {
+    condition <- factor(pheno$sample_group)
+    cols <- c("Low Injury", "High Injury")
+  } else if (comp == 'DD_LI_L1-DD_LI_L2') {
+    condition <- factor(pheno$collection)
+    cols <- c("L1", "L2")
+  } else if (comp == 'DD_LI_L1-LD_LI_L1') {
+    condition <- factor(pheno$donor_type)
+    cols <- c("DD", "LD")
+  } else if (comp == 'DD_LI_L2-LD_LI_L2') {
+    condition <- factor(pheno$donor_type)
+    cols <- c("DD", "LD")
+  } else if (comp == 'LD_LI_L1-LD_LI_L2') {
+    condition <- factor(pheno$collection)
+    cols <- c("L1", "L2")
+  }
+  
+  beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
+  m_case_condition <- beta2m(beta_values_condition)
+  
+  cat("Identify DMPs\n")
+  design <- model.matrix(~0+condition, data=pheno)  
+  #print(design)
+  colnames(design) <- cols
+  fit1 <- lmFit(m_values_condition, design)
+  
+  if (comp == 'DD_HI_L1-DD_HI_L2') {
+    contMatrix <- makeContrasts(L1-L2, levels=design)
+  } else if (comp == 'DD_HI_L1-DD_LI_L1') {
+    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+  } else if (comp == 'DD_HI_L1-LD_LI_L1') {
+    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+  } else if (comp == 'DD_HI_L2-DD_LI_L2') {
+    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+  } else if (comp == 'DD_HI_L2-LD_LI_L2') {
+    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+  } else if (comp == 'DD_LI_L1-DD_LI_L2') {
+    contMatrix <- makeContrasts(L1-L2, levels=design)
+  } else if (comp == 'DD_LI_L1-LD_LI_L1') {
+    contMatrix <- makeContrasts(DD-LD, levels=design)
+  } else if (comp == 'DD_LI_L2-LD_LI_L2') {
+    contMatrix <- makeContrasts(DD-LD, levels=design)
+  } else if (comp == 'LD_LI_L1-LD_LI_L2') {
+    contMatrix <- makeContrasts(L1-L2, levels=design)
+  }
+  
+  fit2 <- contrasts.fit(fit1, contMatrix)
+  fit2 <- eBayes(fit2)
+  
+  #summary(decideTests(fit2))
+  ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
+  DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
+  
+  write.csv(DMPs, file = paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
+  #plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
+  
+  #Manhattan plot using the DMPs
+  cat("Generating manhattan plot from DMPs\n")
+  library(qqman)
+  library(DMRcate)
+  title <- paste(output, " (Adj. P-val)", sep="")
+  col=c("black","grey")
+  DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
+  DMPs$chr = as.numeric(DMPs$chr)
+  DMPs$pos = as.numeric(DMPs$pos)
+  jpeg(paste(output, "_manhattan.jpeg", sep=""), quality = 90)
+  manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  dev.off()
+  
+  # myAnnotation <- cpg.annotate(object = as.matrix(m_values), datatype = "array", what = "M",
+  #                              analysis.type = "differential", design = design, 
+  #                              contrasts = TRUE, cont.matrix = contMatrix,
+  #                              coef = "Low - High", arraytype = "450K")
+  # 
+  # DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+  # results.ranges <- extractRanges(DMRs, genome = "hg19")
+  # write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
 }
-
-#contMatrix
-
-fit2 <- contrasts.fit(fit1, contMatrix)
-fit2 <- eBayes(fit2)
-
-#summary(decideTests(fit2))
-ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
-DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
-DMPs_sig <- DMPs[which(DMPs$adj.P.Val < 0.05),]
-write.csv(DMPs, file = paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
-write.csv(DMPs, file = paste(output, "_DMPs_sig.csv", sep=""), row.names = TRUE)
-#plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
-
-#Manhattan plot using the DMPs
-cat("Generating manhattan plot from DMPs\n")
-library(qqman)
-library(DMRcate)
-title <- paste(output, " (Adj. P-val)", sep="")
-col=c("black","grey")
-DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
-DMPs$chr = as.numeric(DMPs$chr)
-DMPs$pos = as.numeric(DMPs$pos)
-jpeg(paste(output, "_manhattan.jpeg", sep=""), quality = 90)
-manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
-dev.off()
-
-myAnnotation <- cpg.annotate(object = as.matrix(m_values), datatype = "array", what = "M",
-                             analysis.type = "differential", design = design, 
-                             contrasts = TRUE, cont.matrix = contMatrix,
-                             coef = "Low - High", arraytype = "450K")
-
-DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-results.ranges <- extractRanges(DMRs, genome = "hg19")
-write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
 
 q()
 
