@@ -15,10 +15,10 @@ output_dir = args[4]
 comparison = args[5]
 
 #Local Machine
-pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
-base_dir = '/Users/adrianharris/Desktop/liver/'
-git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-output_dir = '/Users/adrianharris/Desktop/liver/'
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+# base_dir = '/Users/adrianharris/Desktop/liver/'
+# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+# output_dir = '/Users/adrianharris/Desktop/liver/'
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
