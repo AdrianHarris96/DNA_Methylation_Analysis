@@ -15,10 +15,10 @@ output_dir = args[4]
 comparison = args[5]
 
 #Local Machine
-# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
-# base_dir = '/Users/adrianharris/Desktop/liver/'
-# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-# output_dir = '/Users/adrianharris/Desktop/liver/'
+pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+base_dir = '/Users/adrianharris/Desktop/liver/'
+git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+output_dir = '/Users/adrianharris/Desktop/liver/'
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
@@ -28,6 +28,18 @@ if (file.exists(output_dir)) {
 
 #Importing manually-curated sample sheet
 pheno_df <- import(pheno_file)
+
+#Update sample_group column 
+for (row in 1:nrow(pheno_df)) {
+  if (pheno_df[row, 'sample_group'] == 'High Injury') {
+    injury <- 'High'
+  } else {
+    injury <- 'Low'
+  }
+  
+  pheno_df[row, 'sample_group'] <- injury
+
+}
 
 #Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
 pheno_df <- pheno_df[!(pheno_df$sample_group == 'control' | pheno_df$sample_group == 'Control'),]
@@ -272,13 +284,9 @@ generate_dendro <- function(beta, pheno, timepoint){
   for (row in 1:nrow(final_beta)) {
     age <- paste(final_beta[row, 'sample_name'], final_beta[row, 'donor_age'], sep = " ")
     donor <- paste(final_beta[row, 'sample_name'], final_beta[row, 'donor_type'], sep = " ")
-    if (final_beta[row, 'sample_group'] == 'High Injury') {
-      injury <- 'High'
-    } else {
-      injury <- 'Low'
-    }
-    group <- paste(final_beta[row, 'sample_name'], injury, sep = " ")
+    group <- paste(final_beta[row, 'sample_name'], final_beta[row, 'sample_group'], sep = " ")
     array <- paste(final_beta[row, 'sample_name'], final_beta[row, 'array_type'], sep = " ")
+    
     final_beta[row, 'sample_name_age'] <- age
     final_beta[row, 'sample_name_donor'] <- donor
     final_beta[row, 'sample_name_group'] <- group
@@ -321,33 +329,33 @@ generate_dendro <- function(beta, pheno, timepoint){
 
 clustering <- function(pheno, condition1, condition2, betas) {
   if (condition1 == "DD_HI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L1'),]
   } else if (condition1 == "DD_HI_L2"){
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L2'),]
   } else if (condition1 == "DD_LI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition1 == "DD_LI_L2") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else if (condition1 == "LD_LI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition1 == "LD_LI_L2") {
-    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else {
     cat('Comparison does not exist\n')
   }
   
   if (condition2 == "DD_HI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L1'),]
   } else if (condition2 == "DD_HI_L2"){
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L2'),]
   } else if (condition2 == "DD_LI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition2 == "DD_LI_L2") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else if (condition2 == "LD_LI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition2 == "LD_LI_L2") {
-    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else {
     cat('Comparison does not exist\n')
   }
@@ -406,15 +414,15 @@ clustering <- function(pheno, condition1, condition2, betas) {
   return('Clustering\n')
 }
 
-clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
-clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
+# clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
 library(lumi)
 
@@ -426,39 +434,39 @@ m_values = beta2m(beta_values_filtered)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 
 for (comp in comparisons) {
+  cat("Identify CpGs\n")
   cond <- unlist(strsplit(comp, "-"))
   condition1 <- cond[1]
   condition2 <- cond[2]
   
-  cat("Identify CpGs\n")
   if (condition1 == "DD_HI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L1'),]
   } else if (condition1 == "DD_HI_L2"){
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L2'),]
   } else if (condition1 == "DD_LI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition1 == "DD_LI_L2") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else if (condition1 == "LD_LI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition1 == "LD_LI_L2") {
-    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else {
     cat('Comparison does not exist\n')
   }
   
   if (condition2 == "DD_HI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L1'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L1'),]
   } else if (condition2 == "DD_HI_L2"){
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High Injury' & pheno$collection == 'L2'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L2'),]
   } else if (condition2 == "DD_LI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition2 == "DD_LI_L2") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else if (condition2 == "LD_LI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L1'),]
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
   } else if (condition2 == "LD_LI_L2") {
-    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low Injury' & pheno$collection == 'L2'),]
+    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
   } else {
     cat('Comparison does not exist\n')
   }
@@ -470,16 +478,16 @@ for (comp in comparisons) {
     cols <- c("L1", "L2")
   } else if (comp == 'DD_HI_L1-DD_LI_L1') {
     condition <- factor(pheno$sample_group)
-    cols <- c("Low Injury", "High Injury")
+    cols <- c("Low", "High")
   } else if (comp == 'DD_HI_L1-LD_LI_L1') {
     condition <- factor(pheno$sample_group)
-    cols <- c("Low Injury", "High Injury")
+    cols <- c("Low", "High")
   } else if (comp == 'DD_HI_L2-DD_LI_L2') {
     condition <- factor(pheno$sample_group)
-    cols <- c("Low Injury", "High Injury")
+    cols <- c("Low", "High")
   } else if (comp == 'DD_HI_L2-LD_LI_L2') {
     condition <- factor(pheno$sample_group)
-    cols <- c("Low Injury", "High Injury")
+    cols <- c("Low", "High")
   } else if (comp == 'DD_LI_L1-DD_LI_L2') {
     condition <- factor(pheno$collection)
     cols <- c("L1", "L2")
@@ -506,13 +514,13 @@ for (comp in comparisons) {
   if (comp == 'DD_HI_L1-DD_HI_L2') {
     contMatrix <- makeContrasts(L1-L2, levels=design)
   } else if (comp == 'DD_HI_L1-DD_LI_L1') {
-    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+    contMatrix <- makeContrasts(Low-High, levels=design)
   } else if (comp == 'DD_HI_L1-LD_LI_L1') {
-    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+    contMatrix <- makeContrasts(Low-High, levels=design)
   } else if (comp == 'DD_HI_L2-DD_LI_L2') {
-    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+    contMatrix <- makeContrasts(Low-High, levels=design)
   } else if (comp == 'DD_HI_L2-LD_LI_L2') {
-    contMatrix <- makeContrasts(Low Injury-High Injury, levels=design)
+    contMatrix <- makeContrasts(Low-High, levels=design)
   } else if (comp == 'DD_LI_L1-DD_LI_L2') {
     contMatrix <- makeContrasts(L1-L2, levels=design)
   } else if (comp == 'DD_LI_L1-LD_LI_L1') {
@@ -529,7 +537,7 @@ for (comp in comparisons) {
   #summary(decideTests(fit2))
   ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
   DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
-  
+  output <- paste(output_dir, comp, sep="")
   write.csv(DMPs, file = paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
   #plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
   
