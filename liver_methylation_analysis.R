@@ -226,7 +226,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
   
-  
   #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
   cat("Hypermethylated\n")
   print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
@@ -236,17 +235,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   print(dim(beta_values_filtered))
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
 }
-
-#Drop 'methylated' and 'unmethylated' sample names
-pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '200999740023_R06C02', '201004900096_R05C02', '201004900096_R06C02', '202702240054_R01C01', '202702240054_R02C01', '202702240079_R07C01', '202702240079_R08C01', '3999442124_R05C02', '3999442124_R06C02')),]
-
-#Drop the one unpaired samples
-pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
-
-#Drop any remaining DCD samples
-#EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
-beta_values_filtered = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
-pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]
 
 #Writing beta and m-values to CSV
 if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
@@ -259,6 +247,17 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(past
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
+
+#Drop 'methylated' and 'unmethylated' sample names
+pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '200999740023_R06C02', '201004900096_R05C02', '201004900096_R06C02', '202702240054_R01C01', '202702240054_R02C01', '202702240079_R07C01', '202702240079_R08C01', '3999442124_R05C02', '3999442124_R06C02')),]
+
+#Drop the one unpaired samples
+pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
+
+#Drop any remaining DCD samples
+#EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
+beta_values_filtered = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
+pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]
 
 generate_dendro <- function(beta, pheno, timepoint){
   cat('Generating dendrograms\n')
@@ -327,10 +326,10 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-# timeList <- c('L1', 'L2', 'L1-L2')
-# for (time in timeList) {
-#   generate_dendro(beta_values_filtered, pheno_df, time)
-# }
+timeList <- c('L1', 'L2', 'L1-L2')
+for (time in timeList) {
+  generate_dendro(beta_values_filtered, pheno_df, time)
+}
 
 clustering <- function(pheno, condition1, condition2, betas) {
   if (condition1 == "DD_HI_L1") {
