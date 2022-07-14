@@ -502,7 +502,7 @@ for (comp in comparisons) {
     cols <- c("L1", "L2")
   }
   
-  m_case_condition <-  m_values[,(colnames(m_values) %in% pheno$Basename)]
+  m_values_condition <-  m_values[,(colnames(m_values) %in% pheno$Basename)]
   
   cat("Identify DMPs\n")
   design <- model.matrix(~0+condition, data=pheno)  
