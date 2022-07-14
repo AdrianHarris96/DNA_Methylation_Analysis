@@ -252,7 +252,8 @@ pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740
 if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
   cat('Loading beta and m_value CSV\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
-  m_values <- import(paste(output_dir, "m_values.csv", sep=""))
+  row.names(beta_values_filtered) <- beta_values_filtered$V1
+  beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
 } else {
   cat('Writing beta and m_values to csv')
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
