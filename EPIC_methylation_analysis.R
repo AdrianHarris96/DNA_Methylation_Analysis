@@ -5,23 +5,23 @@ library(rio)
 library(ggplot2)
 library(tidyverse)
 library(RColorBrewer)
-library(lumi)
 library(limma)
 library(dendextend)
 
-#Example input: Rscript methylation_analysis.R <pheno_file> <base_dir> <output_dir>
+#Example input: Rscript methylation_analysis.R <pheno_file> <paired_pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
 pheno_file = args[1]
-base_dir = args[2]
-git_dir = args[3]
-output_dir = args[4]
+pheno_file2 = args[2]
+base_dir = args[3]
+git_dir = args[4]
+output_dir = args[5]
 
 #Local Machine
-pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/kidney_sample_sheet.csv'
-pheno_file2 = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
-base_dir = '/Users/adrianharris/Desktop/kidney/'
-git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-output_dir = '/Users/adrianharris/Desktop/epic_kidney0713/'
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/kidney_sample_sheet.csv'
+# pheno_file2 = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
+# base_dir = '/Users/adrianharris/Desktop/kidney/'
+# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+# output_dir = '/Users/adrianharris/Desktop/epic_kidney0713/'
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
@@ -52,6 +52,8 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   #Saving set as an RDS file 
   saveRDS(rgSet, file = paste(output_dir, "rgSet.RDS", sep=""))
 }
+
+pheno_df <- data.frame(pData(rgSet))
 
 #Color Scheme Defined 
 pal <- brewer.pal(4,"Dark2")
@@ -118,18 +120,18 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   #Normalization and plotting 
   mtSet <- preprocessNoob(rgSet)
   saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
-postqc <- getQC(mtSet)
-postqc <- data.frame(postqc)
-postqc['Basename'] <- row.names(postqc)
-postqc <- merge(postqc, pheno_df, by = 'Basename')
-jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
-plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
-print(plot2)
-dev.off()
-jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
-densityPlot(mtSet, sampGroups = postqc$array_type)
-dev.off()
-rm(postqc, plot2)
+  postqc <- getQC(mtSet)
+  postqc <- data.frame(postqc)
+  postqc['Basename'] <- row.names(postqc)
+  postqc <- merge(postqc, pheno_df, by = 'Basename')
+  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
+  plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
+  print(plot2)
+  dev.off()
+  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
+  densityPlot(mtSet, sampGroups = postqc$array_type)
+  dev.off()
+  rm(postqc, plot2)
 }
 
 # Map to Genome
@@ -139,7 +141,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Converting to Genomic Methyl Set\n')
   rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
   gmtSet <- mapToGenome(rSet)
-  print(dim(gmtSet)) #Number of probes = 452453
+  print(dim(gmtSet)) #Number of probes = 865859
   
   # #Predicted Sex 
   # predictedSex <- getSex(gmtSet, cutoff = -2)
@@ -152,7 +154,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   gmtSet <- addSnpInfo(gmtSet)
   gr <- granges(gmtSet)
   gmtSet <- dropLociWithSnps(gmtSet, snps=c("SBE","CpG"), maf=0)
-  print(dim(gmtSet)) #Number of probes = 436144
+  print(dim(gmtSet)) #Number of probes = 835424
   rm(snps, gr)
   
   # Filter unwanted sites 
@@ -165,7 +167,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   keep <- detP < 0.01
   keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
   gmtSet <- gmtSet[keep.probes,] 
-  print(dim(gmtSet)) #Number of probes = 436128
+  print(dim(gmtSet)) #Number of probes = 835364 
   rm(keep.probes)
   
   #Remove probes that located on the X or Y chromosome
@@ -174,7 +176,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   keep <- !(featureNames(gmtSet) %in% annEPIC$Name[annEPIC$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
   table(keep)
   gmtSet <- gmtSet[keep,]
-  print(dim(gmtSet)) #Number of probes = 425718
+  print(dim(gmtSet)) #Number of probes = 816068
   rm(annEPIC, keep)
   
   #Creation of bad probes character and filter gmtSet
@@ -188,7 +190,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
   table(keep)
   gmtSet <- gmtSet[keep,]
-  print(dim(gmtSet)) #Number of probes = 392871
+  print(dim(gmtSet)) #Number of probes = 783224
   rm(cross.react, multi.map, bad.probes, cross.react.probes, multi.map.probes, keep)
   
   #Extract betas and m_values
@@ -200,20 +202,16 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Hypomethylated\n')
   print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
-  #33419 Hypomethylated
+  #52924 Hypomethylated
   
   #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
   cat("Hypermethylated\n")
   print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
-  #3091 hypermethylated
+  #4036 hypermethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
   dim(beta_values_filtered)
   m_values = beta2m(beta_values_filtered)
 }
-
-pheno_df <- import(pheno_file2)
-
-pheno_df <- pheno_df[!(pheno_df$sample_id == 'KUT4_K2' | pheno_df$sample_id == 'KUT4_K1'),]
 
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Skip writing beta to CSV\n')
@@ -224,6 +222,20 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 } 
+
+paired_pheno <- import(pheno_file2)
+paired_pheno <- paired_pheno[!(paired_pheno$sample_id == 'KUT4_K2' | paired_pheno$sample_id == 'KUT4_K1'),]
+
+pheno_df <- pheno_df[(pheno_df$Basename %in% paired_pheno$Basename),]
+beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+
+#EXCLUDE DCD SAMPLES - Kidney dataset
+beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
+#Removing rows based on the sample_name column in phenotype dataframe
+pheno_df <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
+
+library(lumi)
+m_values <- beta2m(beta_values_filtered)
 
 clustering <- function(pheno, month, comparison, betas) {
   #Drop other columns and rename eGFR_month -> eGFR
@@ -258,14 +270,6 @@ clustering <- function(pheno, month, comparison, betas) {
   beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
   # dim(beta_values_filtered)
   
-  # #EXCLUDE DCD SAMPLES - Kidney dataset
-  # beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
-  # #Removing rows based on the sample_name column in phenotype dataframe
-  # pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
-  
-  #betas <- betas[1:20000, ] #Used for troubleshooting
-  #m_values <- beta2m(betas)
-  
   cat("PCA plots - Betas\n")
   #Transpose resulting PCA plot - beta values 
   transposed_beta <- t(betas) #t(beta_values_case)
@@ -296,6 +300,7 @@ clustering <- function(pheno, month, comparison, betas) {
   }
   print(plot2)
   
+  #m_values <- beta2m(betas)
   # cat("PCA plots - m_values\n")
   # #Transpose resulting PCA plot - m_values
   # transposed_m <- t(m_values) 
@@ -320,14 +325,14 @@ eGFR_List <- c('eGFR_1month')
 comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
 #comp_List <- c('Low_High')
 
-pdf(file = paste(output_dir, "eGFR1month_comparisons.pdf", sep=""))
-for (comp in comp_List) {
-  for (outcome in eGFR_List) {
-    clustering(pheno_df, outcome, comp, beta_values_filtered)
-  }
-}
-
-dev.off()
+# pdf(file = paste(output_dir, "eGFR1month_comparisons.pdf", sep=""))
+# for (comp in comp_List) {
+#   for (outcome in eGFR_List) {
+#     clustering(pheno_df, outcome, comp, beta_values_filtered)
+#   }
+# }
+# 
+# dev.off()
 
 generate_dendro <- function(beta, pheno, timepoint){
   beta_t <- data.frame(t(beta))
@@ -486,7 +491,7 @@ for (comp in comp_List) {
       contMatrix <- makeContrasts(Low-High, levels=design)
     }
     
-    #contMatrix
+    print(contMatrix)
     
     fit2 <- contrasts.fit(fit1, contMatrix)
     fit2 <- eBayes(fit2)
