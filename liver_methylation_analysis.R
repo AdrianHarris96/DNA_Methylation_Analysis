@@ -5,6 +5,8 @@ library(ggplot2)
 library(tidyverse)
 library(RColorBrewer)
 library(dendextend)
+library(limma)
+library(lumi)
 
 #Example input: Rscript liver_methylation_analysis.R <pheno_file> <base_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -39,16 +41,6 @@ for (row in 1:nrow(pheno_df)) {
   pheno_df[row, 'sample_group'] <- injury
 }
 
-#Drop 'methylated' and 'unmethylated' sample names
-pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '200999740023_R06C02', '201004900096_R05C02', '201004900096_R06C02', '202702240054_R01C01', '202702240054_R02C01', '202702240079_R07C01', '202702240079_R08C01', '3999442124_R05C02', '3999442124_R06C02')),]
-
-#Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
-pheno_df <- pheno_df[!(pheno_df$sample_group == 'control' | pheno_df$sample_group == 'Control'),]
-pheno_df <- pheno_df[!(pheno_df$Basename == '203751390020_R08C01' | pheno_df$Basename == '203751390020_R01C01'),]
-
-#Drop the one unpaired sample
-pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
-
 nrow(subset(pheno_df, array_type == '450K'))
 nrow(subset(pheno_df, array_type == 'EPIC'))
 
@@ -68,6 +60,7 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   rgSet450k <- read.metharray.exp(base=dir450k, target=pheno450k)
   rgSetEPIC <- read.metharray.exp(base=dirEPIC, target=phenoEPIC, force=TRUE)
   rgSet <- combineArrays(rgSet450k, rgSetEPIC)
+  ?read.metharray.exp()
   #Saving set as an RDS file 
   saveRDS(rgSet450k, file = paste(output_dir, "rgSet450k.RDS", sep=""))
   saveRDS(rgSetEPIC, file = paste(output_dir, "rgSetEPIC.RDS", sep=""))
@@ -241,7 +234,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   
   #EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
   beta_values_filered = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
-  pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
+  #pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]  
   
   # #EXCLUDE DCD SAMPLES - Kidney dataset
   # beta_values_case <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
@@ -249,6 +242,16 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   # pheno_df_case <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
 }
+
+#Drop 'methylated' and 'unmethylated' sample names
+pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '200999740023_R06C02', '201004900096_R05C02', '201004900096_R06C02', '202702240054_R01C01', '202702240054_R02C01', '202702240079_R07C01', '202702240079_R08C01', '3999442124_R05C02', '3999442124_R06C02')),]
+
+#Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
+pheno_df <- pheno_df[!(pheno_df$sample_group == 'control' | pheno_df$sample_group == 'Control'),]
+pheno_df <- pheno_df[!(pheno_df$Basename == '203751390020_R08C01' | pheno_df$Basename == '203751390020_R01C01'),]
+
+#Drop the one unpaired sample
+pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
 
 #Writing beta and m-values to CSV
 m_values = beta2m(beta_values_filtered)
@@ -427,8 +430,6 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
-
-library(lumi)
 
 comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
 
