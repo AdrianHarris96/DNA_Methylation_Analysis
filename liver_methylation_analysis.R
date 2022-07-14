@@ -249,11 +249,12 @@ beta_values_filered = beta_values_filtered[,!(colnames(beta_values_filtered) %in
 pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]
 
 #Writing beta and m-values to CSV
-m_values = beta2m(beta_values_filtered)
 if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
-  cat('Skip beta and m_value CSV\n')
-  beta_values_filered <- import(paste(output_dir, "beta_values.csv", sep=""))
+  cat('Loading beta and m_value CSV\n')
+  beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
+  m_values <- import(paste(output_dir, "m_values.csv", sep=""))
 } else {
+  cat('Writing beta and m_values to csv')
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
@@ -325,10 +326,10 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-timeList <- c('L1', 'L2', 'L1-L2')
-for (time in timeList) {
-  generate_dendro(beta_values_filtered, pheno_df, time)
-}
+# timeList <- c('L1', 'L2', 'L1-L2')
+# for (time in timeList) {
+#   generate_dendro(beta_values_filtered, pheno_df, time)
+# }
 
 clustering <- function(pheno, condition1, condition2, betas) {
   if (condition1 == "DD_HI_L1") {
@@ -429,9 +430,6 @@ clustering <- function(pheno, condition1, condition2, betas) {
 
 comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
 
-#Convert filter beta dataframe to m_value dataframe
-m_values = beta2m(beta_values_filtered)
-
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 
 for (comp in comparisons) {
@@ -503,8 +501,7 @@ for (comp in comparisons) {
     cols <- c("L1", "L2")
   }
   
-  beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
-  m_case_condition <- beta2m(beta_values_condition)
+  m_case_condition <-  m_values[,(colnames(m_values) %in% pheno$Basename)]
   
   cat("Identify DMPs\n")
   design <- model.matrix(~0+condition, data=pheno)  
