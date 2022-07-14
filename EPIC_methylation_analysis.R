@@ -17,10 +17,11 @@ git_dir = args[3]
 output_dir = args[4]
 
 #Local Machine
-# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
-# base_dir = '/Users/adrianharris/Desktop/kidney/'
-# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-# output_dir = '/Users/adrianharris/Desktop/epic_kidney/'
+pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/kidney_sample_sheet.csv'
+pheno_file2 = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
+base_dir = '/Users/adrianharris/Desktop/kidney/'
+git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+output_dir = '/Users/adrianharris/Desktop/epic_kidney0713/'
 
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
@@ -33,9 +34,8 @@ pheno_df <- import(pheno_file)
 
 #Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
 pheno_df <- pheno_df[!(pheno_df$Basename == '203504430032_R01C01' | pheno_df$Basename == '203504430032_R02C01'),]
-pheno_df <- pheno_df[!(pheno_df$sample_id == 'KUT4_K2' | pheno_df$sample_id == 'KUT4_K1'),]
 
-nrow(subset(pheno_df, array_type == 'EPIC'))
+pheno_df <- pheno_df[(pheno_df$array_type == 'EPIC'),]
 
 #Number of files 
 nrow(subset(pheno_df, time == 'K1'))
@@ -211,6 +211,10 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   m_values = beta2m(beta_values_filtered)
 }
 
+pheno_df <- import(pheno_file2)
+
+pheno_df <- pheno_df[!(pheno_df$sample_id == 'KUT4_K2' | pheno_df$sample_id == 'KUT4_K1'),]
+
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Skip writing beta to CSV\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
@@ -251,7 +255,7 @@ clustering <- function(pheno, month, comparison, betas) {
   }
   
   #Filter beta dataframe using column names for the relevant comparison
-  beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+  beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
   # dim(beta_values_filtered)
   
   # #EXCLUDE DCD SAMPLES - Kidney dataset
@@ -462,7 +466,7 @@ for (comp in comp_List) {
     
     cat("Identify DMPs\n")
     design <- model.matrix(~0+condition, data=pheno)  
-    print(design)
+    #print(design)
     colnames(design) <- cols
     fit1 <- lmFit(beta_values_condition, design)
     
