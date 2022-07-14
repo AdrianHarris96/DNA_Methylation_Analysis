@@ -473,6 +473,7 @@ for (comp in comparisons) {
   
   pheno <- rbind(pheno1, pheno2)
   print(dim(pheno))
+  print(pheno)
   
   if (comp == 'DD_HI_L1-DD_HI_L2') {
     condition <- factor(pheno$collection)
@@ -505,6 +506,7 @@ for (comp in comparisons) {
   
   beta_values_condition <-  beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
   m_values_condition <- beta2m(beta_values_condition)
+  print(dim(m_values_condition))
   
   cat("Identify DMPs\n")
   design <- model.matrix(~0+condition, data=pheno)  
