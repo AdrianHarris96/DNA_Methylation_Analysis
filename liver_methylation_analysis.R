@@ -249,9 +249,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
 #Drop 'methylated' and 'unmethylated' sample names
 pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '200999740023_R06C02', '201004900096_R05C02', '201004900096_R06C02', '202702240054_R01C01', '202702240054_R02C01', '202702240079_R07C01', '202702240079_R08C01', '3999442124_R05C02', '3999442124_R06C02')),]
 
-#Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
-pheno_df <- pheno_df[!(pheno_df$sample_group == 'control' | pheno_df$sample_group == 'Control'),]
-
 #Drop the one unpaired sample
 pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
 
