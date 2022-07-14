@@ -31,6 +31,9 @@ if (file.exists(output_dir)) {
 #Importing manually-curated sample sheet
 pheno_df <- import(pheno_file)
 
+#Drop 2 samples that are not in L1 or L2 
+pheno_df <- pheno_df[!(pheno_df$Basename == '203751390020_R08C01' | pheno_df$Basename == '203751390020_R01C01'),]
+
 #Update sample_group column 
 for (row in 1:nrow(pheno_df)) {
   if (pheno_df[row, 'sample_group'] == 'High Injury') {
@@ -248,7 +251,6 @@ pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '20099974
 
 #Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
 pheno_df <- pheno_df[!(pheno_df$sample_group == 'control' | pheno_df$sample_group == 'Control'),]
-pheno_df <- pheno_df[!(pheno_df$Basename == '203751390020_R08C01' | pheno_df$Basename == '203751390020_R01C01'),]
 
 #Drop the one unpaired sample
 pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
