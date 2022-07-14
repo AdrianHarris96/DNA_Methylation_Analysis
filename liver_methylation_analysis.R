@@ -441,33 +441,33 @@ for (comp in comparisons) {
   condition2 <- cond[2]
   
   if (condition1 == "DD_HI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L1'),]
+    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L1'),]
   } else if (condition1 == "DD_HI_L2"){
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L2'),]
+    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L2'),]
   } else if (condition1 == "DD_LI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
+    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
   } else if (condition1 == "DD_LI_L2") {
-    pheno1 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
+    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
   } else if (condition1 == "LD_LI_L1") {
-    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
+    pheno1 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
   } else if (condition1 == "LD_LI_L2") {
-    pheno1 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
+    pheno1 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
   } else {
     cat('Comparison does not exist\n')
   }
   
   if (condition2 == "DD_HI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L1'),]
+    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L1'),]
   } else if (condition2 == "DD_HI_L2"){
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'High' & pheno$collection == 'L2'),]
+    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L2'),]
   } else if (condition2 == "DD_LI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
+    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
   } else if (condition2 == "DD_LI_L2") {
-    pheno2 <- pheno[(pheno$donor_type == 'DD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
+    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
   } else if (condition2 == "LD_LI_L1") {
-    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L1'),]
+    pheno2 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
   } else if (condition2 == "LD_LI_L2") {
-    pheno2 <- pheno[(pheno$donor_type == 'LD' & heno$sample_group == 'Low' & pheno$collection == 'L2'),]
+    pheno2 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
   } else {
     cat('Comparison does not exist\n')
   }
