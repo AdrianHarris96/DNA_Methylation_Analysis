@@ -430,6 +430,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
 
 comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
 
+library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 
 for (comp in comparisons) {
