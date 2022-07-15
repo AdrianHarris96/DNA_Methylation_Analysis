@@ -442,6 +442,8 @@ for (comp in comp_List) {
       cat('Comparison request does not exist\n')
     }
     
+    example <- pData(mtSet)
+    print(example)
     #CpGs - DMPs
     beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
     m_values_condition <- beta2m(beta_values_condition)
