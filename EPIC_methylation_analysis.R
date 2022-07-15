@@ -445,7 +445,7 @@ for (comp in comp_List) {
     #CpGs - DMPs
     beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
     m_values_condition <- beta2m(beta_values_condition)
-    dmp <- dmpFinder(M, pheno=pheno$eGFR, type="categorical")
+    dmp <- dmpFinder(m_values_condition, pheno=pheno$eGFR, type="categorical")
     head(dmp)
     
     if (comp == 'K1_Low_K1_High') {
