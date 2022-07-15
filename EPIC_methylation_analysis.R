@@ -445,6 +445,8 @@ for (comp in comp_List) {
     #CpGs - DMPs
     beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
     m_values_condition <- beta2m(beta_values_condition)
+    m_values_condition <- mutate_all(m_values_condition, function(x) as.numeric(as.character(x)))
+    #Next step, just convert the Mset into 
     dmp <- dmpFinder(m_values_condition, pheno=pheno$eGFR, type="categorical")
     head(dmp)
     
