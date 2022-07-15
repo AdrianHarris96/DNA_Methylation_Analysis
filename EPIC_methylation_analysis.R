@@ -443,6 +443,9 @@ for (comp in comp_List) {
       cat('Comparison request does not exist\n')
     }
     
+    #CpGs - DMPs
+    beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
+    
     if (comp == 'K1_Low_K1_High') {
       condition <- factor(pheno$eGFR)
       cols <- c("High", "Low")
@@ -466,13 +469,10 @@ for (comp in comp_List) {
       cols <- c("K2", "K1")
     }
     
-    #CpGs - DMPs
-    
-    beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
-    
+    print(condition)
     cat("Identify DMPs\n")
-    design <- model.matrix(~0+condition, data=pheno)  
-    #print(design)
+    design <- model.matrix(~0+condition, data=pheno)
+    
     colnames(design) <- cols
     fit1 <- lmFit(beta_values_condition, design)
     
