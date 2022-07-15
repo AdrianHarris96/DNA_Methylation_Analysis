@@ -413,6 +413,7 @@ library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 
 for (comp in comp_List) {
+  print(comp)
   for (outcome in eGFR_List) {
     cat("Identify CpGs\n")
     if (outcome == 'eGFR_1month') {
