@@ -6,22 +6,21 @@ library(tidyverse)
 library(RColorBrewer)
 library(dendextend)
 library(limma)
-library(lumi)
 
-#Example input: Rscript liver_methylation_analysis.R <pheno_file> <base_dir> <output_dir>
+#Example input: Rscript liver_methylation_analysis.R <pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
 pheno_file = args[1]
 base_dir = args[2]
 git_dir = args[3]
 output_dir = args[4]
-comparison = args[5]
 
 #Local Machine
-# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
-# base_dir = '/Users/adrianharris/Desktop/liver/'
-# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-# output_dir = '/Users/adrianharris/Desktop/liver/'
+pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+base_dir = '/Users/adrianharris/Desktop/liver/'
+git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+output_dir = '/Users/adrianharris/Desktop/liver/'
 
+#Checking if the output directory exists
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
 } else {
@@ -55,6 +54,7 @@ phenoEPIC <- pheno_df[!(pheno_df$array_type == '450K'),]
 dir450k <- paste(base_dir, "450k_array", sep="")
 dirEPIC <- paste(base_dir, "EPIC_array", sep="")
 
+#Load or generate the rgSet if necessary
 if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   cat('Loading in rgSet (combined)\n')
   rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
@@ -72,12 +72,15 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   rm(rgSetEPIC)
 }
 
-#Color Scheme Defined 
+#Simply ensure the correct order 
+pheno_df <- data.frame(pData(rgSet))
+
+#Color scheme defined 
 pal <- brewer.pal(4,"Dark2")
 
-#Calculate Detection p-values if 
+#Skip or generate p-values if necessary 
 if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
-  cat('P-values.csv is already exists\n')
+  cat('P-values.csv already exists\n')
 } else {
   cat('Performing p-value detection\n')
   detP <- detectionP(rgSet)
@@ -96,22 +99,22 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   detP_df <- merge(detP_df, pheno_df, by = 'Basename')
   
   #Plotting 450K barplot 
-  par(mfrow=c(2,1))
-  jpeg(paste(output_dir, "p_values.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "p_values450k.jpeg", sep=""), quality = 90)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
   legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
+  dev.off()
   
   #Plotting EPIC barplot
+  jpeg(paste(output_dir, "p_valuesEPIC.jpeg", sep=""), quality = 90)
   barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
   legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
-  
-  rm(detP_df, detP)
   dev.off()
-  par(mfrow=c(1,1))
+  rm(detP_df, detP)
 }
 
+#Skip or perform preprocessing if necessary
 if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   cat('Preprocessing already performed\n')
 } else {
@@ -133,13 +136,12 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   rm(mtSet, qc, plot)
 }
 
-#Normalization
-if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
+#Load or normalize if necessary
+if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   cat('Loading normalization\n')
   mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
 } else {
   cat('Performing normalization and plotting\n')
-  #Normalization and plotting 
   mtSet <- preprocessNoob(rgSet)
   saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   postqc <- getQC(mtSet)
@@ -156,7 +158,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   rm(postqc, plot2)
 }
 
-# Map to Genome
+#Load betas or map to genome-generate betas
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Loading beta_values\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
@@ -166,12 +168,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   gmtSet <- mapToGenome(rSet)
   print(dim(gmtSet))
   
-  # #Predicted Sex 
-  # predictedSex <- getSex(gmtSet, cutoff = -2)
-  # gmtSet <- addSex(gmtSet, sex = predictedSex)
-  # plotSex(gmtSet, id = row.names(predictedSex))
-  # rm(predictedSex)
-  
   #Removing probes that include SNPs
   snps <- getSnpInfo(gmtSet)
   gmtSet <- addSnpInfo(gmtSet)
@@ -180,15 +176,13 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   print(dim(gmtSet))
   rm(snps, gr)
   
-  # Filter unwanted sites 
-  # ensure probes are in the same order in the mSetSq and detP objects
-  #rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
+  # Filter unwanted sites - ensure probes are in the same order in the gmtSet and detP objects
   detP <- detectionP(rgSet)
   detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
   
   # remove any probes that have failed in >50% of samples
   keep <- detP < 0.01
-  keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
+  keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #exclude probes that failed detection in more than half of the samples
   gmtSet <- gmtSet[keep.probes,] 
   print(dim(gmtSet))
   rm(keep.probes)
@@ -218,32 +212,33 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   
   #Extract betas and m_values
   beta_values <- getBeta(gmtSet)
-  # m_values <- getM(gmtSet)
+  #m_values <- getM(gmtSet)
   
   #Remove probes Hypomethylated in all samples identified by CpG sites having beta < 0.05 in all samples
   beta_values_filtered <- as.data.frame(beta_values) 
   cat('Hypomethylated\n')
-  print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) #Number of hypomethylated
+  print(dim(filter_all(beta_values_filtered, all_vars(. < 0.05)))) 
+  #345 hypomethylated 
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. >= 0.05)) 
   
   #Remove probes Hypermethylated in all samples identified by CpG sites having beta > 0.95 in all samples
   cat("Hypermethylated\n")
   print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
-  #3091 hypermethylated
+  #5 hypermethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
   cat("Final Dimensions\n")
   print(dim(beta_values_filtered))
-  write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
 }
 
-#Writing beta and m-values to CSV
+
+#Writing beta and m-values to CSV if necessary
 if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
   cat('Loading beta and m_value CSV\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
   row.names(beta_values_filtered) <- beta_values_filtered$V1
   beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
 } else {
-  cat('Writing beta and m_values to csv')
+  cat('Writing beta and m_values to CSV')
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
@@ -254,10 +249,19 @@ pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '20099974
 #Drop the one unpaired samples
 pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
 
-#Drop any remaining DCD samples
-#EXCLUDE CONTROL SAMPLES AND DCD SAMPLES - Liver dataset
-beta_values_filtered = beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02"))]
-pheno_df = pheno_df[!(rownames(pheno_df) %in% c("200999740023_R05C02","200999740023_R06C02","201004900096_R05C02","201004900096_R06C02","202702240054_R01C01","202702240054_R02C01","202702240079_R07C01","202702240079_R08C01","3999442124_R05C02","3999442124_R06C02","203751390020_R02C01","3999442124_R01C02","201004900096_R02C02","200999740005_R06C02","201004900018_R06C01","203751390017_R07C01","200687170042_R05C02","201004900096_R03C02","200999740023_R01C01","201004900018_R01C02","NA","NA.1","NA.2","NA.3","NA.4","NA.5","NA.6","NA.7")),]
+#Drop DCD samples
+pheno_df = pheno_df[!(pheno_df$donor_type == 'DCD'),]
+
+#Exclude control and DCD samples for liver data 
+beta_values_filtered = beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+
+#Loading lumi and converting beta2m 
+library(lumi)
+m_values <- beta2m(beta_values_filtered)
+colnames(m_values)
+print(pheno_df$Basename)
+
+q()
 
 generate_dendro <- function(beta, pheno, timepoint){
   cat('Generating dendrograms\n')
@@ -326,10 +330,10 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-timeList <- c('L1', 'L2', 'L1-L2')
-for (time in timeList) {
-  generate_dendro(beta_values_filtered, pheno_df, time)
-}
+# timeList <- c('L1', 'L2', 'L1-L2')
+# for (time in timeList) {
+#   generate_dendro(beta_values_filtered, pheno_df, time)
+# }
 
 clustering <- function(pheno, condition1, condition2, betas) {
   if (condition1 == "DD_HI_L1") {
@@ -433,6 +437,8 @@ comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 
 library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 library(lumi) #beta to m
+
+
 for (comp in comparisons) {
   cat("Identify CpGs\n")
   cond <- unlist(strsplit(comp, "-"))
