@@ -231,16 +231,25 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
 }
 
 
-#Writing beta and m-values to CSV if necessary
-if (file.exists(paste(output_dir, "beta_values.csv", sep="")) & file.exists(paste(output_dir, "m_values.csv", sep=""))) {
-  cat('Loading beta and m_value CSV\n')
+#Writing beta to CSV if necessary
+if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
+  cat('Loading beta CSV\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
   row.names(beta_values_filtered) <- beta_values_filtered$V1
   beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
 } else {
-  cat('Writing beta and m_values to CSV')
+  cat('Writing beta to CSV')
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
-  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+}
+
+#Loading lumi and converting beta2m 
+library(lumi)
+m_values <- beta2m(beta_values_filtered)
+
+if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  cat('Skip writing of m_values\n')
+} else {
+  write.csv(beta_values_filtered, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
 
 #Drop 'methylated' and 'unmethylated' sample names
@@ -253,11 +262,8 @@ pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
 pheno_df = pheno_df[!(pheno_df$donor_type == 'DCD'),]
 
 #Exclude control and DCD samples for liver data 
-beta_values_filtered = beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
-
-#Loading lumi and converting beta2m 
-library(lumi)
-m_values <- beta2m(beta_values_filtered)
+beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+m_values <- m_values[, colnames(m_values) %in% colnames(beta_values_filtered)]
 colnames(m_values)
 print(pheno_df$Basename)
 
@@ -266,8 +272,9 @@ q()
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
   cat('Generating dendrograms\n')
-  beta_t <- data.frame(t(beta))
-  row.names(pheno) <- pheno$Basename
+  beta_t <- data.frame(t(beta)) #Transform betas
+  row.names(pheno) <- pheno$Basename #Basename applied as rownames
+  #Filtering down to a single timepoint if necessary
   if (timepoint == 'L1') {
     pheno <- pheno[(pheno$collection == 'L1'),]
   } else if (timepoint == 'L2') {
@@ -276,11 +283,11 @@ generate_dendro <- function(beta, pheno, timepoint){
     cat("Skip filtering down\n")
   }
   
-  pheno <- pheno %>% select(c('sample_name', 'donor_age', 'donor_type', 'sample_group', 'array_type'))
+  pheno <- pheno %>% select(c('sample_name', 'donor_age', 'donor_type', 'sample_group', 'array_type')) #Selecting necessary columns
   
   final_beta <- merge(pheno, beta_t, by='row.names')
   
-  #changing the row.names accordingly 
+  #Creating new labels/corresponding columns and moving toward front of dataframe
   final_beta['sample_name_age'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   final_beta['sample_name_donor'] <- 'na'
@@ -290,6 +297,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   final_beta['sample_name_array'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   
+  #Filling these new columns
   for (row in 1:nrow(final_beta)) {
     age <- paste(final_beta[row, 'sample_name'], final_beta[row, 'donor_age'], sep = " ")
     donor <- paste(final_beta[row, 'sample_name'], final_beta[row, 'donor_type'], sep = " ")
@@ -302,6 +310,7 @@ generate_dendro <- function(beta, pheno, timepoint){
     final_beta[row, 'sample_name_array'] <- array
   }
   
+  #Dendrograms with new labels 
   dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
   pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
   row.names(final_beta) <- final_beta$sample_name_age
@@ -331,12 +340,14 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
+#Loop through parameters to create dendrograms
 # timeList <- c('L1', 'L2', 'L1-L2')
 # for (time in timeList) {
 #   generate_dendro(beta_values_filtered, pheno_df, time)
 # }
 
 clustering <- function(pheno, condition1, condition2, betas) {
+  #Filter down according to conditon1
   if (condition1 == "DD_HI_L1") {
     pheno1 <- pheno[(pheno$donor_type == 'DD' & pheno$sample_group == 'High' & pheno$collection == 'L1'),]
   } else if (condition1 == "DD_HI_L2"){
@@ -353,6 +364,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
     cat('Comparison does not exist\n')
   }
   
+  #Filter down according to conditon2
   if (condition2 == "DD_HI_L1") {
     pheno2 <- pheno[(pheno$donor_type == 'DD' & pheno$sample_group == 'High' & pheno$collection == 'L1'),]
   } else if (condition2 == "DD_HI_L2"){
@@ -373,11 +385,11 @@ clustering <- function(pheno, condition1, condition2, betas) {
   pheno <- rbind(pheno1, pheno2)
   
   #Filter beta dataframe using column names for the relevant comparison
-  beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
+  beta <- beta[,(colnames(beta) %in% pheno$Basename)]
   
   cat("PCA plots - Betas\n")
-  #Transpose resulting PCA plot - beta values 
-  transposed_beta <- t(betas)
+  #Transpose beta and incorporate in 
+  transposed_beta <- t(beta)
   transposed_beta <- data.frame(transposed_beta)
   pca_general <- prcomp(transposed_beta, center=TRUE)
   var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
