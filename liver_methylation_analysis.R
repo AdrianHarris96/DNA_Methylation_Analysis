@@ -15,10 +15,10 @@ git_dir = args[3]
 output_dir = args[4]
 
 #Local Machine
-pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
-base_dir = '/Users/adrianharris/Desktop/liver/'
-git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-output_dir = '/Users/adrianharris/Desktop/liver/'
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+# base_dir = '/Users/adrianharris/Desktop/liver/'
+# git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
+# output_dir = '/Users/adrianharris/Desktop/liver/'
 
 #Checking if the output directory exists
 if (file.exists(output_dir)) {
@@ -263,6 +263,7 @@ print(pheno_df$Basename)
 
 q()
 
+#Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
   cat('Generating dendrograms\n')
   beta_t <- data.frame(t(beta))
