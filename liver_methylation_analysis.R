@@ -513,7 +513,7 @@ for (comp in comparisons) {
   
   DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical")
   DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
-  head(DMPs, n = 10L)
+  print(head(DMPs, n = 10L))
 
   ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
   ann450kSub <- data.frame(ann450kSub)
