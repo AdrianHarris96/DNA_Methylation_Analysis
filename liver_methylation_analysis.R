@@ -264,10 +264,6 @@ pheno_df = pheno_df[!(pheno_df$donor_type == 'DCD'),]
 #Exclude control and DCD samples for liver data 
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 m_values <- m_values[, colnames(m_values) %in% colnames(beta_values_filtered)]
-colnames(m_values)
-print(pheno_df$Basename)
-
-q()
 
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
@@ -388,7 +384,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
   beta <- beta[,(colnames(beta) %in% pheno$Basename)]
   
   cat("PCA plots - Betas\n")
-  #Transpose beta and incorporate in 
+  #Transpose beta, run PCA clustering and incorporate phenotype data
   transposed_beta <- t(beta)
   transposed_beta <- data.frame(transposed_beta)
   pca_general <- prcomp(transposed_beta, center=TRUE)
@@ -399,9 +395,8 @@ clustering <- function(pheno, condition1, condition2, betas) {
   output <- paste(condition1, condition2, sep="-")
   title <- paste(output, "_betas", sep="")
   output_path <- paste(output_dir, title, sep="")
-  #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
+  jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
   plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=sample_group)) +theme_bw() + geom_point(aes(shape=collection), alpha=0.5, size=2) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
-  #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
   print(plot)
   #dev.off()
   #Converting NAs to 0 in donor_age
@@ -431,8 +426,8 @@ clustering <- function(pheno, condition1, condition2, betas) {
   # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
   # #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
   # print(plot)
-  # #dev.off()
-  return('Clustering\n')
+  dev.off()
+  return('Clustering done\n')
 }
 
 # clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
@@ -445,12 +440,12 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
+#Vector of comparisons
 comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
 
+#Loading in relevant annotation file
 library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
-library(lumi) #beta to m
-
 
 for (comp in comparisons) {
   cat("Identify CpGs\n")
@@ -492,98 +487,56 @@ for (comp in comparisons) {
   
   pheno <- rbind(pheno1, pheno2)
   print(dim(pheno))
-  print(pheno)
+  
+  m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
+  m_values_condition <- as.matrix(m_values_condition)
   
   if (comp == 'DD_HI_L1-DD_HI_L2') {
-    condition <- factor(pheno$collection)
-    cols <- c("L1", "L2")
+    condition <- pheno$collection
   } else if (comp == 'DD_HI_L1-DD_LI_L1') {
-    condition <- factor(pheno$sample_group)
-    cols <- c("Low", "High")
+    condition <- pheno$sample_group
   } else if (comp == 'DD_HI_L1-LD_LI_L1') {
-    condition <- factor(pheno$sample_group)
-    cols <- c("Low", "High")
+    condition <- pheno$sample_group
   } else if (comp == 'DD_HI_L2-DD_LI_L2') {
-    condition <- factor(pheno$sample_group)
-    cols <- c("Low", "High")
+    condition <- pheno$sample_group
   } else if (comp == 'DD_HI_L2-LD_LI_L2') {
-    condition <- factor(pheno$sample_group)
-    cols <- c("Low", "High")
+    condition <- pheno$sample_group
   } else if (comp == 'DD_LI_L1-DD_LI_L2') {
-    condition <- factor(pheno$collection)
-    cols <- c("L1", "L2")
+    condition <- pheno$collection
   } else if (comp == 'DD_LI_L1-LD_LI_L1') {
-    condition <- factor(pheno$donor_type)
-    cols <- c("DD", "LD")
+    condition <- pheno$donor_type
   } else if (comp == 'DD_LI_L2-LD_LI_L2') {
-    condition <- factor(pheno$donor_type)
-    cols <- c("DD", "LD")
+    condition <- pheno$donor_type
   } else if (comp == 'LD_LI_L1-LD_LI_L2') {
-    condition <- factor(pheno$collection)
-    cols <- c("L1", "L2")
+    condition <- pheno$collection
   }
   
-  beta_values_condition <-  beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
-  m_values_condition <- beta2m(beta_values_condition)
-  print(dim(m_values_condition))
-  
-  cat("Identify DMPs\n")
-  design <- model.matrix(~0+condition, data=pheno)  
-  #print(design)
-  colnames(design) <- cols
-  fit1 <- lmFit(m_values_condition, design)
-  
-  if (comp == 'DD_HI_L1-DD_HI_L2') {
-    contMatrix <- makeContrasts(L1-L2, levels=design)
-  } else if (comp == 'DD_HI_L1-DD_LI_L1') {
-    contMatrix <- makeContrasts(Low-High, levels=design)
-  } else if (comp == 'DD_HI_L1-LD_LI_L1') {
-    contMatrix <- makeContrasts(Low-High, levels=design)
-  } else if (comp == 'DD_HI_L2-DD_LI_L2') {
-    contMatrix <- makeContrasts(Low-High, levels=design)
-  } else if (comp == 'DD_HI_L2-LD_LI_L2') {
-    contMatrix <- makeContrasts(Low-High, levels=design)
-  } else if (comp == 'DD_LI_L1-DD_LI_L2') {
-    contMatrix <- makeContrasts(L1-L2, levels=design)
-  } else if (comp == 'DD_LI_L1-LD_LI_L1') {
-    contMatrix <- makeContrasts(DD-LD, levels=design)
-  } else if (comp == 'DD_LI_L2-LD_LI_L2') {
-    contMatrix <- makeContrasts(DD-LD, levels=design)
-  } else if (comp == 'LD_LI_L1-LD_LI_L2') {
-    contMatrix <- makeContrasts(L1-L2, levels=design)
-  }
-  
-  fit2 <- contrasts.fit(fit1, contMatrix)
-  fit2 <- eBayes(fit2)
-  
-  #summary(decideTests(fit2))
+  DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical")
+
   ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
-  DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
-  output <- paste(output_dir, comp, sep="")
-  write.csv(DMPs, file = paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
-  #plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
+  ann450kSub <- data.frame(ann450kSub)
+  
+  DMPs <- merge(DMPs, ann450kSub, by = "row.names")
+  
+  DMPs$probes <- DMPs$Row.names
+  DMPs <- DMPs[,c(ncol(DMPs), 2:(ncol(DMPs)-1))]
+  
+  output <- paste(comp, "_DMPs.csv", sep="")
+  write.csv(DMPs, file = paste(output_dir, output, sep=""), row.names = FALSE)
   
   #Manhattan plot using the DMPs
   cat("Generating manhattan plot from DMPs\n")
   library(qqman)
   library(DMRcate)
-  title <- paste(output, " (Adj. P-val)", sep="")
+  title <- paste(comp, " (Adj. P-val)", sep="")
   col=c("black","grey")
   DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
   DMPs$chr = as.numeric(DMPs$chr)
   DMPs$pos = as.numeric(DMPs$pos)
-  jpeg(paste(output, "_manhattan.jpeg", sep=""), quality = 90)
+  output <- paste(comp, "_manhattan.jpeg", sep="")
+  jpeg(paste(output_dir, output, sep=""), quality = 90)
   manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
-  
-  # myAnnotation <- cpg.annotate(object = as.matrix(m_values), datatype = "array", what = "M",
-  #                              analysis.type = "differential", design = design, 
-  #                              contrasts = TRUE, cont.matrix = contMatrix,
-  #                              coef = "Low - High", arraytype = "450K")
-  # 
-  # DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-  # results.ranges <- extractRanges(DMRs, genome = "hg19")
-  # write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
 }
 
 q()
