@@ -440,12 +440,74 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
-#Vector of comparisons
-comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
-
 #Loading in relevant annotation file
 library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
+
+#Addition of condition column 
+pheno_df$condition <- 'NA'
+
+for (row in 1:nrow(pheno_df)) {
+  if (pheno_df[row, 'donor_type'] == 'DD' & pheno_df[row, 'sample_group'] == 'High' &  pheno_df[row, 'collection'] == 'L1') {
+    pheno_df[row, 'condition'] <- "DD_HI_L1"
+  } else if (pheno_df[row, 'donor_type'] == 'DD' & pheno_df[row, 'sample_group'] == 'High' &  pheno_df[row, 'collection'] == 'L2') {
+    pheno_df[row, 'condition'] <- "DD_HI_L2"
+  } else if (pheno_df[row, 'donor_type'] == 'DD' & pheno_df[row, 'sample_group'] == 'Low' &  pheno_df[row, 'collection'] == 'L1') {
+    pheno_df[row, 'condition'] <- "DD_LI_L1"
+  } else if (pheno_df[row, 'donor_type'] == 'DD' & pheno_df[row, 'sample_group'] == 'Low' &  pheno_df[row, 'collection'] == 'L2') {
+    pheno_df[row, 'condition'] <- "DD_LI_L2"
+  } else if (pheno_df[row, 'donor_type'] == 'LD' & pheno_df[row, 'sample_group'] == 'Low' &  pheno_df[row, 'collection'] == 'L1') {
+    pheno_df[row, 'condition'] <- "LD_LI_L1"
+  } else if (pheno_df[row, 'donor_type'] == 'LD' & pheno_df[row, 'sample_group'] == 'Low' &  pheno_df[row, 'collection'] == 'L2') {
+    pheno_df[row, 'condition'] <- "LD_LI_L2"
+  }
+}
+
+# Probe-wise differential methylation analysis
+condition <- factor(pheno_df$condition)
+
+# create design matrix
+design <- model.matrix(~0+condition, data=pheno_df)
+colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
+
+# fit the linear model 
+fit1 <- lmFit(m_values, design)
+# create a contrast matrix for specific comparisons
+contMatrix <- makeContrasts(DD_HI_L1-DD_HI_L2,
+                            DD_HI_L1-DD_LI_L1,
+                            DD_HI_L1-LD_LI_L1,
+                            DD_HI_L2-DD_LI_L2,
+                            DD_HI_L2-LD_LI_L2,
+                            DD_LI_L1-DD_LI_L2,
+                            DD_LI_L1-LD_LI_L1,
+                            DD_LI_L2-LD_LI_L2,
+                            LD_LI_L1-LD_LI_L2,
+                            levels=design)
+
+contMatrix
+
+# fit the contrasts
+fit2 <- contrasts.fit(fit1, contMatrix)
+fit2 <- eBayes(fit2)
+
+#topTable(fit2, adjust="BH")
+
+# look at the numbers of DM CpGs at FDR < 0.05
+summary(decideTests(fit2))
+
+ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name),
+                      c(1:4,12:19,24:ncol(ann450k))]
+
+DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
+#write.table(DMPs, file="DMP_DD_HI_L1-DD_HI_L2.csv", sep=",", row.names=FALSE)
+
+DMPs_sig <- DMPs[(DMPs$adj.P.Val < 0.05),]
+print(dim(DMPs_sig))
+
+q()
+
+#Vector of comparisons
+comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
 
 for (comp in comparisons) {
   cat("Identify CpGs\n")
