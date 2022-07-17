@@ -511,9 +511,9 @@ for (comp in comparisons) {
     condition <- pheno$collection
   }
   
-  DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical")
+  DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical", shrinkVar = TRUE)
   DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
-  DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
+  DMPs_sig <- DMPs[(DMPs$qval < 0.05),]
   print(dim(DMPs_sig))
 
   ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
