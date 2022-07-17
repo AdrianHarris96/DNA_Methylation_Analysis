@@ -498,122 +498,84 @@ summary(decideTests(fit2))
 ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name),
                       c(1:4,12:19,24:ncol(ann450k))]
 
-DMPs <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
-#write.table(DMPs, file="DMP_DD_HI_L1-DD_HI_L2.csv", sep=",", row.names=FALSE)
+DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
+output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
+write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
+print(dim(DMPs1_sig))
+output <- "DD_HI_L1-DD_HI_L2_DMPs_sig.csv"
+write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 
-DMPs_sig <- DMPs[(DMPs$adj.P.Val < 0.05),]
-print(dim(DMPs_sig))
 
-q()
+DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=ann450kSub)
+output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
+write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
+print(dim(DMPs2_sig))
+output <- "DD_HI_L1-DD_LI_L1_DMPs_sig.csv"
+write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 
-#Vector of comparisons
-comparisons <- c('DD_HI_L1-DD_HI_L2', 'DD_HI_L1-DD_LI_L1', 'DD_HI_L1-LD_LI_L1', 'DD_HI_L2-DD_LI_L2', 'DD_HI_L2-LD_LI_L2', 'DD_LI_L1-DD_LI_L2', 'DD_LI_L1-LD_LI_L1', 'DD_LI_L2-LD_LI_L2', 'LD_LI_L1-LD_LI_L2')
+DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=ann450kSub)
+output <- "DD_HI_L1-LD_LI_L1_DMPs.csv"
+write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
+print(dim(DMPs3_sig))
+output <- "DD_HI_L1-LD_LI_L1_DMPs_sig.csv"
+write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 
-for (comp in comparisons) {
-  cat("Identify CpGs\n")
-  cond <- unlist(strsplit(comp, "-"))
-  condition1 <- cond[1]
-  condition2 <- cond[2]
-  
-  if (condition1 == "DD_HI_L1") {
-    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L1'),]
-  } else if (condition1 == "DD_HI_L2"){
-    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L2'),]
-  } else if (condition1 == "DD_LI_L1") {
-    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
-  } else if (condition1 == "DD_LI_L2") {
-    pheno1 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
-  } else if (condition1 == "LD_LI_L1") {
-    pheno1 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
-  } else if (condition1 == "LD_LI_L2") {
-    pheno1 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
-  } else {
-    cat('Comparison does not exist\n')
-  }
-  
-  if (condition2 == "DD_HI_L1") {
-    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L1'),]
-  } else if (condition2 == "DD_HI_L2"){
-    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'High' & pheno_df$collection == 'L2'),]
-  } else if (condition2 == "DD_LI_L1") {
-    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
-  } else if (condition2 == "DD_LI_L2") {
-    pheno2 <- pheno_df[(pheno_df$donor_type == 'DD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
-  } else if (condition2 == "LD_LI_L1") {
-    pheno2 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L1'),]
-  } else if (condition2 == "LD_LI_L2") {
-    pheno2 <- pheno_df[(pheno_df$donor_type == 'LD' & pheno_df$sample_group == 'Low' & pheno_df$collection == 'L2'),]
-  } else {
-    cat('Comparison does not exist\n')
-  }
-  
-  pheno <- rbind(pheno1, pheno2)
-  #print(dim(pheno))
-  
-  m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
-  m_values_condition <- as.matrix(m_values_condition)
-  
-  if (comp == 'DD_HI_L1-DD_HI_L2') {
-    condition <- pheno$collection
-  } else if (comp == 'DD_HI_L1-DD_LI_L1') {
-    condition <- pheno$sample_group
-  } else if (comp == 'DD_HI_L1-LD_LI_L1') {
-    condition <- pheno$sample_group
-  } else if (comp == 'DD_HI_L2-DD_LI_L2') {
-    condition <- pheno$sample_group
-  } else if (comp == 'DD_HI_L2-LD_LI_L2') {
-    condition <- pheno$sample_group
-  } else if (comp == 'DD_LI_L1-DD_LI_L2') {
-    condition <- pheno$collection
-  } else if (comp == 'DD_LI_L1-LD_LI_L1') {
-    condition <- pheno$donor_type
-  } else if (comp == 'DD_LI_L2-LD_LI_L2') {
-    condition <- pheno$donor_type
-  } else if (comp == 'LD_LI_L1-LD_LI_L2') {
-    condition <- pheno$collection
-  }
-  
-  DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical")
-  DMPs$adj_p <- p.adjust(DMPs$pval, method="bonferroni")
-  print(comp)
-  DMPs_sig <- DMPs[(DMPs$pval < 0.05),]
-  print(dim(DMPs_sig))
-  DMPs_sig <- DMPs[(DMPs$qval < 0.05),]
-  print(dim(DMPs_sig))
-  DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
-  print(dim(DMPs_sig))
-  
-  print(comp)
-  keep <- (sampleNames(gmtSet) %in% pheno$Basename)
-  table(keep)
-  example <- gmtSet[,keep]
-  m <- getM(example)
-  DMPs <- dmpFinder(m, pheno=condition, type = "categorical")
-  DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
-  print(comp)
-  DMPs_sig <- DMPs[(DMPs$pval < 0.05),]
-  print(dim(DMPs_sig))
-  DMPs_sig <- DMPs[(DMPs$qval < 0.05),]
-  print(dim(DMPs_sig))
-  DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
-  print(dim(DMPs_sig))
-  
+DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=ann450kSub)
+output <- "DD_HI_L2-DD_LI_L2_DMPs.csv"
+write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
+print(dim(DMPs4_sig))
+output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
+write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 
-  ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
-  ann450kSub <- data.frame(ann450kSub)
-  
-  DMPs <- merge(DMPs, ann450kSub, by = "row.names")
-  
-  DMPs$probes <- DMPs$Row.names
-  DMPs <- DMPs[,c(ncol(DMPs), 2:(ncol(DMPs)-1))]
-  
-  #output <- paste(comp, "_DMPs.csv", sep="")
-  #write.csv(DMPs, file = paste(output_dir, output, sep=""), row.names = FALSE)
-  
+DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
+output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
+write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05),]
+print(dim(DMPs5_sig))
+output <- "DD_LI_L1-DD_LI_L2_DMPs_sig.csv"
+write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+
+DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
+output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
+write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05),]
+print(dim(DMPs6_sig))
+output <- "DD_HI_L2-LD_LI_L2_DMPs_sig.csv"
+write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+
+DMPs7 <- topTable(fit2, num=Inf, coef=7, genelist=ann450kSub)
+output <- "DD_LI_L1-LD_LI_L1_DMPs.csv"
+write.csv(DMPs7, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs7_sig <- DMPs7[(DMPs7$adj.P.Val < 0.05),]
+print(dim(DMPs7_sig))
+output <- "DD_LI_L1-LD_LI_L1_DMPs_sig.csv"
+write.csv(DMPs7_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+
+DMPs8 <- topTable(fit2, num=Inf, coef=8, genelist=ann450kSub)
+output <- "DD_LI_L2-LD_LI_L2_DMPs.csv"
+write.csv(DMPs8, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs8_sig <- DMPs8[(DMPs8$adj.P.Val < 0.05),]
+print(dim(DMPs8_sig))
+output <- "DD_LI_L2-LD_LI_L2_DMPs_sig.csv"
+write.csv(DMPs8_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+
+DMPs9<- topTable(fit2, num=Inf, coef=9, genelist=ann450kSub)
+output <- "LD_LI_L1-LD_LI_L2_DMPs.csv"
+write.csv(DMPs9, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+DMPs9_sig <- DMPs9[(DMPs9$adj.P.Val < 0.05),]
+print(dim(DMPs9_sig))
+output <- "LD_LI_L1-LD_LI_L2_DMPs_sig.csv"
+write.csv(DMPs9_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+
+library(qqman)
+library(DMRcate)
+generate_man(DMPs, comp) {
   #Manhattan plot using the DMPs
   cat("Generating manhattan plot from DMPs\n")
-  library(qqman)
-  library(DMRcate)
   title <- paste(comp, " (Adj. P-val)", sep="")
   col=c("black","grey")
   DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
@@ -621,9 +583,20 @@ for (comp in comparisons) {
   DMPs$pos = as.numeric(DMPs$pos)
   output <- paste(comp, "_manhattan.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 90)
-  manhattan(DMPs, chr="chr", bp="pos",, p="adj_p", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
+  return("Done with manhattan plot\n")
 }
+
+generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
+generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
+generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
+generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
+generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
+generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
+generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
+generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
+generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
 
 q()
 
