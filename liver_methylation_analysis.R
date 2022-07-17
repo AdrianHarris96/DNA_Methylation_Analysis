@@ -488,8 +488,8 @@ for (comp in comparisons) {
   pheno <- rbind(pheno1, pheno2)
   print(dim(pheno))
   
-  betas_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
-  betas_condition <- as.matrix(betas_condition)
+  m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
+  m_values_condition <- as.matrix(m_values_condition)
   
   if (comp == 'DD_HI_L1-DD_HI_L2') {
     condition <- pheno$collection
@@ -511,12 +511,12 @@ for (comp in comparisons) {
     condition <- pheno$collection
   }
   
-  DMPs <- dmpFinder(betas_condition, pheno=condition, type = "categorical")
-  DMPs$adj_p <- p.adjust(DMPs$pval, method="bonferroni")
+  DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical")
+  DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
   DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
   print(dim(DMPs_sig))
 
-  ann450kSub <- ann450k[match(rownames(betas_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
+  ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
   ann450kSub <- data.frame(ann450kSub)
   
   DMPs <- merge(DMPs, ann450kSub, by = "row.names")
