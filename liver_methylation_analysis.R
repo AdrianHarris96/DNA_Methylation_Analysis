@@ -512,6 +512,7 @@ for (comp in comparisons) {
   }
   
   DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical")
+  DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
 
   ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
   ann450kSub <- data.frame(ann450kSub)
@@ -535,7 +536,7 @@ for (comp in comparisons) {
   DMPs$pos = as.numeric(DMPs$pos)
   output <- paste(comp, "_manhattan.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 90)
-  manhattan(DMPs, chr="chr", bp="pos",, p="qval", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  manhattan(DMPs, chr="chr", bp="pos",, p="adj_p", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
 }
 
