@@ -334,7 +334,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   plot(dend, xlab = "Sample ID and Array Type", ylab="Height", main= paste(timepoint, "- Array Type Dendrogram", sep = " "))
   
   dev.off()
-}
+} 
 
 #Loop through parameters to create dendrograms
 # timeList <- c('L1', 'L2', 'L1-L2')
@@ -521,8 +521,8 @@ for (comp in comparisons) {
   DMPs$probes <- DMPs$Row.names
   DMPs <- DMPs[,c(ncol(DMPs), 2:(ncol(DMPs)-1))]
   
-  output <- paste(comp, "_DMPs.csv", sep="")
-  write.csv(DMPs, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  #output <- paste(comp, "_DMPs.csv", sep="")
+  #write.csv(DMPs, file = paste(output_dir, output, sep=""), row.names = FALSE)
   
   #Manhattan plot using the DMPs
   cat("Generating manhattan plot from DMPs\n")
