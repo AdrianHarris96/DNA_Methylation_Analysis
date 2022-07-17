@@ -520,6 +520,22 @@ for (comp in comparisons) {
   print(dim(DMPs_sig))
   DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
   print(dim(DMPs_sig))
+  
+  print(comp)
+  keep <- (sampleNames(gmtSet) %in% pheno$Basename)
+  table(keep)
+  example <- gmtSet[,keep]
+  m <- getM(example, type="beta", betaThreshold = 0.001)
+  DMPs <- dmpFinder(m, pheno=condition, type = "categorical")
+  DMPs$adj_p <- p.adjust(DMPs$pval, method="bonferroni")
+  print(comp)
+  DMPs_sig <- DMPs[(DMPs$pval < 0.05),]
+  print(dim(DMPs_sig))
+  DMPs_sig <- DMPs[(DMPs$qval < 0.05),]
+  print(dim(DMPs_sig))
+  DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
+  print(dim(DMPs_sig))
+  
 
   ann450kSub <- ann450k[match(rownames(m_values_condition),ann450k$Name), c(1:4,12:19,24:ncol(ann450k))]
   ann450kSub <- data.frame(ann450kSub)
