@@ -527,7 +527,7 @@ for (comp in comparisons) {
   example <- gmtSet[,keep]
   m <- getM(example, type="beta", betaThreshold = 0.001)
   DMPs <- dmpFinder(m, pheno=condition, type = "categorical")
-  DMPs$adj_p <- p.adjust(DMPs$pval, method="bonferroni")
+  DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
   print(comp)
   DMPs_sig <- DMPs[(DMPs$pval < 0.05),]
   print(dim(DMPs_sig))
