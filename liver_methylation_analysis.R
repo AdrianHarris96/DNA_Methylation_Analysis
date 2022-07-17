@@ -535,7 +535,7 @@ for (comp in comparisons) {
   DMPs$pos = as.numeric(DMPs$pos)
   output <- paste(comp, "_manhattan.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 90)
-  manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  manhattan(DMPs, chr="chr", bp="pos",, p="qval", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
 }
 
