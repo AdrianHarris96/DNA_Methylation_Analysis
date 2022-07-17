@@ -525,7 +525,7 @@ for (comp in comparisons) {
   keep <- (sampleNames(gmtSet) %in% pheno$Basename)
   table(keep)
   example <- gmtSet[,keep]
-  m <- getM(example, type="beta", betaThreshold = 0.001)
+  m <- getM(example)
   DMPs <- dmpFinder(m, pheno=condition, type = "categorical")
   DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
   print(comp)
