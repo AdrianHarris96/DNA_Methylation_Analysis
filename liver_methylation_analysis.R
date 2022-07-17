@@ -512,7 +512,7 @@ for (comp in comparisons) {
   }
   
   DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical", shrinkVar = TRUE)
-  DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
+  DMPs$adj_p <- p.adjust(DMPs$pval, method="BY")
   print(comp)
   DMPs_sig <- DMPs[(DMPs$pval < 0.05),]
   print(dim(DMPs_sig))
