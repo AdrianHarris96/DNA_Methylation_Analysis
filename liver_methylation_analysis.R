@@ -486,7 +486,7 @@ for (comp in comparisons) {
   }
   
   pheno <- rbind(pheno1, pheno2)
-  print(dim(pheno))
+  #print(dim(pheno))
   
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   m_values_condition <- as.matrix(m_values_condition)
@@ -513,6 +513,7 @@ for (comp in comparisons) {
   
   DMPs <- dmpFinder(m_values_condition, pheno=condition, type = "categorical", shrinkVar = TRUE)
   DMPs$adj_p <- p.adjust(DMPs$pval, method="BH")
+  print(comp)
   DMPs_sig <- DMPs[(DMPs$pval < 0.05),]
   print(dim(DMPs_sig))
   DMPs_sig <- DMPs[(DMPs$adj_p < 0.05),]
