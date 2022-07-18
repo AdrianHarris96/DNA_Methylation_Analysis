@@ -15,7 +15,7 @@ git_dir = args[3]
 output_dir = args[4]
 
 #Local Machine
-# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
 # base_dir = '/Users/adrianharris/Desktop/liver/'
 # git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
 # output_dir = '/Users/adrianharris/Desktop/liver/'
@@ -160,8 +160,7 @@ if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
 
 #Load betas or map to genome-generate betas
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
-  cat('Loading beta_values\n')
-  beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
+  cat('beta_values exists\n')
 } else {
   cat('Converting to Genomic Methyl Set\n')
   rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
@@ -447,6 +446,7 @@ ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 #Addition of condition column 
 pheno_df$condition <- 'NA'
 
+#Filling the condition column
 for (row in 1:nrow(pheno_df)) {
   if (pheno_df[row, 'donor_type'] == 'DD' & pheno_df[row, 'sample_group'] == 'High' &  pheno_df[row, 'collection'] == 'L1') {
     pheno_df[row, 'condition'] <- "DD_HI_L1"
@@ -498,6 +498,7 @@ summary(decideTests(fit2))
 ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name),
                       c(1:4,12:19,24:ncol(ann450k))]
 
+#Identifying and writing output for DMPs
 DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
 output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
 write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -505,7 +506,6 @@ DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
 print(dim(DMPs1_sig))
 output <- "DD_HI_L1-DD_HI_L2_DMPs_sig.csv"
 write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-
 
 DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=ann450kSub)
 output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
