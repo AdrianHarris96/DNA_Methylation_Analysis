@@ -15,7 +15,7 @@ git_dir = args[3]
 output_dir = args[4]
 
 #Local Machine
-#pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
 # base_dir = '/Users/adrianharris/Desktop/liver/'
 # git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
 # output_dir = '/Users/adrianharris/Desktop/liver/'
@@ -92,13 +92,6 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   #Plotting 450K barplot 
   jpeg(paste(output_dir, "p_values450k.jpeg", sep=""), quality = 90)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
-  legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
-         cex=0.27, bty = "n", bg="white")
-  dev.off()
-  
-  #Plotting EPIC barplot
-  jpeg(paste(output_dir, "p_valuesEPIC.jpeg", sep=""), quality = 90)
-  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
   legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   dev.off()
