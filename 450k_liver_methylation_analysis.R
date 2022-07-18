@@ -44,7 +44,6 @@ for (row in 1:nrow(pheno_df)) {
 }
 
 nrow(subset(pheno_df, array_type == '450K'))
-nrow(subset(pheno_df, array_type == 'EPIC'))
 
 #Split into phenotype file 
 pheno450k <- pheno_df[!(pheno_df$array_type == 'EPIC'),]
@@ -590,4 +589,3 @@ generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
 generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
 
 q()
-
