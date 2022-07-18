@@ -573,7 +573,7 @@ write.csv(DMPs9_sig, file = paste(output_dir, output, sep=""), row.names = FALSE
 
 library(qqman)
 library(DMRcate)
-generate_man(DMPs, comp) {
+generate_man <- function(DMPs, comp) {
   #Manhattan plot using the DMPs
   cat("Generating manhattan plot from DMPs\n")
   title <- paste(comp, " (Adj. P-val)", sep="")
