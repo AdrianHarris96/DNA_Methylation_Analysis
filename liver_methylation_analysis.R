@@ -467,7 +467,6 @@ get_deltaBeta <- function(cond1, cond2) {
   betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_name)]
   print(dim(betas_condition))
   betas_condition$deltaBeta <- rowMeans(betas_condition)
-  print(betas_condition$deltaBeta)
   betas_condition$Name <- row.names(betas_condition)
   betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
   return(betas_condition)
