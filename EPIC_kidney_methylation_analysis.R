@@ -418,7 +418,7 @@ generate_dendro <- function(beta, pheno, timepoint){
 #Function for generating manhattan plots
 library(qqman)
 library(DMRcate)
-generate_man <- function(DMPs, comp) {
+generate_man <- function(DMPs, comp, status) {
   #Manhattan plot using the DMPs
   cat("Generating manhattan plot from DMPs\n")
   title <- paste(comp, " (Adj. P-val)", sep="")
@@ -431,10 +431,11 @@ generate_man <- function(DMPs, comp) {
   manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
   DMPs[is.na(DMPs)] = 0
-  title <- paste(comp, " (deltaBetas)", sep="")
-  output <- paste(comp, "_manhattan_deltas.jpeg", sep="")
+  title <- paste(comp, status, sep="-")
+  title_fig <- paste(title, " (deltaBetas)", sep="")
+  output <- paste(title, "_manhattan_deltas.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 100)
-  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.2), main=title)
+  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.2), main=title_fig)
   dev.off()
   return("Done with manhattan plot")
 }
@@ -536,11 +537,11 @@ for (outcome in eGFR_List) {
   deltaBeta_df <- get_deltaBeta("K1_Low", "K1_High")[[1]]
   sample_num <- get_deltaBeta("K1_Low", "K1_High")[[2]]
   DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
-  output <- "K1_Low-K1_High_DMPs.csv"
+  output <- paste(outcome, "K1_Low-K1_High_DMPs.csv", sep="-")
   write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.2),]
   print(dim(DMPs1_sig))
-  output <- "K1_Low-K1_High_DMPs_sig.csv"
+  output <- paste(outcome, "K1_Low-K1_High_DMPs_sig.csv", sep = "-")
   write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_Low-K1_High", sample_num, nrow(DMPs1_sig))
   
@@ -549,11 +550,11 @@ for (outcome in eGFR_List) {
   deltaBeta_df <- get_deltaBeta("K2_Low", "K2_High")[[1]]
   sample_num <- get_deltaBeta("K2_Low", "K2_High")[[2]]
   DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
-  output <- "K2_Low-K2_High_DMPs.csv"
+  output <- paste(outcome, "K2_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.2),]
   print(dim(DMPs2_sig))
-  output <- "K2_Low-K2_High_DMPs_sig.csv"
+  output <- paste(outcome, "K2_Low-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K2_Low-K2_High", sample_num, nrow(DMPs2_sig))
   
@@ -562,11 +563,11 @@ for (outcome in eGFR_List) {
   deltaBeta_df <- get_deltaBeta("K1_High", "K2_High")[[1]]
   sample_num <- get_deltaBeta("K1_High", "K2_High")[[2]]
   DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
-  output <- "K1_High-K2_High_DMPs.csv"
+  output <- paste(outcome, "K1_High-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.2),]
   print(dim(DMPs3_sig))
-  output <- "K1_High-K2_High_DMPs_sig.csv"
+  output <- paste(outcome, "K1_High-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_High-K2_High", sample_num, nrow(DMPs3_sig))
   
@@ -575,11 +576,11 @@ for (outcome in eGFR_List) {
   deltaBeta_df <- get_deltaBeta("K2_Low", "K2_Low")[[1]]
   sample_num <- get_deltaBeta("K2_Low", "K2_Low")[[2]]
   DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
-  output <- "K1_Low-K2_Low_DMPs.csv"
+  output <- paste(outcome, "K1_Low-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.2),]
   print(dim(DMPs4_sig))
-  output <- "K1_Low-K2_Low_DMPs_sig.csv"
+  output <- paste(outcome, "K1_Low-K2_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_Low-K2_Low", sample_num, nrow(DMPs4_sig))
   
@@ -588,11 +589,11 @@ for (outcome in eGFR_List) {
   deltaBeta_df <- get_deltaBeta("K1_High", "K2_Low")[[1]]
   sample_num <- get_deltaBeta("K1_High", "K2_Low")[[2]]
   DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
-  output <- "K1_High-K2_Low_DMPs.csv"
+  output <- paste(outcome, "K1_High-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.2),]
   print(dim(DMPs5_sig))
-  output <- "K1_High-K2_Low_DMPs_sig.csv"
+  output <- paste(outcome, "K1_High-K2_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_High-K2_Low", sample_num, nrow(DMPs5_sig))
   
@@ -601,23 +602,23 @@ for (outcome in eGFR_List) {
   deltaBeta_df <- get_deltaBeta("K1_Low", "K2_High")[[1]]
   sample_num <- get_deltaBeta("K1_Low", "K2_High")[[2]]
   DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
-  output <- "K1_Low-K2_High_DMPs.csv"
+  output <- paste(outcome, "K1_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.2),]
   print(dim(DMPs6_sig))
-  output <- "K1_Low-K2_High_DMPs_sig.csv"
+  output <- paste(outcome, "K1_Low-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_Low-K2_High", sample_num, nrow(DMPs6_sig))
   
   final_title <- paste(outcome, "_EPIC_kidney_log.csv", sep="")
   write.csv(log_df, file = paste(output_dir, final_title, sep=""), row.names = FALSE)
   
-  generate_man(DMPs1, 'K1_Low-K1_High')
-  generate_man(DMPs2, 'K2_Low-K2_High')
-  generate_man(DMPs3, 'K1_High-K2_High')
-  generate_man(DMPs4, 'K1_Low-K2_Low')
-  generate_man(DMPs5, 'K1_High-K2_Low')
-  generate_man(DMPs6, 'DK1_Low-K2_High')
+  generate_man(DMPs1, 'K1_Low-K1_High', outcome)
+  generate_man(DMPs2, 'K2_Low-K2_High', outcome)
+  generate_man(DMPs3, 'K1_High-K2_High', outcome)
+  generate_man(DMPs4, 'K1_Low-K2_Low', outcome)
+  generate_man(DMPs5, 'K1_High-K2_Low', outcome)
+  generate_man(DMPs6, 'DK1_Low-K2_High', outcome)
 
 }
 
