@@ -468,9 +468,7 @@ get_deltaBeta <- function(cond1, cond2) {
   betas_condition$deltaBeta <- rowMeans(betas_condition)
   betas_condition$Name <- row.names(betas_condition)
   betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
-  sample_number <- nrow(pheno_condition)
-  returnlist <- list(a = betas_condition, b = sample_number)
-  return(returnlist)
+  return(betas_condition)
 }
 
 log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
@@ -537,8 +535,8 @@ ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name),
 #Identifying and writing output for DMPs
 DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
 DMPs1 <- data.frame(DMPs1)
-deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == 'DD_HI_L1' | condition == 'DD_HI_L2')))
 DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
 write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -550,8 +548,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_HI_L2", sample_num, nrow(DMPs1_sig))
 
 DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=ann450kSub)
 DMPs2 <- data.frame(DMPs2)
-deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L1" | condition == "DD_LI_L1")))
 DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
 write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -563,8 +561,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_LI_L1", sample_num, nrow(DMPs2_sig))
 
 DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=ann450kSub)
 DMPs3 <- data.frame(DMPs3)
-deltaBeta_df <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L1" | condition == "LD_LI_L1")))
 DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -576,8 +574,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-LD_LI_L1", sample_num, nrow(DMPs3_sig))
 
 DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=ann450kSub)
 DMPs4 <- data.frame(DMPs4)
-deltaBeta_df <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "DD_LI_L2")))
 DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-DD_LI_L2_DMPs.csv"
 write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -589,8 +587,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
 DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
 DMPs5 <- data.frame(DMPs5)
-deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "DD_LI_L2")))
 DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
 write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -602,8 +600,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-DD_LI_L2", sample_num, nrow(DMPs5_sig))
 
 DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
 DMPs6 <- data.frame(DMPs6)
-deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "LD_LI_L2")))
 DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -615,8 +613,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-LD_LI_L2", sample_num, nrow(DMPs6_sig))
 
 DMPs7 <- topTable(fit2, num=Inf, coef=7, genelist=ann450kSub)
 DMPs7 <- data.frame(DMPs7)
-deltaBeta_df <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[1]]
-sample_num <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "LD_LI_L1")))
 DMPs7 <- merge(DMPs7, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs7, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -628,8 +626,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-LD_LI_L1", sample_num, nrow(DMPs7_sig))
 
 DMPs8 <- topTable(fit2, num=Inf, coef=8, genelist=ann450kSub)
 DMPs8 <- data.frame(DMPs8)
-deltaBeta_df <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L2" | condition == "LD_LI_L2")))
 DMPs8 <- merge(DMPs8, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs8, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -641,8 +639,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_LI_L2-LD_LI_L2", sample_num, nrow(DMPs8_sig))
 
 DMPs9<- topTable(fit2, num=Inf, coef=9, genelist=ann450kSub)
 DMPs9 <- data.frame(DMPs9)
-deltaBeta_df <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "LD_LI_L1" | condition == "LD_LI_L2")))
 DMPs9 <- merge(DMPs9, deltaBeta_df, by = 'Name')
 output <- "LD_LI_L1-LD_LI_L2_DMPs.csv"
 write.csv(DMPs9, file = paste(output_dir, output, sep=""), row.names = FALSE) 
