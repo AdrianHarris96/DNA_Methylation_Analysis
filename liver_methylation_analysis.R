@@ -15,7 +15,7 @@ git_dir = args[3]
 output_dir = args[4]
 
 #Local Machine
-pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
+# pheno_file = '/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv'
 # base_dir = '/Users/adrianharris/Desktop/liver/'
 # git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
 # output_dir = '/Users/adrianharris/Desktop/liver/'
