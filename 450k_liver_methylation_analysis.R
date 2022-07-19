@@ -526,7 +526,7 @@ sample_num <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[2]]
 DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
 write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1_sig$deltaBeta > 0.2),]
+DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.2),]
 print(dim(DMPs1_sig))
 output <- "DD_HI_L1-DD_HI_L2_DMPs_sig.csv"
 write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -539,7 +539,7 @@ sample_num <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[2]]
 DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
 write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2_sig$deltaBeta > 0.2),]
+DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.2),]
 print(dim(DMPs2_sig))
 output <- "DD_HI_L1-DD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -552,7 +552,7 @@ sample_num <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[2]]
 DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3_sig$deltaBeta > 0.2),]
+DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.2),]
 print(dim(DMPs3_sig))
 output <- "DD_HI_L1-LD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -565,7 +565,7 @@ sample_num <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[2]]
 DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-DD_LI_L2_DMPs.csv"
 write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4_sig$deltaBeta > 0.2),]
+DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.2),]
 print(dim(DMPs4_sig))
 output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -578,7 +578,7 @@ sample_num <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[2]]
 DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
 write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5_sig$deltaBeta > 0.2),]
+DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.2),]
 print(dim(DMPs5_sig))
 output <- "DD_LI_L1-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -591,7 +591,7 @@ sample_num <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[2]]
 DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6_sig$deltaBeta > 0.2),]
+DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.2),]
 print(dim(DMPs6_sig))
 output <- "DD_HI_L2-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -604,7 +604,7 @@ sample_num <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[2]]
 DMPs7 <- merge(DMPs7, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs7, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs7_sig <- DMPs7[(DMPs7$adj.P.Val < 0.05 & DMPs7_sig$deltaBeta > 0.2),]
+DMPs7_sig <- DMPs7[(DMPs7$adj.P.Val < 0.05 & DMPs7$deltaBeta > 0.2),]
 print(dim(DMPs7_sig))
 output <- "DD_LI_L1-LD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs7_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -617,7 +617,7 @@ sample_num <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[2]]
 DMPs8 <- merge(DMPs8, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs8, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs8_sig <- DMPs8[(DMPs8$adj.P.Val < 0.05 & DMPs8_sig$deltaBeta > 0.2),]
+DMPs8_sig <- DMPs8[(DMPs8$adj.P.Val < 0.05 & DMPs8$deltaBeta > 0.2),]
 print(dim(DMPs8_sig))
 output <- "DD_LI_L2-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs8_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -630,7 +630,7 @@ sample_num <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[2]]
 DMPs9 <- merge(DMPs9, deltaBeta_df, by = 'Name')
 output <- "LD_LI_L1-LD_LI_L2_DMPs.csv"
 write.csv(DMPs9, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs9_sig <- DMPs9[(DMPs9$adj.P.Val < 0.05 & DMPs9_sig$deltaBeta > 0.2),]
+DMPs9_sig <- DMPs9[(DMPs9$adj.P.Val < 0.05 & DMPs9$deltaBeta > 0.2),]
 print(dim(DMPs9_sig))
 output <- "LD_LI_L1-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs9_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
