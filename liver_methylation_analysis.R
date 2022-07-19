@@ -465,6 +465,7 @@ for (col in colnames(newBeta_df)) {
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
   betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_name)]
+  library(fame)
   betas_condition$deltaBeta <- rowMeans(betas_condition)
   print(list(betas_condition$deltaBeta)[3])
   betas_condition$Name <- row.names(betas_condition)
