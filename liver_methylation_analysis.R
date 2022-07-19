@@ -99,14 +99,14 @@ if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
   detP_df <- merge(detP_df, pheno_df, by = 'Basename')
   
   #Plotting 450K barplot 
-  jpeg(paste(output_dir, "p_values450k.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "p_values450k.jpeg", sep=""), quality = 100)
   barplot((subset(detP_df, array_type == '450K'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == '450K'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='450K Array')
   legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   dev.off()
   
   #Plotting EPIC barplot
-  jpeg(paste(output_dir, "p_valuesEPIC.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "p_valuesEPIC.jpeg", sep=""), quality = 100)
   barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$collection)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
   legend("topleft", legend=levels(factor(detP_df$collection)), fill=pal,
          cex=0.27, bty = "n", bg="white")
@@ -126,11 +126,11 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   qc <- data.frame(qc)
   qc['Basename'] <- row.names(qc)
   qc <- merge(qc, pheno_df, by = 'Basename')
-  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 100)
   plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=collection)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot)
   dev.off()
-  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 100)
   densityPlot(mtSet, sampGroups =qc$array_type)
   dev.off()
   rm(mtSet, qc, plot)
@@ -148,17 +148,17 @@ if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   postqc <- data.frame(postqc)
   postqc['Basename'] <- row.names(postqc)
   postqc <- merge(postqc, pheno_df, by = 'Basename')
-  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 100)
   plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=collection)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot2)
   dev.off()
-  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 100)
   densityPlot(mtSet, sampGroups = postqc$array_type)
   dev.off()
   rm(postqc, plot2)
 }
 
-#Load betas or map to genome-generate betas
+#Map to genome-generate betas if necessary 
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('beta_values exists\n')
 } else {
@@ -189,7 +189,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   #Remove probes that located on the X or Y chromosome
   ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
   
-  keep <- !(featureNames(gmtSet) %in% ann450k$Name[ann450k$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
+  keep <- !(featureNames(gmtSet) %in% ann450k$Name[ann450k$chr %in% c("chrX","chrY")]) #remove probes that are of the chrom x or y
   table(keep)
   gmtSet <- gmtSet[keep,]
   print(dim(gmtSet))
@@ -229,7 +229,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   print(dim(beta_values_filtered))
 }
 
-
 #Writing beta to CSV if necessary
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Loading beta CSV\n')
@@ -237,7 +236,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   row.names(beta_values_filtered) <- beta_values_filtered$V1
   beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
 } else {
-  cat('Writing beta to CSV')
+  cat('Writing beta to CSV\n')
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
 }
 
@@ -248,7 +247,7 @@ m_values <- beta2m(beta_values_filtered)
 if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
   cat('Skip writing of m_values\n')
 } else {
-  write.csv(beta_values_filtered, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
 
 #Drop 'methylated' and 'unmethylated' sample names
@@ -439,6 +438,43 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
+#Copying of the betas dataframe
+newBeta_df <- beta_values_filtered
+
+#Adding the collection to the sample_name to introduce consistency 
+for (row in 1:nrow(pheno_df)){
+  sample <- pheno_df[row, 'sample_name']
+  collection <- pheno_df[row, 'collection']
+  new_name <- paste(sample, collection, sep = " ")
+  pheno_df[row, 'sample_name'] <- new_name
+}
+
+#Changing the column names to sample_name
+colnames(newBeta_df) <- pheno_df$sample_name
+
+#Iterate through columns and subtract 
+for (col in colnames(newBeta_df)) {
+  samples <- substr(col,1,nchar(col)-1)
+  sample1 <- paste(samples, "1", sep="")
+  sample2 <- paste(samples, "2", sep="")
+  diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
+  newBeta_df[col] <- diff
+} #This will be later used during the identification of DMPs
+
+#Calculating average delta beta per comparison
+get_deltaBeta <- function(cond1, cond2) {
+  pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
+  betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_id)]
+  betas_condition$deltaBeta <- rowMeans(betas_condition)
+  betas_condition$Name <- row.names(betas_condition)
+  betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
+  sample_number <- nrow(pheno_condition)
+  returnlist <- list(a = betas_condition, b = sample_number)
+  return(returnlist)
+}
+
+log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
+
 #Loading in relevant annotation file
 library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
@@ -484,7 +520,7 @@ contMatrix <- makeContrasts(DD_HI_L1-DD_HI_L2,
                             LD_LI_L1-LD_LI_L2,
                             levels=design)
 
-contMatrix
+#contMatrix
 
 # fit the contrasts
 fit2 <- contrasts.fit(fit1, contMatrix)
@@ -500,76 +536,123 @@ ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name),
 
 #Identifying and writing output for DMPs
 DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
+DMPs1 <- data.frame(DMPs1)
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[1]]
+sample_num <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[2]]
+DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
 write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
+DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.2),]
 print(dim(DMPs1_sig))
 output <- "DD_HI_L1-DD_HI_L2_DMPs_sig.csv"
 write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_HI_L2", sample_num, nrow(DMPs1_sig))
 
 DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=ann450kSub)
+DMPs2 <- data.frame(DMPs2)
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[1]]
+sample_num <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[2]]
+DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
 write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
+DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.2),]
 print(dim(DMPs2_sig))
 output <- "DD_HI_L1-DD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_LI_L1", sample_num, nrow(DMPs2_sig))
 
 DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=ann450kSub)
+DMPs3 <- data.frame(DMPs3)
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[1]]
+sample_num <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[2]]
+DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
+DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.2),]
 print(dim(DMPs3_sig))
 output <- "DD_HI_L1-LD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-LD_LI_L1", sample_num, nrow(DMPs3_sig))
 
 DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=ann450kSub)
+DMPs4 <- data.frame(DMPs4)
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[1]]
+sample_num <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[2]]
+DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-DD_LI_L2_DMPs.csv"
 write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
+DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.2),]
 print(dim(DMPs4_sig))
 output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
 DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
+DMPs5 <- data.frame(DMPs5)
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[1]]
+sample_num <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[2]]
+DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
 write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05),]
+DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.2),]
 print(dim(DMPs5_sig))
 output <- "DD_LI_L1-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-DD_LI_L2", sample_num, nrow(DMPs5_sig))
 
 DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
+DMPs6 <- data.frame(DMPs6)
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[1]]
+sample_num <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[2]]
+DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05),]
+DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.2),]
 print(dim(DMPs6_sig))
 output <- "DD_HI_L2-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-LD_LI_L2", sample_num, nrow(DMPs6_sig))
 
 DMPs7 <- topTable(fit2, num=Inf, coef=7, genelist=ann450kSub)
+DMPs7 <- data.frame(DMPs7)
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[1]]
+sample_num <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[2]]
+DMPs7 <- merge(DMPs7, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs7, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs7_sig <- DMPs7[(DMPs7$adj.P.Val < 0.05),]
+DMPs7_sig <- DMPs7[(DMPs7$adj.P.Val < 0.05 & DMPs7$deltaBeta > 0.2),]
 print(dim(DMPs7_sig))
 output <- "DD_LI_L1-LD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs7_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-LD_LI_L1", sample_num, nrow(DMPs7_sig))
 
 DMPs8 <- topTable(fit2, num=Inf, coef=8, genelist=ann450kSub)
+DMPs8 <- data.frame(DMPs8)
+deltaBeta_df <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[1]]
+sample_num <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[2]]
+DMPs8 <- merge(DMPs8, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs8, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs8_sig <- DMPs8[(DMPs8$adj.P.Val < 0.05),]
+DMPs8_sig <- DMPs8[(DMPs8$adj.P.Val < 0.05 & DMPs8$deltaBeta > 0.2),]
 print(dim(DMPs8_sig))
 output <- "DD_LI_L2-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs8_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("DD_LI_L2-LD_LI_L2", sample_num, nrow(DMPs8_sig))
 
 DMPs9<- topTable(fit2, num=Inf, coef=9, genelist=ann450kSub)
+DMPs9 <- data.frame(DMPs9)
+deltaBeta_df <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[1]]
+sample_num <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[2]]
+DMPs9 <- merge(DMPs9, deltaBeta_df, by = 'Name')
 output <- "LD_LI_L1-LD_LI_L2_DMPs.csv"
 write.csv(DMPs9, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs9_sig <- DMPs9[(DMPs9$adj.P.Val < 0.05),]
+DMPs9_sig <- DMPs9[(DMPs9$adj.P.Val < 0.05 & DMPs9$deltaBeta > 0.2),]
 print(dim(DMPs9_sig))
 output <- "LD_LI_L1-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs9_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+log_df[nrow(log_df) + 1,] <- c("LD_LI_L1-LD_LI_L2", sample_num, nrow(DMPs9_sig))
+
+write.csv(log_df, file = paste(output_dir, "combined_array_liver_log.csv", sep=""), row.names = FALSE)
 
 library(qqman)
 library(DMRcate)
@@ -582,10 +665,16 @@ generate_man <- function(DMPs, comp) {
   DMPs$chr = as.numeric(DMPs$chr)
   DMPs$pos = as.numeric(DMPs$pos)
   output <- paste(comp, "_manhattan.jpeg", sep="")
-  jpeg(paste(output_dir, output, sep=""), quality = 90)
-  manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  jpeg(paste(output_dir, output, sep=""), quality = 100)
+  manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
-  return("Done with manhattan plot\n")
+  DMPs[is.na(DMPs)] = 0
+  title <- paste(comp, " (deltaBetas)", sep="")
+  output <- paste(comp, "_manhattan_deltas.jpeg", sep="")
+  jpeg(paste(output_dir, output, sep=""), quality = 100)
+  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.2), main=title)
+  dev.off()
+  return("Done with manhattan plot")
 }
 
 generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
