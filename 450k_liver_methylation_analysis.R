@@ -247,29 +247,6 @@ pheno_df = pheno_df[!(pheno_df$donor_type == 'DCD'),]
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 m_values <- m_values[, colnames(m_values) %in% colnames(beta_values_filtered)]
 
-#Copying of the betas dataframe
-newBeta_df <- beta_values_filtered
-
-#Adding the collection to the sample_name to introduce consistency 
-for (row in 1:nrow(pheno_df)){
-  sample <- pheno_df[row, 'sample_name']
-  collection <- pheno_df[row, 'collection']
-  new_name <- paste(sample, collection, sep = " ")
-  pheno_df[row, 'sample_name'] <- new_name
-}
-
-#Changing the column names to sample_name
-colnames(newBeta_df) <- pheno_df$sample_name
-
-#Iterate through columns and subtract 
-for (col in colnames(newBeta_df)) {
-  samples <- substr(col,1,nchar(col)-1)
-  sample1 <- paste(samples, "1", sep="")
-  sample2 <- paste(samples, "2", sep="")
-  diff <- (newBeta_df[sample2] - newBeta_df[sample1])
-  newBeta_df[col] <- diff
-} #This will be later used during the identification of DMPs
-
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
   cat('Generating dendrograms\n')
@@ -444,6 +421,29 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
+
+#Copying of the betas dataframe
+newBeta_df <- beta_values_filtered
+
+#Adding the collection to the sample_name to introduce consistency 
+for (row in 1:nrow(pheno_df)){
+  sample <- pheno_df[row, 'sample_name']
+  collection <- pheno_df[row, 'collection']
+  new_name <- paste(sample, collection, sep = " ")
+  pheno_df[row, 'sample_name'] <- new_name
+}
+
+#Changing the column names to sample_name
+colnames(newBeta_df) <- pheno_df$sample_name
+
+#Iterate through columns and subtract 
+for (col in colnames(newBeta_df)) {
+  samples <- substr(col,1,nchar(col)-1)
+  sample1 <- paste(samples, "1", sep="")
+  sample2 <- paste(samples, "2", sep="")
+  diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
+  newBeta_df[col] <- diff
+} #This will be later used during the identification of DMPs
 
 #Calculating average delta beta per comparison
 get_deltaBeta <- function(cond1, cond2) {
