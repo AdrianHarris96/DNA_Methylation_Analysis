@@ -468,6 +468,7 @@ colnames(newBeta_df) <- pheno_df$sample_name
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
   betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_name)]
+  print(colnames(betas_condition))
   betas_condition['deltaBeta'] <- rowSums(betas_condition[,1:ncol(betas_condition)])
   betas_condition$deltaBeta <-as.numeric(as.character(betas_condition$deltaBeta)) / (ncol(betas_condition))
   betas_condition$Name <- row.names(betas_condition)
