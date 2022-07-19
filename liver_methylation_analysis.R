@@ -461,6 +461,9 @@ for (col in colnames(newBeta_df)) {
   newBeta_df[col] <- diff
 } #This will be later used during the identification of DMPs
 
+#Revert colnames back to old names
+colnames(newBeta_df) <- pheno_df$sample_name
+
 #Calculating average delta beta per comparison
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
