@@ -456,8 +456,8 @@ for (col in colnames(newBeta_df)) {
 } #This will be later used during the identification of DMPs
 
 #Calculating average delta beta per comparison
-get_deltaBeta <- function(cond1, cond2) {
-  pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
+get_deltaBeta <- function(cond1, cond2, pheno) {
+  pheno_condition <- pheno[(pheno$condition == cond1 | pheno$condition == cond2),]
   betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_id)]
   betas_condition$deltaBeta <- rowMeans(betas_condition)
   betas_condition$Name <- row.names(betas_condition)
@@ -534,8 +534,8 @@ for (outcome in eGFR_List) {
   #Identifying and writing output for DMPs
   DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=annEPICSub)
   DMPs1 <- data.frame(DMPs1)
-  deltaBeta_df <- get_deltaBeta("K1_Low", "K1_High")[[1]]
-  sample_num <- get_deltaBeta("K1_Low", "K1_High")[[2]]
+  deltaBeta_df <- get_deltaBeta("K1_Low", "K1_High", pheno)[[1]]
+  sample_num <- get_deltaBeta("K1_Low", "K1_High", pheno)[[2]]
   DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K1_High_DMPs.csv", sep="-")
   write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -547,8 +547,8 @@ for (outcome in eGFR_List) {
   
   DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=annEPICSub)
   DMPs2 <- data.frame(DMPs2)
-  deltaBeta_df <- get_deltaBeta("K2_Low", "K2_High")[[1]]
-  sample_num <- get_deltaBeta("K2_Low", "K2_High")[[2]]
+  deltaBeta_df <- get_deltaBeta("K2_Low", "K2_High", pheno)[[1]]
+  sample_num <- get_deltaBeta("K2_Low", "K2_High", pheno)[[2]]
   DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K2_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -560,8 +560,8 @@ for (outcome in eGFR_List) {
   
   DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
   DMPs3 <- data.frame(DMPs3)
-  deltaBeta_df <- get_deltaBeta("K1_High", "K2_High")[[1]]
-  sample_num <- get_deltaBeta("K1_High", "K2_High")[[2]]
+  deltaBeta_df <- get_deltaBeta("K1_High", "K2_High", pheno)[[1]]
+  sample_num <- get_deltaBeta("K1_High", "K2_High", pheno)[[2]]
   DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_High-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -573,8 +573,8 @@ for (outcome in eGFR_List) {
   
   DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
   DMPs4 <- data.frame(DMPs4)
-  deltaBeta_df <- get_deltaBeta("K2_Low", "K2_Low")[[1]]
-  sample_num <- get_deltaBeta("K2_Low", "K2_Low")[[2]]
+  deltaBeta_df <- get_deltaBeta("K2_Low", "K2_Low", pheno)[[1]]
+  sample_num <- get_deltaBeta("K2_Low", "K2_Low", pheno)[[2]]
   DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -586,8 +586,8 @@ for (outcome in eGFR_List) {
   
   DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=annEPICSub)
   DMPs5 <- data.frame(DMPs5)
-  deltaBeta_df <- get_deltaBeta("K1_High", "K2_Low")[[1]]
-  sample_num <- get_deltaBeta("K1_High", "K2_Low")[[2]]
+  deltaBeta_df <- get_deltaBeta("K1_High", "K2_Low", pheno)[[1]]
+  sample_num <- get_deltaBeta("K1_High", "K2_Low", pheno)[[2]]
   DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_High-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -599,8 +599,8 @@ for (outcome in eGFR_List) {
   
   DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=annEPICSub)
   DMPs6 <- data.frame(DMPs6)
-  deltaBeta_df <- get_deltaBeta("K1_Low", "K2_High")[[1]]
-  sample_num <- get_deltaBeta("K1_Low", "K2_High")[[2]]
+  deltaBeta_df <- get_deltaBeta("K1_Low", "K2_High", pheno)[[1]]
+  sample_num <- get_deltaBeta("K1_Low", "K2_High", pheno)[[2]]
   DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
