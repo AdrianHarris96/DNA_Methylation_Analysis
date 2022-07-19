@@ -473,6 +473,7 @@ get_deltaBeta <- function(cond1, cond2) {
   }
   betas_condition$Name <- row.names(betas_condition)
   betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
+  print(betas_condition[1:10,])
   return(betas_condition)
 }
 
