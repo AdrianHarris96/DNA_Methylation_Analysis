@@ -457,6 +457,7 @@ for (col in colnames(newBeta_df)) {
   samples <- substr(col,1,nchar(col)-1)
   sample1 <- paste(samples, "1", sep="")
   sample2 <- paste(samples, "2", sep="")
+  print(newBeta_df[nchar(sample2)])
   diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
   newBeta_df[col] <- diff
 } #This will be later used during the identification of DMPs
