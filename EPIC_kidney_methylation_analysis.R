@@ -102,11 +102,11 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   qc <- data.frame(qc)
   qc['Basename'] <- row.names(qc)
   qc <- merge(qc, pheno_df, by = 'Basename')
-  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "preprocessQC.jpeg", sep=""), quality = 100)
   plot <- ggplot(data=qc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(7, 14) + ylim(7, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot)
   dev.off()
-  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "preprocessDensity.jpeg", sep=""), quality = 100)
   densityPlot(mtSet, sampGroups =qc$array_type)
   dev.off()
   rm(mtSet, qc, plot)
@@ -125,11 +125,11 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   postqc <- data.frame(postqc)
   postqc['Basename'] <- row.names(postqc)
   postqc <- merge(postqc, pheno_df, by = 'Basename')
-  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "postNormQC.jpeg", sep=""), quality = 100)
   plot2 <- ggplot(data=postqc, mapping = aes(x = mMed, y = uMed, color=time)) + geom_point(aes(shape=array_type), alpha=0.5) + xlim(5, 14) + ylim(5, 14) + theme_bw()+ geom_abline(slope=-1, intercept = 21.25 , color="black", linetype="dashed", size=0.5) + scale_color_manual(values=pal)
   print(plot2)
   dev.off()
-  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 90)
+  jpeg(paste(output_dir, "postNormDensity.jpeg", sep=""), quality = 100)
   densityPlot(mtSet, sampGroups = postqc$array_type)
   dev.off()
   rm(postqc, plot2)
@@ -427,10 +427,43 @@ generate_man <- function(DMPs, comp) {
   DMPs$chr = as.numeric(DMPs$chr)
   DMPs$pos = as.numeric(DMPs$pos)
   output <- paste(comp, "_manhattan.jpeg", sep="")
-  jpeg(paste(output_dir, output, sep=""), quality = 90)
-  manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  jpeg(paste(output_dir, output, sep=""), quality = 100)
+  manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
-  return("Done with manhattan plot\n")
+  DMPs[is.na(DMPs)] = 0
+  title <- paste(comp, " (deltaBetas)", sep="")
+  output <- paste(comp, "_manhattan_deltas.jpeg", sep="")
+  jpeg(paste(output_dir, output, sep=""), quality = 100)
+  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.2), main=title)
+  dev.off()
+  return("Done with manhattan plot")
+}
+
+#Copying of the betas dataframe
+newBeta_df <- beta_values_filtered
+
+#Changing the column names to sample_id
+colnames(newBeta_df) <- pheno_df$sample_id
+
+#Iterate through columns and subtract 
+for (col in colnames(newBeta_df)) {
+  samples <- substr(col,1,nchar(col)-1)
+  sample1 <- paste(samples, "1", sep="")
+  sample2 <- paste(samples, "2", sep="")
+  diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
+  newBeta_df[col] <- diff
+} #This will be later used during the identification of DMPs
+
+#Calculating average delta beta per comparison
+get_deltaBeta <- function(cond1, cond2) {
+  pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
+  betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_id)]
+  betas_condition$deltaBeta <- rowMeans(betas_condition)
+  betas_condition$Name <- row.names(betas_condition)
+  betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
+  sample_number <- nrow(pheno_condition)
+  returnlist <- list(a = betas_condition, b = sample_number)
+  return(returnlist)
 }
 
 #Load library for EPIC 
@@ -442,6 +475,7 @@ eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 #eGFR_List <- c('eGFR_1month')
 for (outcome in eGFR_List) {
   cat("Identify CpGs\n")
+  log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month') {
     pheno <- subset(pheno_df, select = -c(eGFR_12month, eGFR_24month))
     pheno <- pheno %>% rename('eGFR' = 'eGFR_1month')
@@ -459,19 +493,19 @@ for (outcome in eGFR_List) {
   #Filling of condition column
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'High') {
-      pheno[row, 'condition'] <- "K1-High"
+      pheno[row, 'condition'] <- "K1_High"
     } else if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'Low') {
-      pheno[row, 'condition'] <- "K1-Low"
+      pheno[row, 'condition'] <- "K1_Low"
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
-      pheno[row, 'condition'] <- "K2-High"
+      pheno[row, 'condition'] <- "K2_High"
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
-      pheno[row, 'condition'] <- "K2-Low"
+      pheno[row, 'condition'] <- "K2_Low"
     }
   }
 
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
-  colnames(design) <- c("K1-High", "K1-Low", "K2-High", "K2-Low")
+  colnames(design) <- c("K1_High", "K1_Low", "K2_High", "K2_Low")
   
   # fit the linear model 
   fit1 <- lmFit(m_values, design)
@@ -498,52 +532,85 @@ for (outcome in eGFR_List) {
   
   #Identifying and writing output for DMPs
   DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=annEPICSub)
+  DMPs1 <- data.frame(DMPs1)
+  deltaBeta_df <- get_deltaBeta("K1_Low", "K1_High")[[1]]
+  sample_num <- get_deltaBeta("K1_Low", "K1_High")[[2]]
+  DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
   output <- "K1_Low-K1_High_DMPs.csv"
   write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
+  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.2),]
   print(dim(DMPs1_sig))
   output <- "K1_Low-K1_High_DMPs_sig.csv"
   write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K1_Low-K1_High", sample_num, nrow(DMPs1_sig))
   
   DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=annEPICSub)
+  DMPs2 <- data.frame(DMPs2)
+  deltaBeta_df <- get_deltaBeta("K2_Low", "K2_High")[[1]]
+  sample_num <- get_deltaBeta("K2_Low", "K2_High")[[2]]
+  DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
   output <- "K2_Low-K2_High_DMPs.csv"
   write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
+  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.2),]
   print(dim(DMPs2_sig))
   output <- "K2_Low-K2_High_DMPs_sig.csv"
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K2_Low-K2_High", sample_num, nrow(DMPs2_sig))
   
   DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
+  DMPs3 <- data.frame(DMPs3)
+  deltaBeta_df <- get_deltaBeta("K1_High", "K2_High")[[1]]
+  sample_num <- get_deltaBeta("K1_High", "K2_High")[[2]]
+  DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
   output <- "K1_High-K2_High_DMPs.csv"
   write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
+  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.2),]
   print(dim(DMPs3_sig))
   output <- "K1_High-K2_High_DMPs_sig.csv"
   write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K1_High-K2_High", sample_num, nrow(DMPs3_sig))
   
   DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
+  DMPs4 <- data.frame(DMPs4)
+  deltaBeta_df <- get_deltaBeta("K2_Low", "K2_Low")[[1]]
+  sample_num <- get_deltaBeta("K2_Low", "K2_Low")[[2]]
+  DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
   output <- "K1_Low-K2_Low_DMPs.csv"
   write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
+  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.2),]
   print(dim(DMPs4_sig))
   output <- "K1_Low-K2_Low_DMPs_sig.csv"
   write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K1_Low-K2_Low", sample_num, nrow(DMPs4_sig))
   
   DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=annEPICSub)
+  DMPs5 <- data.frame(DMPs5)
+  deltaBeta_df <- get_deltaBeta("K1_High", "K2_Low")[[1]]
+  sample_num <- get_deltaBeta("K1_High", "K2_Low")[[2]]
+  DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
   output <- "K1_High-K2_Low_DMPs.csv"
   write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05),]
+  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.2),]
   print(dim(DMPs5_sig))
   output <- "K1_High-K2_Low_DMPs_sig.csv"
   write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K1_High-K2_Low", sample_num, nrow(DMPs5_sig))
   
   DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=annEPICSub)
+  DMPs6 <- data.frame(DMPs6)
+  deltaBeta_df <- get_deltaBeta("K1_Low", "K2_High")[[1]]
+  sample_num <- get_deltaBeta("K1_Low", "K2_High")[[2]]
+  DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
   output <- "K1_Low-K2_High_DMPs.csv"
   write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05),]
+  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.2),]
   print(dim(DMPs6_sig))
   output <- "K1_Low-K2_High_DMPs_sig.csv"
   write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K1_Low-K2_High", sample_num, nrow(DMPs6_sig))
+  
+  final_title <- paste(outcome, "_EPIC_kidney_log.csv", sep="")
+  write.csv(log_df, file = paste(output_dir, final_title, sep=""), row.names = FALSE)
   
   generate_man(DMPs1, 'K1_Low-K1_High')
   generate_man(DMPs2, 'K2_Low-K2_High')
