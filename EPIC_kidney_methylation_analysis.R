@@ -421,17 +421,18 @@ library(DMRcate)
 generate_man <- function(DMPs, comp, status) {
   #Manhattan plot using the DMPs
   cat("Generating manhattan plot from DMPs\n")
-  title <- paste(comp, " (Adj. P-val)", sep="")
+  title <- paste(status, comp, sep="-")
+  title_fig <- paste(title, " (Adj. P-val)", sep="")
   col=c("black","grey")
   DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
   DMPs$chr = as.numeric(DMPs$chr)
   DMPs$pos = as.numeric(DMPs$pos)
-  output <- paste(comp, "_manhattan.jpeg", sep="")
+  output <- paste(title, "_manhattan.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 100)
-  manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title_fig)
   dev.off()
   DMPs[is.na(DMPs)] = 0
-  title <- paste(comp, status, sep="-")
+  title <- paste(status, comp, sep="-")
   title_fig <- paste(title, " (deltaBetas)", sep="")
   output <- paste(title, "_manhattan_deltas.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 100)
@@ -618,7 +619,7 @@ for (outcome in eGFR_List) {
   generate_man(DMPs3, 'K1_High-K2_High', outcome)
   generate_man(DMPs4, 'K1_Low-K2_Low', outcome)
   generate_man(DMPs5, 'K1_High-K2_Low', outcome)
-  generate_man(DMPs6, 'DK1_Low-K2_High', outcome)
+  generate_man(DMPs6, 'K1_Low-K2_High', outcome)
 
 }
 
