@@ -465,8 +465,12 @@ for (col in colnames(newBeta_df)) {
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
   betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_name)]
-  print(dim(betas_condition))
-  betas_condition$deltaBeta <- rowMeans(betas_condition)
+  betas_condition['deltaBeta'] <- rowSums(betas_condition[,1:ncol(betas_condition)])
+  for (row in 1:nrow(betas_condition)) {
+    sum <- betas_condition[row, 'deltaBeta']
+    average <- sum/(ncol(betas_condition))
+    betas_condition[row, 'deltaBeta'] <- average
+  }
   betas_condition$Name <- row.names(betas_condition)
   betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
   return(betas_condition)
