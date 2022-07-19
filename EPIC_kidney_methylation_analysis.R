@@ -1,5 +1,4 @@
 #Script for DNA Methylation Analysis
-rm(list = ls())
 library(minfi)
 library(rio)
 library(ggplot2)
@@ -23,6 +22,7 @@ output_dir = args[5]
 # git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
 # output_dir = '/Users/adrianharris/Desktop/epic_kidney0713/'
 
+#Checking if output directory exists
 if (file.exists(output_dir)) {
   cat("Directory already exists\n")
 } else {
@@ -58,7 +58,7 @@ pheno_df <- data.frame(pData(rgSet))
 #Color Scheme Defined 
 pal <- brewer.pal(4,"Dark2")
 
-#Calculate Detection p-values
+#Complete the detection of p-values if necessary
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Skipping p-value step\n')
 } else if (file.exists(paste(output_dir, "p-values.csv", sep=""))) {
@@ -90,6 +90,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   par(mfrow=c(1,1))
 }
 
+#Perform preprocessing if necessary
 if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   cat('Preprocessing already performed\n')
 } else {
@@ -111,7 +112,7 @@ if (file.exists(paste(output_dir, "preprocessQC.jpeg", sep=""))) {
   rm(mtSet, qc, plot)
 }
 
-#Normalization
+#Normalize if necessary
 if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
   cat('Loading normalization\n')
   mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
@@ -135,7 +136,7 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 }
 
 library(lumi) #Load in for beta2m
-# Map to Genome
+# Map to genome-generate betas if necessary
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Skip genomic methyl set\n')
 }else {
@@ -143,12 +144,6 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   rSet <- ratioConvert(mtSet, what = "both", keepCN = TRUE)
   gmtSet <- mapToGenome(rSet)
   print(dim(gmtSet)) #Number of probes = 865859
-  
-  # #Predicted Sex 
-  # predictedSex <- getSex(gmtSet, cutoff = -2)
-  # gmtSet <- addSex(gmtSet, sex = predictedSex)
-  # plotSex(gmtSet, id = row.names(predictedSex))
-  # rm(predictedSex)
   
   #Removing probes that include SNPs
   snps <- getSnpInfo(gmtSet)
@@ -158,15 +153,13 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   print(dim(gmtSet)) #Number of probes = 835424
   rm(snps, gr)
   
-  # Filter unwanted sites 
-  # ensure probes are in the same order in the mSetSq and detP objects
-  #rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
+  # Filter unwanted sites - ensure probes are in the same order in the gmtSet and detP objects
   detP <- detectionP(rgSet)
   detP <- detP[match(featureNames(gmtSet),rownames(detP)),] 
   
   # remove any probes that have failed in >50% of samples
   keep <- detP < 0.01
-  keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #probes that failed detection in more than half of the samples
+  keep.probes <- rownames(detP[rowMeans(keep)>=0.5,]) #exclude probes that failed detection in more than half of the samples
   gmtSet <- gmtSet[keep.probes,] 
   print(dim(gmtSet)) #Number of probes = 835364 
   rm(keep.probes)
@@ -174,7 +167,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   #Remove probes that located on the X or Y chromosome
   annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
   
-  keep <- !(featureNames(gmtSet) %in% annEPIC$Name[annEPIC$chr %in% c("chrX","chrY")]) #remove probes that are not of the chrom x or y
+  keep <- !(featureNames(gmtSet) %in% annEPIC$Name[annEPIC$chr %in% c("chrX","chrY")]) #remove probes that are of the chrom x or y
   table(keep)
   gmtSet <- gmtSet[keep,]
   print(dim(gmtSet)) #Number of probes = 816068
@@ -186,7 +179,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   #Probes identified with potential hybridization issues
   multi.map <- read.csv(paste(git_dir, 'HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt', sep=""), head = F, as.is = T)
   multi.map.probes <- as.character(multi.map$V1)
-  # determine unique probes between the cross-reactive and multi-map probes
+  # Determine unique probes between the cross-reactive and multi-map probes
   bad.probes <- unique(c(cross.react.probes, multi.map.probes))
   keep <- !(featureNames(gmtSet) %in% bad.probes) #Removal of these bad probes
   table(keep)
@@ -210,30 +203,43 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   print(dim(filter_all(beta_values_filtered, all_vars(. > 0.95))))
   #4036 hypermethylated
   beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
+  cat("Final Dimensions\n")
   dim(beta_values_filtered)
-  m_values = beta2m(beta_values_filtered)
 }
 
+#Writing beta to CSV if necessary
 if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   cat('Skip writing beta to CSV\n')
   beta_values_filtered <- import(paste(output_dir, "beta_values.csv", sep=""))
   row.names(beta_values_filtered) <- beta_values_filtered$V1
   beta_values_filtered <- beta_values_filtered[, 2:ncol(beta_values_filtered)]
 } else {
+  cat('Writing beta to CSV\n')
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
-  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 } 
 
+#Loading lumi and converting beta2m 
+library(lumi)
+m_values <- beta2m(beta_values_filtered)
+
+if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
+  cat('Skip writing of m_values\n')
+} else {
+  write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
+}
+
+#Loading in the paired file
 paired_pheno <- import(pheno_file2)
 paired_pheno <- paired_pheno[!(paired_pheno$sample_id == 'KUT4_K2' | paired_pheno$sample_id == 'KUT4_K1'),]
 
+#Making the phenotype dataframe the paired dataframe 
 pheno_df <- pheno_df[(pheno_df$Basename %in% paired_pheno$Basename),]
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 
-#EXCLUDE DCD SAMPLES - Kidney dataset
+#Exclude DCD samples - Kidney data
 beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
 #Removing rows based on the sample_name column in phenotype dataframe
-pheno_df <- pheno_df[!(pheno_df$sample_name %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
+pheno_df <- pheno_df[!(pheno_df$Basename %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
 
 m_values <- beta2m(beta_values_filtered)
 
@@ -250,6 +256,7 @@ clustering <- function(pheno, month, comparison, betas) {
     pheno <- pheno %>% rename('eGFR' = 'eGFR_24month')
   }
   
+  #Filtering the dataframe down
   if (comparison == 'K1_Low_K1_High') {
     pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K1' & pheno$eGFR == 'High')),]
   } else if (comparison == 'K2_Low_K2_High') {
@@ -271,7 +278,7 @@ clustering <- function(pheno, month, comparison, betas) {
   # dim(beta_values_filtered)
   
   cat("PCA plots - Betas\n")
-  #Transpose resulting PCA plot - beta values 
+  #Transpose betas and generate PCA plot
   transposed_beta <- t(betas) #t(beta_values_case)
   transposed_beta <- data.frame(transposed_beta)
   pca_general <- prcomp(transposed_beta, center=TRUE)
@@ -321,9 +328,10 @@ clustering <- function(pheno, month, comparison, betas) {
 }
 
 #eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+#comp_List <- c('Low_High')
 eGFR_List <- c('eGFR_1month')
 comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-#comp_List <- c('Low_High')
+
 
 # pdf(file = paste(output_dir, "eGFR1month_comparisons.pdf", sep=""))
 # for (comp in comp_List) {
@@ -334,6 +342,7 @@ comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2
 # 
 # dev.off()
 
+#Generate dendrogram 
 generate_dendro <- function(beta, pheno, timepoint){
   beta_t <- data.frame(t(beta))
   row.names(pheno) <- pheno$Basename
@@ -349,7 +358,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   
   final_beta <- merge(pheno, beta_t, by='row.names')
   
-  #changing the row.names accordingly 
+  #Creating new labels/corresponding columns and moving toward front of dataframe
   final_beta['sample_id_age'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   final_beta['sample_id_eGFR1'] <- 'na'
@@ -359,6 +368,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   final_beta['sample_id_eGFR24'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   
+  #Filling these new columns
   for (row in 1:nrow(final_beta)) {
     age <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_age'], sep = " ")
     eGFR1 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_1month'], sep = " ")
@@ -370,6 +380,7 @@ generate_dendro <- function(beta, pheno, timepoint){
     final_beta[row, 'sample_id_eGFR24'] <- eGFR24
   }
   
+  #Generate dendrograms for each label
   dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
   pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
   row.names(final_beta) <- final_beta$sample_id_age
@@ -404,142 +415,144 @@ generate_dendro <- function(beta, pheno, timepoint){
 #   generate_dendro(beta_values_filtered, pheno_df, time)
 # }
 
-#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-eGFR_List <- c('eGFR_1month')
-comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-#comp_List <- c('Low_High')
+#Function for generating manhattan plots
+library(qqman)
+library(DMRcate)
+generate_man <- function(DMPs, comp) {
+  #Manhattan plot using the DMPs
+  cat("Generating manhattan plot from DMPs\n")
+  title <- paste(comp, " (Adj. P-val)", sep="")
+  col=c("black","grey")
+  DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
+  DMPs$chr = as.numeric(DMPs$chr)
+  DMPs$pos = as.numeric(DMPs$pos)
+  output <- paste(comp, "_manhattan.jpeg", sep="")
+  jpeg(paste(output_dir, output, sep=""), quality = 90)
+  manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
+  dev.off()
+  return("Done with manhattan plot\n")
+}
 
+#Load library for EPIC 
 library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 
-for (comp in comp_List) {
-  for (outcome in eGFR_List) {
-    cat("Identify CpGs\n")
-    if (outcome == 'eGFR_1month') {
-      pheno <- subset(pheno_df, select = -c(eGFR_12month, eGFR_24month))
-      pheno <- pheno %>% rename('eGFR' = 'eGFR_1month')
-    } else if (outcome == 'eGFR_12month') {
-      pheno <- subset(pheno_df, select = -c(eGFR_1month, eGFR_24month))
-      pheno <- pheno %>% rename('eGFR' = 'eGFR_12month')
-    } else {
-      pheno <- subset(pheno_df, select = -c(eGFR_1month, eGFR_12month))
-      pheno <- pheno %>% rename('eGFR' = 'eGFR_24month')
-    }
-    
-    if (comp == 'K1_Low_K1_High') {
-      pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K1' & pheno$eGFR == 'High')),]
-    } else if (comp == 'K2_Low_K2_High') {
-      pheno <- pheno[((pheno$time == 'K2' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
-    } else if (comp == 'K1_High_K2_High') {
-      pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'High') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
-    } else if (comp == 'K1_Low_K2_Low') {
-      pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'Low')),]
-    } else if (comp == 'K1_High_K2_Low') {
-      pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'High') | (pheno$time == 'K2' & pheno$eGFR == 'Low')),]
-    } else if (comp == 'K1_Low_K2_High') {
-      pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
-    } else {
-      cat('Comparison request does not exist\n')
-    }
-    
-    example <- pData(mtSet)
-    print(example)
-    #CpGs - DMPs
-    beta_values_condition <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
-    m_values_condition <- beta2m(beta_values_condition)
-    m_values_condition <- mutate_all(m_values_condition, function(x) as.numeric(as.character(x)))
-    #Next step, just convert the Mset into 
-    dmp <- dmpFinder(m_values_condition, pheno=pheno$eGFR, type="categorical")
-    head(dmp)
-    
-    if (comp == 'K1_Low_K1_High') {
-      condition <- factor(pheno$eGFR)
-      cols <- c("High", "Low")
-    } else if (comp == 'K2_Low_K2_High') {
-      condition <- factor(pheno$eGFR)
-      cols <- c("High", "Low")
-    } else if (comp == 'K1_High_K2_High') {
-      condition <- factor(pheno$time)
-      cols <- c("K2", "K1")
-    } else if (comp == 'K1_Low_K2_Low') {
-      condition <- factor(pheno$time)
-      cols <- c("K2", "K1")
-    } else if (comp == 'K1_High_K2_Low') {
-      condition <- factor(pheno$time)
-      cols <- c("K2", "K1")
-    } else if (comp == 'Low_High') {
-      condition <- factor(pheno$eGFR)
-      cols <- c("High", "Low")
-    } else {
-      condition <- factor(pheno$time)
-      cols <- c("K2", "K1")
-    }
-    
-    print(condition)
-    cat("Identify DMPs\n")
-    design <- model.matrix(~0+condition, data=pheno)
-    
-    colnames(design) <- cols
-    fit1 <- lmFit(beta_values_condition, design)
-    
-    if (comp == 'K1_Low_K1_High') {
-      contMatrix <- makeContrasts(Low-High, levels=design)
-    } else if (comp == 'K2_Low_K2_High') {
-      contMatrix <- makeContrasts(Low-High, levels=design)
-    } else if (comp == 'K1_High_K2_High') {
-      contMatrix <- makeContrasts(K1-K2, levels=design)
-    } else if (comp == 'K1_Low_K2_Low') {
-      contMatrix <- makeContrasts(K1-K2, levels=design)
-    } else if (comp == 'K1_High_K2_Low') {
-      contMatrix <- makeContrasts(K1-K2, levels=design)
-    } else if (comp == 'K1_Low_K2_High'){
-      contMatrix <- makeContrasts(K1-K2, levels=design)
-    } else {
-      contMatrix <- makeContrasts(Low-High, levels=design)
-    }
-    
-    print(contMatrix)
-    
-    fit2 <- contrasts.fit(fit1, contMatrix)
-    fit2 <- eBayes(fit2)
-    
-    #summary(decideTests(fit2))
-    annEPICSub <- annEPIC[match(rownames(beta_values_condition),annEPIC$Name), c(1:4,12:19,24:ncol(annEPIC))]
-    DMPs <- topTable(fit2, num=Inf, coef=1, genelist=annEPICSub)
-    #plotCpg(m_values, cpg=rownames(DMPs)[1:4], pheno=type, ylab = "Beta values") #plots individual probes
-    output <- paste(outcome, "_", sep="")
-    title <- paste(output, comp, sep="")
-    output <- paste(output_dir, title, sep="")
-    write.csv(DMPs, file = paste(output, "_DMPs.csv", sep=""), row.names = TRUE)
-    
-    #Manhattan plot using the DMPs
-    cat("Generating manhattan plot from DMPs\n")
-    library(qqman)
-    library(DMRcate)
-    title <- paste(title, " (Adj. P-val)", sep="")
-    col=c("black","grey")
-    DMPs$chr = str_replace_all(DMPs$chr, 'chr', '')
-    DMPs$chr = as.numeric(DMPs$chr)
-    DMPs$pos = as.numeric(DMPs$pos)
-    jpeg(paste(output, "_manhattan.jpeg", sep=""), quality = 90)
-    manhattan(DMPs, chr="chr", bp="pos",, p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
-    dev.off()
-    
-    # myAnnotation <- cpg.annotate(object = as.matrix(m_values), datatype = "array", what = "M",
-    #                              analysis.type = "differential", design = design, 
-    #                              contrasts = TRUE, cont.matrix = contMatrix,
-    #                              coef = "Low - High", arraytype = "450K")
-    # 
-    # DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    # results.ranges <- extractRanges(DMRs, genome = "hg19")
-    # write.csv(result.ranges, file=paste(output, "_DMRs.csv", sep=""), row.names = FALSE)
-    
-    # dmp <- dmpFinder(beta_values_condition, pheno = condition, type = "categorical")
-    # write.csv(dmp, file = paste(output, "_dmpFinderResults.csv", sep=""), row.names = TRUE)
-    # rm(pheno, beta_values_condition, annEPICSub)
+#Vector of eGFR statuses
+eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+#eGFR_List <- c('eGFR_1month')
+for (outcome in eGFR_List) {
+  cat("Identify CpGs\n")
+  if (outcome == 'eGFR_1month') {
+    pheno <- subset(pheno_df, select = -c(eGFR_12month, eGFR_24month))
+    pheno <- pheno %>% rename('eGFR' = 'eGFR_1month')
+  } else if (outcome == 'eGFR_12month') {
+    pheno <- subset(pheno_df, select = -c(eGFR_1month, eGFR_24month))
+    pheno <- pheno %>% rename('eGFR' = 'eGFR_12month')
+  } else {
+    pheno <- subset(pheno_df, select = -c(eGFR_1month, eGFR_12month))
+    pheno <- pheno %>% rename('eGFR' = 'eGFR_24month')
   }
+  
+  #Addition of condition column 
+  pheno$condition <- 'NA'
+  
+  #Filling of condition column
+  for (row in 1:nrow(pheno)) {
+    if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'High') {
+      pheno[row, 'condition'] <- "K1-High"
+    } else if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'Low') {
+      pheno[row, 'condition'] <- "K1-Low"
+    } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
+      pheno[row, 'condition'] <- "K2-High"
+    } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
+      pheno[row, 'condition'] <- "K2-Low"
+    }
+  }
+
+  # create design matrix
+  design <- model.matrix(~0+condition, data=pheno)
+  colnames(design) <- c("K1-High", "K1-Low", "K2-High", "K2-Low")
+  
+  # fit the linear model 
+  fit1 <- lmFit(m_values, design)
+  # create a contrast matrix for specific comparisons
+  contMatrix <- makeContrasts(K1_Low-K1_High,
+                              K2_Low-K2_High,
+                              K1_High-K2_High,
+                              K1_Low-K2_Low,
+                              K1_High-K2_Low,
+                              K1_Low-K2_High,
+                              levels=design)
+  
+  contMatrix
+
+  # fit the contrasts
+  fit2 <- contrasts.fit(fit1, contMatrix)
+  fit2 <- eBayes(fit2)
+  
+  # look at the numbers of DM CpGs at FDR < 0.05
+  summary(decideTests(fit2))
+
+  annEPICSub <- annEPIC[match(rownames(m_values),annEPIC$Name),
+                        c(1:4,12:19,24:ncol(annEPIC))]
+  
+  #Identifying and writing output for DMPs
+  DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=annEPICSub)
+  output <- "K1_Low-K1_High_DMPs.csv"
+  write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
+  print(dim(DMPs1_sig))
+  output <- "K1_Low-K1_High_DMPs_sig.csv"
+  write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  
+  DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=annEPICSub)
+  output <- "K2_Low-K2_High_DMPs.csv"
+  write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
+  print(dim(DMPs2_sig))
+  output <- "K2_Low-K2_High_DMPs_sig.csv"
+  write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  
+  DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
+  output <- "K1_High-K2_High_DMPs.csv"
+  write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
+  print(dim(DMPs3_sig))
+  output <- "K1_High-K2_High_DMPs_sig.csv"
+  write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  
+  DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
+  output <- "K1_Low-K2_Low_DMPs.csv"
+  write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
+  print(dim(DMPs4_sig))
+  output <- "K1_Low-K2_Low_DMPs_sig.csv"
+  write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  
+  DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=annEPICSub)
+  output <- "K1_High-K2_Low_DMPs.csv"
+  write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05),]
+  print(dim(DMPs5_sig))
+  output <- "K1_High-K2_Low_DMPs_sig.csv"
+  write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  
+  DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=annEPICSub)
+  output <- "K1_Low-K2_High_DMPs.csv"
+  write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05),]
+  print(dim(DMPs6_sig))
+  output <- "K1_Low-K2_High_DMPs_sig.csv"
+  write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  
+  generate_man(DMPs1, 'K1_Low-K1_High')
+  generate_man(DMPs2, 'K2_Low-K2_High')
+  generate_man(DMPs3, 'K1_High-K2_High')
+  generate_man(DMPs4, 'K1_Low-K2_Low')
+  generate_man(DMPs5, 'K1_High-K2_Low')
+  generate_man(DMPs6, 'DK1_Low-K2_High')
+
 }
 
 q()
-
 
