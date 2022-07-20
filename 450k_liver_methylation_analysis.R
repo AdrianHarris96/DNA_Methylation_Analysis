@@ -440,7 +440,7 @@ colnames(newBeta_df) <- pheno_df$sample_name
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
   pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
-  betas_condition1 <- newBeta_df[,(colnames(newBta_df) %in% pheno_condition1$sample_name)]
+  betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
   betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
