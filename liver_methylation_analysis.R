@@ -458,8 +458,8 @@ get_deltaBeta <- function(cond1, cond2) {
   pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
-  print(betas_condition2[1,5,])
-  print(betas_condition1[1,5,])
+  print(betas_condition2[1:5,])
+  print(betas_condition1[1:5,])
   betas_condition1['deltaBeta'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['deltaBeta'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
   betas_condition1$deltaBeta <-as.numeric(as.character(betas_condition1$deltaBeta)) / (nrow(pheno_condition1))
@@ -469,7 +469,7 @@ get_deltaBeta <- function(cond1, cond2) {
   betas_condition1 <- betas_condition1[,c(ncol(betas_condition1), (ncol(betas_condition1)-1))]
   betas_condition2 <- betas_condition2[,c(ncol(betas_condition2), (ncol(betas_condition2)-1))]
   betas_condition <- merge(betas_condition1, betas_condition2, by = "Name")
-  print(betas_condition[1,5,])
+  print(betas_condition[1:5,])
   q()
   betas_condition <- betas_condition
   print(betas_condition[1:5,])
