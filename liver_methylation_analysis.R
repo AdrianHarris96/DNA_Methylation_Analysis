@@ -453,11 +453,13 @@ for (row in 1:nrow(pheno_df)){
 colnames(newBeta_df) <- pheno_df$sample_name
 
 #Calculating average delta beta per comparison
-get_deltaBeta <- function(cond1, cond2, beta_df) {
+get_deltaBeta <- function(cond1, cond2) {
   pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
   pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
+  print(betas_condition2[1,5,])
+  print(betas_condition1[1,5,])
   betas_condition1['deltaBeta'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['deltaBeta'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
   betas_condition1$deltaBeta <-as.numeric(as.character(betas_condition1$deltaBeta)) / (nrow(pheno_condition1))
