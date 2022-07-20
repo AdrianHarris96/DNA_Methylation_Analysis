@@ -126,7 +126,7 @@ if (file.exists(paste(output_dir, "mtSet.RDS", sep=""))) {
   mtSet <- readRDS(paste(output_dir, "mtSet.RDS", sep=""))
 } else {
   cat('Performing normalization and plotting\n')
-  mtSet <- preprocessNoob(rgSet)
+  mtSet <- preprocessSWAN(rgSet)
   saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   postqc <- getQC(mtSet)
   postqc <- data.frame(postqc)
@@ -436,25 +436,24 @@ for (row in 1:nrow(pheno_df)){
 #Changing the column names to sample_name
 colnames(newBeta_df) <- pheno_df$sample_name
 
-#Iterate through columns and subtract 
-for (col in colnames(newBeta_df)) {
-  samples <- substr(col,1,nchar(col)-1)
-  sample1 <- paste(samples, "1", sep="")
-  sample2 <- paste(samples, "2", sep="")
-  diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
-  newBeta_df[col] <- diff
-} #This will be later used during the identification of DMPs
-
 #Calculating average delta beta per comparison
 get_deltaBeta <- function(cond1, cond2) {
-  pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
-  betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_id)]
-  betas_condition$deltaBeta <- rowMeans(betas_condition)
-  betas_condition$Name <- row.names(betas_condition)
-  betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
-  sample_number <- nrow(pheno_condition)
-  returnlist <- list(a = betas_condition, b = sample_number)
-  return(returnlist)
+  pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
+  pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
+  betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
+  betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
+  betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
+  betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
+  betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
+  betas_condition2$average <-as.numeric(as.character(betas_condition2$average)) / (nrow(pheno_condition2))
+  betas_condition1$Name <- row.names(betas_condition1)
+  betas_condition2$Name <- row.names(betas_condition2)
+  betas_condition1 <- betas_condition1[,c(ncol(betas_condition1), (ncol(betas_condition1)-1))]
+  betas_condition2 <- betas_condition2[,c(ncol(betas_condition2), (ncol(betas_condition2)-1))]
+  betas_condition <- merge(betas_condition1, betas_condition2, by = "Name")
+  betas_condition['deltaBeta'] <- (betas_condition$average.y - betas_condition$average.x)
+  betas_condition <- betas_condition[,c(1, ncol(betas_condition))]
+  return(betas_condition)
 }
 
 log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
@@ -521,8 +520,8 @@ ann450kSub <- ann450k[match(rownames(m_values),ann450k$Name),
 #Identifying and writing output for DMPs
 DMPs1 <- topTable(fit2, num=Inf, coef=1, genelist=ann450kSub)
 DMPs1 <- data.frame(DMPs1)
-deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_HI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == 'DD_HI_L1' | condition == 'DD_HI_L2')))
 DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
 write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -534,8 +533,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_HI_L2", sample_num, nrow(DMPs1_sig))
 
 DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=ann450kSub)
 DMPs2 <- data.frame(DMPs2)
-deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "DD_LI_L1")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L1" | condition == "DD_LI_L1")))
 DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
 write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -547,8 +546,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_LI_L1", sample_num, nrow(DMPs2_sig))
 
 DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=ann450kSub)
 DMPs3 <- data.frame(DMPs3)
-deltaBeta_df <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L1", "LD_LI_L1")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L1" | condition == "LD_LI_L1")))
 DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -560,8 +559,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-LD_LI_L1", sample_num, nrow(DMPs3_sig))
 
 DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=ann450kSub)
 DMPs4 <- data.frame(DMPs4)
-deltaBeta_df <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "DD_LI_L2")))
 DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-DD_LI_L2_DMPs.csv"
 write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -573,8 +572,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
 DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
 DMPs5 <- data.frame(DMPs5)
-deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "DD_LI_L2")))
 DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
 write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -586,8 +585,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-DD_LI_L2", sample_num, nrow(DMPs5_sig))
 
 DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
 DMPs6 <- data.frame(DMPs6)
-deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "LD_LI_L2")))
 DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -599,8 +598,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-LD_LI_L2", sample_num, nrow(DMPs6_sig))
 
 DMPs7 <- topTable(fit2, num=Inf, coef=7, genelist=ann450kSub)
 DMPs7 <- data.frame(DMPs7)
-deltaBeta_df <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[1]]
-sample_num <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "LD_LI_L1")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "LD_LI_L1")))
 DMPs7 <- merge(DMPs7, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-LD_LI_L1_DMPs.csv"
 write.csv(DMPs7, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -612,8 +611,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-LD_LI_L1", sample_num, nrow(DMPs7_sig))
 
 DMPs8 <- topTable(fit2, num=Inf, coef=8, genelist=ann450kSub)
 DMPs8 <- data.frame(DMPs8)
-deltaBeta_df <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("DD_LI_L2", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L2" | condition == "LD_LI_L2")))
 DMPs8 <- merge(DMPs8, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs8, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -625,8 +624,8 @@ log_df[nrow(log_df) + 1,] <- c("DD_LI_L2-LD_LI_L2", sample_num, nrow(DMPs8_sig))
 
 DMPs9<- topTable(fit2, num=Inf, coef=9, genelist=ann450kSub)
 DMPs9 <- data.frame(DMPs9)
-deltaBeta_df <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[1]]
-sample_num <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")[[2]]
+deltaBeta_df <- get_deltaBeta("LD_LI_L1", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "LD_LI_L1" | condition == "LD_LI_L2")))
 DMPs9 <- merge(DMPs9, deltaBeta_df, by = 'Name')
 output <- "LD_LI_L1-LD_LI_L2_DMPs.csv"
 write.csv(DMPs9, file = paste(output_dir, output, sep=""), row.names = FALSE) 
@@ -658,7 +657,7 @@ generate_man <- function(DMPs, comp) {
   jpeg(paste(output_dir, output, sep=""), quality = 100)
   manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.2), main=title)
   dev.off()
-  return("Done with manhattan plot\n")
+  return("Done with manhattan plot")
 }
 
 generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
