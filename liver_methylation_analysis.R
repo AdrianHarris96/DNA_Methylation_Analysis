@@ -442,6 +442,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
 #Correction with combat()
 # pheno_df$Basename 
 # colnames(m_values)
+print(dim(m_values))
 batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
