@@ -667,7 +667,6 @@ generate_man <- function(DMPs, comp) {
   jpeg(paste(output_dir, output, sep=""), quality = 100)
   manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title)
   dev.off()
-  DMPs[is.na(DMPs)] = 0
   title <- paste(comp, " (deltaBetas)", sep="")
   output <- paste(comp, "_manhattan_deltas.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 100)
