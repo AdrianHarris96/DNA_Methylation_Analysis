@@ -447,6 +447,9 @@ modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- m2beta(m_values)
 
+print(dim(beta_values_filtered))
+q()
+
 #Copying of the betas dataframe
 newBeta_df <- beta_values_filtered
 
