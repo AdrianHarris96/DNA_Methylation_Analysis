@@ -6,6 +6,7 @@ library(tidyverse)
 library(RColorBrewer)
 library(dendextend)
 library(limma)
+library(sva)
 
 #Example input: Rscript liver_methylation_analysis.R <pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -441,10 +442,10 @@ clustering <- function(pheno, condition1, condition2, betas) {
 #Correction with combat()
 # pheno_df$Basename 
 # colnames(m_values)
-batch <- pheno_df$array_type
-modCombat <- model.matrix(~1, data=pheno_df)
-m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
-beta_values_filtered <- m2beta(m_values)
+# batch <- pheno_df$array_type
+# modCombat <- model.matrix(~1, data=pheno_df)
+# m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
+# beta_values_filtered <- m2beta(m_values)
 
 #Copying of the betas dataframe
 newBeta_df <- beta_values_filtered
