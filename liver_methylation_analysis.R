@@ -452,28 +452,24 @@ for (row in 1:nrow(pheno_df)){
 #Changing the column names to sample_name
 colnames(newBeta_df) <- pheno_df$sample_name
 
-#Iterate through columns and subtract 
-for (col in colnames(newBeta_df)) {
-  samples <- substr(col,1,nchar(col)-1)
-  sample1 <- paste(samples, "1", sep="")
-  sample2 <- paste(samples, "2", sep="")
-  print(newBeta_df[nchar(sample2)])
-  diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
-  newBeta_df[col] <- diff
-} #This will be later used during the identification of DMPs
-
-print(newBeta_df[1:10,])
-q()
-
 #Calculating average delta beta per comparison
 get_deltaBeta <- function(cond1, cond2, beta_df) {
-  pheno_condition <- pheno_df[(pheno_df$condition == cond1 | pheno_df$condition == cond2),]
-  betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_name)]
-  print(betas_condition[1:5,])
-  betas_condition['deltaBeta'] <- rowSums(betas_condition[,1:ncol(betas_condition)])
-  betas_condition$deltaBeta <-as.numeric(as.character(betas_condition$deltaBeta)) / (ncol(betas_condition))
-  betas_condition$Name <- row.names(betas_condition)
-  betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
+  pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
+  pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
+  betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
+  betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
+  betas_condition1['deltaBeta'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
+  betas_condition2['deltaBeta'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
+  betas_condition1$deltaBeta <-as.numeric(as.character(betas_condition1$deltaBeta)) / (nrow(pheno_condition1))
+  betas_condition2$deltaBeta <-as.numeric(as.character(betas_condition2$deltaBeta)) / (nrow(pheno_condition2))
+  betas_condition1$Name <- row.names(betas_condition1)
+  betas_condition2$Name <- row.names(betas_condition2)
+  betas_condition1 <- betas_condition1[,c(ncol(betas_condition1), (ncol(betas_condition1)-1))]
+  betas_condition2 <- betas_condition2[,c(ncol(betas_condition2), (ncol(betas_condition2)-1))]
+  betas_condition <- merge(betas_condition1, betas_condition2, by = "Name")
+  print(betas_condition[1,5,])
+  q()
+  betas_condition <- betas_condition
   print(betas_condition[1:5,])
   return(betas_condition)
 }
