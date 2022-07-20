@@ -460,8 +460,8 @@ get_deltaBeta <- function(cond1, cond2) {
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
   betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
-  betas_condition1$average <-as.numeric(as.character(betas_condition1$deltaBeta)) / (nrow(pheno_condition1))
-  betas_condition2$average <-as.numeric(as.character(betas_condition2$deltaBeta)) / (nrow(pheno_condition2))
+  betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
+  betas_condition2$average <-as.numeric(as.character(betas_condition2$average)) / (nrow(pheno_condition2))
   betas_condition1$Name <- row.names(betas_condition1)
   betas_condition2$Name <- row.names(betas_condition2)
   betas_condition1 <- betas_condition1[,c(ncol(betas_condition1), (ncol(betas_condition1)-1))]
