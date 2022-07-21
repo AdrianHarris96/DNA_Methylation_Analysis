@@ -447,8 +447,6 @@ batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
-print(beta_values_filtered[1:100,ncol(beta_values_filtered)])
-q()
 
 #Copying of the betas dataframe
 newBeta_df <- beta_values_filtered
@@ -481,6 +479,7 @@ get_deltaBeta <- function(cond1, cond2) {
   betas_condition <- merge(betas_condition1, betas_condition2, by = "Name")
   betas_condition['deltaBeta'] <- (betas_condition$average.y - betas_condition$average.x)
   betas_condition <- betas_condition[,c(1, ncol(betas_condition))]
+  q()
   return(betas_condition)
 }
 
