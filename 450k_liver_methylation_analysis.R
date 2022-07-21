@@ -570,31 +570,31 @@ output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
-DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
+DMPs5 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
 DMPs5 <- data.frame(DMPs5)
-deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")
-sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "DD_LI_L2")))
+deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "LD_LI_L2")))
 DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
-output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
+output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
 write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
 DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & abs(DMPs5$deltaBeta) > 0.15),]
 print(dim(DMPs5_sig))
-output <- "DD_LI_L1-DD_LI_L2_DMPs_sig.csv"
+output <- "DD_HI_L2-LD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-DD_LI_L2", sample_num, nrow(DMPs5_sig))
+log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-LD_LI_L2", sample_num, nrow(DMPs5_sig))
 
 DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
 DMPs6 <- data.frame(DMPs6)
-deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")
-sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "LD_LI_L2")))
+deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")
+sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "DD_LI_L2")))
 DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
-output <- "DD_HI_L2-LD_LI_L2_DMPs.csv"
+output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
 write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
 DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & abs(DMPs6$deltaBeta) > 0.15),]
 print(dim(DMPs6_sig))
-output <- "DD_HI_L2-LD_LI_L2_DMPs_sig.csv"
+output <- "DD_LI_L1-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-LD_LI_L2", sample_num, nrow(DMPs6_sig))
+log_df[nrow(log_df) + 1,] <- c("DD_LI_L1-DD_LI_L2", sample_num, nrow(DMPs6_sig))
 
 DMPs7 <- topTable(fit2, num=Inf, coef=7, genelist=ann450kSub)
 DMPs7 <- data.frame(DMPs7)
