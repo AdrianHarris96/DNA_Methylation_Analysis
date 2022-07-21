@@ -539,7 +539,7 @@ output <- "DD_HI_L1-DD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 log_df[nrow(log_df) + 1,] <- c("DD_HI_L1-DD_LI_L1", sample_num, nrow(DMPs2_sig))
 
-DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
+DMPs4 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
 DMPs4 <- data.frame(DMPs4)
 deltaBeta_df <- get_deltaBeta("DD_HI_L2", "DD_LI_L2")
 sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "DD_LI_L2")))
@@ -552,7 +552,7 @@ output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
-DMPs6 <- topTable(fit2, num=Inf, coef=6, genelist=annEPICSub)
+DMPs6 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
 DMPs6 <- data.frame(DMPs6)
 deltaBeta_df <- get_deltaBeta("DD_LI_L1", "DD_LI_L2")
 sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "DD_LI_L2")))
