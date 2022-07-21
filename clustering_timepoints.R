@@ -9,6 +9,7 @@ library(RColorBrewer)
 library(lumi)
 library(optparse)
 library(gridExtra)
+library(sva)
 
 option_list = list(
   make_option(c("-s", "--sample"), type="character", default=NULL, 
@@ -64,6 +65,9 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     rm(rgSet450k)
     rm(rgSetEPIC)
   }
+  
+  #Simply ensure the correct order 
+  pheno_df <- data.frame(pData(rgSet))
  
   #Generation or Loading of mtSet
   if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
@@ -151,12 +155,18 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
     beta_values_filtered <- filter_all(beta_values_filtered, any_vars(. < 0.95)) 
     dim(beta_values_filtered) #Final dimensions = 356361
     m_values <- beta2m(beta_values_filtered)
-    write.csv(beta_values_filtered, file = paste(output_dir, "beta_values2.csv", sep=""), row.names = TRUE)
+    write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
     write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
     rm(beta_values_filtered)
   }
   
-  typeList <- c('450K', 'EPIC', 'Combined')
+  print(dim(m_values))
+  print(dim(pheno_df))
+  batch <- pheno_df$array_type
+  modCombat <- model.matrix(~1, data=pheno_df)
+  m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
+  
+  typeList <- c('Combined')
   for (array in typeList) {
     clustering(array, pheno_df, 'K1', m_values, pheno_file)
     clustering(array, pheno_df, 'K2', m_values, pheno_file)
@@ -271,7 +281,7 @@ if (file.exists(opt$out_dir)) {
 }
 
 
-pdf(file = paste(opt$out_dir, "SWANclustering.pdf", sep=""))
+pdf(file = paste(opt$out_dir, "Combatclustering.pdf", sep=""))
 calculate_betas(pheno_file = opt$sample, 
                 base_dir =opt$base_dir, 
                 git_dir = opt$git_dir, 
