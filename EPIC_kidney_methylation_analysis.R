@@ -6,7 +6,6 @@ library(tidyverse)
 library(RColorBrewer)
 library(limma)
 library(dendextend)
-library(sva)
 
 #Example input: Rscript methylation_analysis.R <pheno_file> <paired_pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -452,8 +451,10 @@ colnames(newBeta_df) <- pheno_df$sample_id
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
   pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
+  print(dim(pheno_condition1))
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_id)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_id)]
+  print(dim(betas_condition1))
   betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
   betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
