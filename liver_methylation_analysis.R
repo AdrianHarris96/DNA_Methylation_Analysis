@@ -254,6 +254,7 @@ if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
 #Correction with combat()
 # pheno_df$Basename 
 # colnames(m_values)
+print(nrow(pheno_df))
 print(dim(m_values))
 batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
