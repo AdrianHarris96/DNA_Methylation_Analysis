@@ -251,6 +251,15 @@ if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
 
+#Correction with combat()
+# pheno_df$Basename 
+# colnames(m_values)
+print(dim(m_values))
+batch <- pheno_df$array_type
+modCombat <- model.matrix(~1, data=pheno_df)
+m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
+beta_values_filtered <- data.frame(m2beta(m_values))
+
 #Drop 'methylated' and 'unmethylated' sample names
 pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '200999740023_R06C02', '201004900096_R05C02', '201004900096_R06C02', '202702240054_R01C01', '202702240054_R02C01', '202702240079_R07C01', '202702240079_R08C01', '3999442124_R05C02', '3999442124_R06C02')),]
 
