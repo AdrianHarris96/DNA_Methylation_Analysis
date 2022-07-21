@@ -6,6 +6,7 @@ library(tidyverse)
 library(RColorBrewer)
 library(limma)
 library(dendextend)
+library(sva)
 
 #Example input: Rscript methylation_analysis.R <pheno_file> <paired_pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -20,7 +21,7 @@ output_dir = args[5]
 # pheno_file2 = '/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv'
 # base_dir = '/Users/adrianharris/Desktop/kidney/'
 # git_dir = '/Users/adrianharris/Documents/dna_methylation_analysis/'
-# output_dir = '/Users/adrianharris/Desktop/epic_kidney0713/'
+# output_dir = '/Users/adrianharris/Desktop/test_kidney/'
 
 #Checking if output directory exists
 if (file.exists(output_dir)) {
@@ -44,7 +45,7 @@ nrow(subset(pheno_df, time == 'K2'))
 #Specify the directories and read in respective IDAT Files 
 dirEPIC <- paste(base_dir, "EPIC_array", sep="")
 if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
-  cat('Loading in rgSet (combined)\n')
+  cat('Loading in rgSet\n')
   rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
 } else {
   cat('Generate rgSet\n')
@@ -119,7 +120,8 @@ if (file.exists(paste(output_dir, "postNormQC.jpeg", sep=""))) {
 } else {
   cat('Performing normalization and plotting\n')
   #Normalization and plotting 
-  mtSet <- preprocessNoob(rgSet)
+  #mtSet <- preprocessNoob(rgSet)
+  mtSet <- preprocessSWAN(rgSet)
   saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   postqc <- getQC(mtSet)
   postqc <- data.frame(postqc)
@@ -436,7 +438,7 @@ generate_man <- function(DMPs, comp, status) {
   title_fig <- paste(title, " (deltaBetas)", sep="")
   output <- paste(title, "_manhattan_deltas.jpeg", sep="")
   jpeg(paste(output_dir, output, sep=""), quality = 100)
-  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.2), main=title_fig)
+  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.15), main=title_fig)
   dev.off()
   return("Done with manhattan plot")
 }
@@ -447,23 +449,24 @@ newBeta_df <- beta_values_filtered
 #Changing the column names to sample_id
 colnames(newBeta_df) <- pheno_df$sample_id
 
-#Iterate through columns and subtract 
-for (col in colnames(newBeta_df)) {
-  samples <- substr(col,1,nchar(col)-1)
-  sample1 <- paste(samples, "1", sep="")
-  sample2 <- paste(samples, "2", sep="")
-  diff <- (newBeta_df[nchar(sample2)] - newBeta_df[nchar(sample1)])
-  newBeta_df[col] <- diff
-} #This will be later used during the identification of DMPs
-
 #Calculating average delta beta per comparison
 get_deltaBeta <- function(cond1, cond2, pheno) {
-  pheno_condition <- pheno[(pheno$condition == cond1 | pheno$condition == cond2),]
-  betas_condition <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition$sample_id)]
-  betas_condition$deltaBeta <- rowMeans(betas_condition)
-  betas_condition$Name <- row.names(betas_condition)
-  betas_condition <- betas_condition[,c(ncol(betas_condition), (ncol(betas_condition)-1))]
-  sample_number <- nrow(pheno_condition)
+  pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
+  pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
+  betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
+  betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
+  betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
+  betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
+  betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
+  betas_condition2$average <-as.numeric(as.character(betas_condition2$average)) / (nrow(pheno_condition2))
+  betas_condition1$Name <- row.names(betas_condition1)
+  betas_condition2$Name <- row.names(betas_condition2)
+  betas_condition1 <- betas_condition1[,c(ncol(betas_condition1), (ncol(betas_condition1)-1))]
+  betas_condition2 <- betas_condition2[,c(ncol(betas_condition2), (ncol(betas_condition2)-1))]
+  betas_condition <- merge(betas_condition1, betas_condition2, by = "Name")
+  betas_condition['deltaBeta'] <- (betas_condition$average.y - betas_condition$average.x)
+  betas_condition <- betas_condition[,c(1, ncol(betas_condition))]
+  sample_number <- nrow(pheno_condition1) + nrow(pheno_condition2)
   returnlist <- list(a = betas_condition, b = sample_number)
   return(returnlist)
 }
@@ -540,7 +543,7 @@ for (outcome in eGFR_List) {
   DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K1_High_DMPs.csv", sep="-")
   write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.2),]
+  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.15),]
   print(dim(DMPs1_sig))
   output <- paste(outcome, "K1_Low-K1_High_DMPs_sig.csv", sep = "-")
   write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -553,7 +556,7 @@ for (outcome in eGFR_List) {
   DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K2_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.2),]
+  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.15),]
   print(dim(DMPs2_sig))
   output <- paste(outcome, "K2_Low-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -566,7 +569,7 @@ for (outcome in eGFR_List) {
   DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_High-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.2),]
+  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.15),]
   print(dim(DMPs3_sig))
   output <- paste(outcome, "K1_High-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -579,7 +582,7 @@ for (outcome in eGFR_List) {
   DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.2),]
+  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.15),]
   print(dim(DMPs4_sig))
   output <- paste(outcome, "K1_Low-K2_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -592,7 +595,7 @@ for (outcome in eGFR_List) {
   DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_High-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.2),]
+  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.15),]
   print(dim(DMPs5_sig))
   output <- paste(outcome, "K1_High-K2_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -605,7 +608,7 @@ for (outcome in eGFR_List) {
   DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.2),]
+  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.15),]
   print(dim(DMPs6_sig))
   output <- paste(outcome, "K1_Low-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
