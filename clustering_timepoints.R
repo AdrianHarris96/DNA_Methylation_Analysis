@@ -78,7 +78,7 @@ calculate_betas <- function(pheno_file, base_dir, git_dir, output_dir) {
   } else {
     cat('Performing normalization\n')
     #Normalization and plotting 
-    mtSet <- preprocessSWAN(rgSet)
+    mtSet <- preprocessNoob(rgSet)
     saveRDS(mtSet, file = paste(output_dir, "mtSet.RDS", sep=""))
   }
   
