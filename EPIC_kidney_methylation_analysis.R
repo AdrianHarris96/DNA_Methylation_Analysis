@@ -82,7 +82,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   detP_df <- merge(detP_df, pheno_df, by = 'Basename')
   
   #Plotting EPIC barplot
-  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_name, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
+  barplot((subset(detP_df, array_type == 'EPIC'))$p_value_mean, col=pal[factor(detP_df$time)], names.arg=(subset(detP_df, array_type == 'EPIC'))$sample_id, las=2, cex.names=0.4, cex.axis=0.5, space=0.5, ylab="Mean detection p-values", main='EPIC Array')
   legend("topleft", legend=levels(factor(detP_df$time)), fill=pal,
          cex=0.27, bty = "n", bg="white")
   
@@ -294,7 +294,7 @@ clustering <- function(pheno, month, comparison, betas) {
   output_path <- paste(output_dir, title, sep="")
   #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
   plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
-  #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
+  #plot + geom_text(aes(label = sample_id), size=3.5) + xlim(-100, 400)
   print(plot)
   #dev.off()
   #Converting NAs to 0 in donor_age
@@ -323,7 +323,7 @@ clustering <- function(pheno, month, comparison, betas) {
   # output_path <- paste(output_dir, title, sep="")
   # #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
   # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
-  # #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
+  # #plot + geom_text(aes(label = sample_id), size=3.5) + xlim(-100, 400)
   # print(plot)
   # #dev.off()
   return('Clustering\n')
@@ -452,8 +452,8 @@ colnames(newBeta_df) <- pheno_df$sample_id
 get_deltaBeta <- function(cond1, cond2) {
   pheno_condition1 <- pheno_df[(pheno_df$condition == cond1),]
   pheno_condition2 <- pheno_df[(pheno_df$condition == cond2),]
-  betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_name)]
-  betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_name)]
+  betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_id)]
+  betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_id)]
   betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
   betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
