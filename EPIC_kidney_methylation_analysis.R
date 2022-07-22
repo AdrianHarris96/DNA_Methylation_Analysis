@@ -511,12 +511,16 @@ for (outcome in eGFR_List) {
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   
+  print(pheno$Basename)
+  print(colnames(m_values_condition))
+  q()
+  
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
   colnames(design) <- c("K1_High", "K1_Low", "K2_High", "K2_Low")
   
   # fit the linear model 
-  fit1 <- lmFit(m_values, design)
+  fit1 <- lmFit(m_values_condition, design)
   # create a contrast matrix for specific comparisons
   contMatrix <- makeContrasts(K1_Low-K1_High,
                               K2_Low-K2_High,
