@@ -511,10 +511,6 @@ for (outcome in eGFR_List) {
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   
-  print(pheno$Basename)
-  print(colnames(m_values_condition))
-  q()
-  
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
   colnames(design) <- c("K1_High", "K1_Low", "K2_High", "K2_Low")
@@ -539,7 +535,7 @@ for (outcome in eGFR_List) {
   # look at the numbers of DM CpGs at FDR < 0.05
   summary(decideTests(fit2))
 
-  annEPICSub <- annEPIC[match(rownames(m_values),annEPIC$Name),
+  annEPICSub <- annEPIC[match(rownames(m_values_condition),annEPIC$Name),
                         c(1:4,12:19,24:ncol(annEPIC))]
   
   #Identifying and writing output for DMPs
