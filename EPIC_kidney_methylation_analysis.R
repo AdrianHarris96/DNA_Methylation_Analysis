@@ -505,7 +505,12 @@ for (outcome in eGFR_List) {
       pheno[row, 'condition'] <- "K2_Low"
     }
   }
-
+  
+  #if condition is empty, drop it
+  pheno <- pheno[!is.na(pheno$condition),]
+  #m_values filtered using new pheno 
+  m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
+  
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
   colnames(design) <- c("K1_High", "K1_Low", "K2_High", "K2_Low")
