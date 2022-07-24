@@ -238,9 +238,9 @@ pheno_df <- pheno_df[(pheno_df$Basename %in% paired_pheno$Basename),]
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 
 #Exclude DCD samples - Kidney data
-beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01"))]
+beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
 #Removing rows based on the sample_name column in phenotype dataframe
-pheno_df <- pheno_df[!(pheno_df$Basename %in% c("9296930129_R05C01", "9305651174_R01C01", "9305651174_R03C01", "9305651174_R02C02", "9305651174_R03C02", "9305651191_R02C02", "9305651191_R04C02", "201465900002_R04C01", "202240580106_R03C01", "202240580208_R03C01", "202259340119_R05C01", "202259350016_R04C01", "203496240002_R03C01", "203504430032_R05C01", "204001300109_R07C01", "204001300109_R08C01", "204001350016_R01C01", "202702240079_R06C01")),]
+pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
 
 m_values <- beta2m(beta_values_filtered)
 
@@ -451,10 +451,8 @@ colnames(newBeta_df) <- pheno_df$sample_id
 get_deltaBeta <- function(cond1, cond2, phenotype) {
   pheno_condition1 <- phenotype[(phenotype$condition == cond1),]
   pheno_condition2 <- phenotype[(phenotype$condition == cond2),]
-  print(dim(pheno_condition1))
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_id)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_id)]
-  print(dim(betas_condition1))
   betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
   betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
   betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
@@ -497,12 +495,16 @@ for (outcome in eGFR_List) {
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K1_High"
+      nrow(subset(pheno, condition == "K1_High"))
     } else if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K1_Low"
+      nrow(subset(pheno, condition == "K1_Low"))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K2_High"
+      nrow(subset(pheno, condition == "K2_High"))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K2_Low"
+      nrow(subset(pheno, condition == "K2_Low"))
     }
   }
   
