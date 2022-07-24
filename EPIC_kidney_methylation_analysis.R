@@ -432,12 +432,6 @@ generate_man <- function(DMPs, comp, status) {
   jpeg(paste(output_dir, output, sep=""), quality = 100)
   manhattan(DMPs, chr="chr", bp="pos", p="adj.P.Val", snp="Islands_Name", col=col, suggestiveline=(-log10(0.05)), main=title_fig)
   dev.off()
-  title <- paste(status, comp, sep="-")
-  title_fig <- paste(title, " (deltaBetas)", sep="")
-  output <- paste(title, "_manhattan_deltas.jpeg", sep="")
-  jpeg(paste(output_dir, output, sep=""), quality = 100)
-  manhattan(DMPs, chr="chr", bp="pos", logp=FALSE, p="deltaBeta", snp="Islands_Name", col=col, suggestiveline=(0.15), main=title_fig)
-  dev.off()
   return("Done with manhattan plot")
 }
 
@@ -495,16 +489,16 @@ for (outcome in eGFR_List) {
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K1_High"
-      nrow(subset(pheno, condition == "K1_High"))
+      print(nrow(subset(pheno, condition == "K1_High")))
     } else if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K1_Low"
-      nrow(subset(pheno, condition == "K1_Low"))
+      print(nrow(subset(pheno, condition == "K1_Low")))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K2_High"
-      nrow(subset(pheno, condition == "K2_High"))
+     print(nrow(subset(pheno, condition == "K2_High")))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K2_Low"
-      nrow(subset(pheno, condition == "K2_Low"))
+      print(nrow(subset(pheno, condition == "K2_Low")))
     }
   }
   
@@ -548,7 +542,7 @@ for (outcome in eGFR_List) {
   DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K1_High_DMPs.csv", sep="-")
   write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & DMPs1$deltaBeta > 0.15),]
+  DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
   print(dim(DMPs1_sig))
   output <- paste(outcome, "K1_Low-K1_High_DMPs_sig.csv", sep = "-")
   write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -561,7 +555,7 @@ for (outcome in eGFR_List) {
   DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K2_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & DMPs2$deltaBeta > 0.15),]
+  DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
   print(dim(DMPs2_sig))
   output <- paste(outcome, "K2_Low-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -574,7 +568,7 @@ for (outcome in eGFR_List) {
   DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_High-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05 & DMPs3$deltaBeta > 0.15),]
+  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
   print(dim(DMPs3_sig))
   output <- paste(outcome, "K1_High-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -587,7 +581,7 @@ for (outcome in eGFR_List) {
   DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & DMPs4$deltaBeta > 0.15),]
+  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
   print(dim(DMPs4_sig))
   output <- paste(outcome, "K1_Low-K2_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -600,7 +594,7 @@ for (outcome in eGFR_List) {
   DMPs5 <- merge(DMPs5, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_High-K2_Low_DMPs.csv", sep="-")
   write.csv(DMPs5, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05 & DMPs5$deltaBeta > 0.15),]
+  DMPs5_sig <- DMPs5[(DMPs5$adj.P.Val < 0.05),]
   print(dim(DMPs5_sig))
   output <- paste(outcome, "K1_High-K2_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs5_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -613,7 +607,7 @@ for (outcome in eGFR_List) {
   DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
   output <- paste(outcome, "K1_Low-K2_High_DMPs.csv", sep="-")
   write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & DMPs6$deltaBeta > 0.15),]
+  DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05),]
   print(dim(DMPs6_sig))
   output <- paste(outcome, "K1_Low-K2_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
