@@ -38,8 +38,8 @@ pheno_df <- pheno_df[!(pheno_df$Basename == '203504430032_R01C01' | pheno_df$Bas
 pheno_df <- pheno_df[(pheno_df$array_type == 'EPIC'),]
 
 #Number of files 
-nrow(subset(pheno_df, time == 'K1'))
-nrow(subset(pheno_df, time == 'K2'))
+nrow(subset(pheno_df, array_type == '450K'))
+nrow(subset(pheno_df, time == 'EPIC'))
 
 #Specify the directories and read in respective IDAT Files 
 dirEPIC <- paste(base_dir, "EPIC_array", sep="")
