@@ -712,7 +712,7 @@ write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-DD_HI_L2_DMRs.csv", s
 myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
                              analysis.type = "differential", design = design, 
                              contrasts = TRUE, cont.matrix = contMatrix, 
-                             coef = "DD_HI_L1  - DD_LI_L1", arraytype = "450K")
+                             coef = "DD_HI_L1 - DD_LI_L1", arraytype = "450K")
 DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
 results.ranges <- extractRanges(DMRs, genome = "hg19")
 write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
