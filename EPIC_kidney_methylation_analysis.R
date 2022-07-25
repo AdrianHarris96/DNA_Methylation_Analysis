@@ -486,7 +486,7 @@ for (outcome in eGFR_List) {
   }
   
   #Addition of condition column 
-  pheno$condition <- ''
+  pheno$condition <- 'NA'
   
   #Filling of condition column
   for (row in 1:nrow(pheno)) {
@@ -511,7 +511,10 @@ for (outcome in eGFR_List) {
   print(nrow(subset(pheno, condition == "K2_Low")))
   
   #if condition is empty, drop it
-  pheno <- pheno[!is.na(pheno$condition),]
+  pheno <- pheno[!(pheno$condition == 'NA'),]
+  
+  print(colnames(m_values))
+  print(nrow(pheno))
   
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
