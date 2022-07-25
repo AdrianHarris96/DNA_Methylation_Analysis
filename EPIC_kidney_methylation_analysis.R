@@ -511,6 +511,7 @@ for (outcome in eGFR_List) {
   print("K2_Low")
   print(nrow(subset(pheno, condition == "K2_Low")))
   
+  print(pheno)
   q()
   
   #if condition is empty, drop it
