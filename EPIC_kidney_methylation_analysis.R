@@ -473,7 +473,6 @@ eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 #eGFR_List <- c('eGFR_1month')
 for (outcome in eGFR_List) {
   cat("Identify CpGs\n")
-  print(outcome)
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month') {
     pheno <- subset(pheno_df, select = -c(eGFR_12month, eGFR_24month))
@@ -511,8 +510,6 @@ for (outcome in eGFR_List) {
   print("K2_Low")
   print(nrow(subset(pheno, condition == "K2_Low")))
   
-  #if condition is empty, drop it
-  pheno <- pheno[!is.na(pheno$condition),]
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   
