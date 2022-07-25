@@ -37,6 +37,7 @@ for x in range(args.start, args.end): #Iterate through important sheets in the e
 df = pd.read_csv(args.excel)
 for index in df.index:
 	basename = df['Basename'][index]
+	array = df['array_type'][index]
 	if basename in arrayDict.keys():
 		pass #avoid loading duplicates with this line
 	else:
