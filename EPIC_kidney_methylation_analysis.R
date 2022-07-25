@@ -511,10 +511,6 @@ for (outcome in eGFR_List) {
   print("K2_Low")
   print(nrow(subset(pheno, condition == "K2_Low")))
   
-  print(pheno)
-  write.csv(pheno, file = paste(output_dir, "pheno.csv", sep=""), row.names = FALSE)
-  q()
-  
   #if condition is empty, drop it
   pheno <- pheno[!is.na(pheno$condition),]
   #m_values filtered using new pheno 
