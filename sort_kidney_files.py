@@ -12,12 +12,13 @@ parser = ap.ArgumentParser(description='Sort raw files into respective folder ac
 parser.add_argument("-x", "--excel", help="excel sample file", required=True)
 parser.add_argument("-w", "--working", help="working directory", default='/local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/')
 parser.add_argument("-d", "--directory", help="home directory", default="/home/amharris/")
-parser.add_argument("-s", "--start", help="starting sheet(#) in excel file", type=int, required=True)
-parser.add_argument("-e", "--end", help="ending sheet(#) in excel file", type=int, required=True)
+#parser.add_argument("-s", "--start", help="starting sheet(#) in excel file", type=int, required=True)
+#parser.add_argument("-e", "--end", help="ending sheet(#) in excel file", type=int, required=True)
 args = parser.parse_args()
 
 arrayDict = {} #Dictionary intended for moving files later in script
 
+'''
 for x in range(args.start, args.end): #Iterate through important sheets in the excel file 
 	sheet_df =  pd.read_excel(args.excel, sheet_name=x, keep_default_na=True)
 	sheet_df.columns = [col.strip() for col in sheet_df.columns] #Stripping whitespace in column names
@@ -30,6 +31,15 @@ for x in range(args.start, args.end): #Iterate through important sheets in the e
 			arrayDict[sentrix] = array
 
 #print(arrayDict)
+'''
+
+df = pd.read_csv(args.excel)
+for index in df.index:
+	basename = df['Basename'][index]
+	if basename in arrayDict.keys():
+			pass #avoid loading duplicates with this line
+		else:
+			arrayDict[basename] = array
 
 #Appending to either 450K or EPIC list 
 list450K = []
