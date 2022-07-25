@@ -513,11 +513,11 @@ for (outcome in eGFR_List) {
   #if condition is empty, drop it
   pheno <- pheno[!(pheno$condition == 'NA'),]
   
-  print(colnames(m_values))
-  print(nrow(pheno))
-  
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
+  print(pheno$Basename)
+  print(colnames(m_values_condition))
+  q()
   
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
