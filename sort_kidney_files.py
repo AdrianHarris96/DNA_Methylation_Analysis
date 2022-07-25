@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
-#Example input: ./sort_array_type.py -x /home/amharris/dna_methylation_analysis/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -w /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/ -h /home/amharris/
+#Example input: ./sort_kidney_files.py -x /home/amharris/dna_methylation_analysis/kidney_sample_sheet.csv -w /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/ -d /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/01_analysis/kidneyTx_methylation/
+#Old input: ./sort_array_type.py -x /home/amharris/dna_methylation_analysis/Kidney\ Tx\ sample\ annotation.xlsx -s 1 -e 5 -w /local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/ -h /home/amharris/
 
 import pandas as pd
 import argparse as ap
@@ -11,7 +12,7 @@ parser = ap.ArgumentParser()
 parser = ap.ArgumentParser(description='Sort raw files into respective folder according to array type')
 parser.add_argument("-x", "--excel", help="excel sample file", required=True)
 parser.add_argument("-w", "--working", help="working directory", default='/local/projects-t3/XVMAS_Lab/Projects_2022/XVMAS_P09_methylation/00_raw_data/kidneyTx_methylation/')
-parser.add_argument("-d", "--directory", help="home directory", default="/home/amharris/")
+parser.add_argument("-d", "--directory", help="destination directory", default="/home/amharris/")
 #parser.add_argument("-s", "--start", help="starting sheet(#) in excel file", type=int, required=True)
 #parser.add_argument("-e", "--end", help="ending sheet(#) in excel file", type=int, required=True)
 args = parser.parse_args()
@@ -37,9 +38,9 @@ df = pd.read_csv(args.excel)
 for index in df.index:
 	basename = df['Basename'][index]
 	if basename in arrayDict.keys():
-			pass #avoid loading duplicates with this line
-		else:
-			arrayDict[basename] = array
+		pass #avoid loading duplicates with this line
+	else:
+		arrayDict[basename] = array
 
 #Appending to either 450K or EPIC list 
 list450K = []
