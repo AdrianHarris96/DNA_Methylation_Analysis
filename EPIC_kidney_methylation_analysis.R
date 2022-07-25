@@ -473,6 +473,7 @@ eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 #eGFR_List <- c('eGFR_1month')
 for (outcome in eGFR_List) {
   cat("Identify CpGs\n")
+  print(outcome)
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month') {
     pheno <- subset(pheno_df, select = -c(eGFR_12month, eGFR_24month))
