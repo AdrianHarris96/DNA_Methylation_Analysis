@@ -512,6 +512,7 @@ for (outcome in eGFR_List) {
   print(nrow(subset(pheno, condition == "K2_Low")))
   
   print(pheno)
+  write.csv(pheno, file = paste(output_dir, "pheno.csv", sep=""), row.names = FALSE)
   q()
   
   #if condition is empty, drop it
