@@ -726,14 +726,14 @@ DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
 results.ranges <- extractRanges(DMRs, genome = "hg19")
 write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-LD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
 
-#4 DMRs - DD_HI_L2-DD_LI_L2
-myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
-                             analysis.type = "differential", design = design, 
-                             contrasts = TRUE, cont.matrix = contMatrix, 
-                             coef = "DD_HI_L2 - DD_LI_L2", arraytype = "450K")
-DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-results.ranges <- extractRanges(DMRs, genome = "hg19")
-write.csv(results.ranges, file=paste(output_dir, "DD_HI_L2-DD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
+#4 DMRs - DD_HI_L2-DD_LI_L2 - No sig. DMPs
+# myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+#                              analysis.type = "differential", design = design, 
+#                              contrasts = TRUE, cont.matrix = contMatrix, 
+#                              coef = "DD_HI_L2 - DD_LI_L2", arraytype = "450K")
+# DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+# results.ranges <- extractRanges(DMRs, genome = "hg19")
+# write.csv(results.ranges, file=paste(output_dir, "DD_HI_L2-DD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
 
 #5 DMRs - DD_HI_L2-LD_LI_L2
 myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
@@ -771,14 +771,14 @@ DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
 results.ranges <- extractRanges(DMRs, genome = "hg19")
 write.csv(results.ranges, file=paste(output_dir, "DD_LI_L2-LD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
 
-#9 DMRs - LD_LI_L1-LD_LI_L2
-myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
-                             analysis.type = "differential", design = design, 
-                             contrasts = TRUE, cont.matrix = contMatrix, 
-                             coef = "LD_LI_L1 - LD_LI_L2", arraytype = "450K")
-DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-results.ranges <- extractRanges(DMRs, genome = "hg19")
-write.csv(results.ranges, file=paste(output_dir, "LD_LI_L1-LD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
+#9 DMRs - LD_LI_L1-LD_LI_L2 - No sig. DMPs
+# myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+#                              analysis.type = "differential", design = design, 
+#                              contrasts = TRUE, cont.matrix = contMatrix, 
+#                              coef = "LD_LI_L1 - LD_LI_L2", arraytype = "450K")
+# DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+# results.ranges <- extractRanges(DMRs, genome = "hg19")
+# write.csv(results.ranges, file=paste(output_dir, "LD_LI_L1-LD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
 
 q()
 
