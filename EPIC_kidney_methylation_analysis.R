@@ -495,12 +495,14 @@ for (outcome in eGFR_List) {
       print(nrow(subset(pheno, condition == "K1_Low")))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K2_High"
-     print(nrow(subset(pheno, condition == "K2_High")))
+      print(nrow(subset(pheno, condition == "K2_High")))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K2_Low"
       print(nrow(subset(pheno, condition == "K2_Low")))
     }
   }
+  
+  q()
   
   #if condition is empty, drop it
   pheno <- pheno[!is.na(pheno$condition),]
