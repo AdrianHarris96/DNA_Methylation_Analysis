@@ -237,6 +237,9 @@ paired_pheno <- paired_pheno[!(paired_pheno$sample_id == 'KUT4_K2' | paired_phen
 pheno_df <- pheno_df %>% select(c(Basename))
 pheno_df <- merge(pheno_df, paired_pheno, by = 'Basename')
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+print(pheno_df$Basename)
+print(colnames(beta_values_filtered))
+q()
 
 #Exclude DCD samples - Kidney data
 beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
