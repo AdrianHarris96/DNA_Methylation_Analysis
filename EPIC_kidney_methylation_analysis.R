@@ -489,22 +489,23 @@ for (outcome in eGFR_List) {
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K1_High"
-      print("K1_High")
-      print(nrow(subset(pheno, condition == "K1_High")))
     } else if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K1_Low"
-      print("K1_Low")
-      print(nrow(subset(pheno, condition == "K1_Low")))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
       pheno[row, 'condition'] <- "K2_High"
-      print("K2_High")
-      print(nrow(subset(pheno, condition == "K2_High")))
     } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
       pheno[row, 'condition'] <- "K2_Low"
-      print("K2_Low")
-      print(nrow(subset(pheno, condition == "K2_Low")))
     }
   }
+  
+  print("K1_High")
+  print(nrow(subset(pheno, condition == "K1_High")))
+  print("K1_Low")
+  print(nrow(subset(pheno, condition == "K1_Low")))
+  print("K2_High")
+  print(nrow(subset(pheno, condition == "K2_High")))
+  print("K2_Low")
+  print(nrow(subset(pheno, condition == "K2_Low")))
   
   q()
   
