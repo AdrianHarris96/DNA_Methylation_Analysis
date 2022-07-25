@@ -234,7 +234,8 @@ paired_pheno <- import(pheno_file2)
 paired_pheno <- paired_pheno[!(paired_pheno$sample_id == 'KUT4_K2' | paired_pheno$sample_id == 'KUT4_K1'),]
 
 #Making the phenotype dataframe the paired dataframe 
-pheno_df <- pheno_df[(pheno_df$Basename %in% paired_pheno$Basename),]
+pheno_df <- pheno_df %>% select(c(Basename))
+pheno_df <- merge(pheno_df, paired_pheno, by = 'Basename')
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 
 #Exclude DCD samples - Kidney data
