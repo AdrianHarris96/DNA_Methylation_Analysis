@@ -303,50 +303,51 @@ for (outcome in eGFR_List) {
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month-eGFR_12month') {
     pheno <- subset(pheno_df, select = -c(eGFR_24month))
-    pheno <- pheno %>% rename("first_status" = "eGFR_1month")
+    pheno <- pheno %>% rename("eGFR1" = "eGFR_1month")
   } else {
     pheno <- subset(pheno_df, select = -c(eGFR_1month))
-    pheno <- pheno %>% rename("first_status" = "eGFR_12month")
+    pheno <- pheno %>% rename("eGFR1" = "eGFR_12month")
   }
   
   if (outcome == 'eGFR_1month-eGFR_12month') {
-    pheno <- subset(pheno_df, select = -c(eGFR_24month))
-    pheno <- pheno %>% rename("second_status" = "eGFR_12month")
+    pheno <- pheno %>% rename("eGFR2" = "eGFR_12month")
   } else {
-    pheno <- subset(pheno_df, select = -c(eGFR_1month))
-    pheno <- pheno %>% rename("second_status" = "eGFR_24month")
+    pheno <- pheno %>% rename("eGFR2" = "eGFR_24month")
   }
   
   #Addition of condition column 
   pheno$condition <- 'NA'
   
+  
+  print(pheno)
+  
   #Filling of condition column
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1') {
-      if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'High') {
+      if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'High') {
         pheno[row, 'condition'] <- "K1_High_High"
-      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'High') {
+      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'High') {
         pheno[row, 'condition'] <- "K1_Low_High"
-      } else if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'Low') {
+      } else if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'Low') {
         pheno[row, 'condition'] <- "K1_High_Low"
-      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'Low') {
+      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'Low') {
         pheno[row, 'condition'] <- "K1_Low_Low"
       }
     } else {
-      if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'High') {
+      if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'High') {
         pheno[row, 'condition'] <- "K2_High_High"
-      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'High') {
+      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'High') {
         pheno[row, 'condition'] <- "K2_Low_High"
-      } else if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'Low') {
+      } else if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'Low') {
         pheno[row, 'condition'] <- "K2_High_Low"
-      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'Low') {
+      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'Low') {
         pheno[row, 'condition'] <- "K2_Low_Low"
       }
     }
   }
   
-  #if condition is empty, drop it
-  pheno <- pheno[!is.na(pheno$condition),]
+  #if condition is NA, drop it
+  pheno <- pheno[!(pheno$condition == 'NA'),]
   
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
