@@ -699,6 +699,7 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K1_High - K2_Low", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    print(DMRs)
     results.ranges <- extractRanges(DMRs, genome = "hg19")
     output <- paste(outcome, "K1_High-K2_Low_DMRs.csv", sep="-")
     write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
