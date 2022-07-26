@@ -278,10 +278,15 @@ get_deltaBeta <- function(cond1, cond2, phenotype) {
   pheno_condition2 <- phenotype[(phenotype$condition == cond2),]
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_id)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_id)]
-  betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
-  betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
-  betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
-  betas_condition2$average <-as.numeric(as.character(betas_condition2$average)) / (nrow(pheno_condition2))
+  if (nrow(pheno_condition1) == 1) {
+    betas_condition1['average'] <- betas_condition1[,1]
+    betas_condition2['average'] <- betas_condition2[,1]
+  } else {
+    betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
+    betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
+    betas_condition1$average <-as.numeric(as.character(betas_condition1$average)) / (nrow(pheno_condition1))
+    betas_condition2$average <-as.numeric(as.character(betas_condition2$average)) / (nrow(pheno_condition2))
+  }
   betas_condition1$Name <- row.names(betas_condition1)
   betas_condition2$Name <- row.names(betas_condition2)
   betas_condition1 <- betas_condition1[,c(ncol(betas_condition1), (ncol(betas_condition1)-1))]
@@ -411,19 +416,18 @@ for (outcome in eGFR_List) {
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_Low_High-K2_Low_High", sample_num, nrow(DMPs2_sig))
   
-  #Comparison 3 commented out due to single pair 
-  # DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
-  # DMPs3 <- data.frame(DMPs3)
-  # deltaBeta_df <- get_deltaBeta("K1_High_Low", "K2_High_Low", pheno)
-  # sample_num <- nrow(subset(pheno, (condition == 'K1_High_Low' | condition == 'K2_High_Low')))
-  # DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
-  # output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs.csv", sep="-")
-  # write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  # DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
-  # print(dim(DMPs3_sig))
-  # output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs_sig.csv", sep="-")
-  # write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-  # log_df[nrow(log_df) + 1,] <- c("K1_High_Low-K2_High_Low", sample_num, nrow(DMPs3_sig))
+  DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
+  DMPs3 <- data.frame(DMPs3)
+  deltaBeta_df <- get_deltaBeta("K1_High_Low", "K2_High_Low", pheno)
+  sample_num <- nrow(subset(pheno, (condition == 'K1_High_Low' | condition == 'K2_High_Low')))
+  DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
+  output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs.csv", sep="-")
+  write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
+  print(dim(DMPs3_sig))
+  output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs_sig.csv", sep="-")
+  write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K1_High_Low-K2_High_Low", sample_num, nrow(DMPs3_sig))
   
   DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
   DMPs4 <- data.frame(DMPs4)
@@ -443,7 +447,7 @@ for (outcome in eGFR_List) {
   
   generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
   generate_man(DMPs2, 'K1_Low_High-K2_Low_High', outcome)
-  # generate_man(DMPs3, 'K1_High_Low-K2_High_Low', outcome)
+  generate_man(DMPs3, 'K1_High_Low-K2_High_Low', outcome)
   generate_man(DMPs4, 'K1_Low_Low-K2_Low_Low', outcome)
   
 }
