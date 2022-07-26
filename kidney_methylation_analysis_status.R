@@ -443,7 +443,7 @@ for (outcome in eGFR_List) {
   
   generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
   generate_man(DMPs2, 'K1_Low_High-K2_Low_High', outcome)
-  generate_man(DMPs3, 'K1_High_Low-K2_High_Low', outcome)
+  # generate_man(DMPs3, 'K1_High_Low-K2_High_Low', outcome)
   generate_man(DMPs4, 'K1_Low_Low-K2_Low_Low', outcome)
   
 }
