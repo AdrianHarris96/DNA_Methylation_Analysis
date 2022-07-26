@@ -318,9 +318,6 @@ for (outcome in eGFR_List) {
   #Addition of condition column 
   pheno$condition <- 'NA'
   
-  
-  print(pheno)
-  
   #Filling of condition column
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1') {
@@ -348,6 +345,14 @@ for (outcome in eGFR_List) {
   
   #if condition is NA, drop it
   pheno <- pheno[!(pheno$condition == 'NA'),]
+  
+  #Subset to check numbers for each condition
+  print(nrow(subset(pheno, condition == 'K1_High_High')))
+  print(nrow(subset(pheno, condition == 'K1_Low_High')))
+  print(nrow(subset(pheno, condition == 'K1_High_Low')))
+  print(nrow(subset(pheno, condition == 'K1_Low_Low')))
+  
+  q()
   
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
