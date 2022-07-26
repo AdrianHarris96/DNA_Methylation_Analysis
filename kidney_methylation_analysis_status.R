@@ -278,9 +278,10 @@ get_deltaBeta <- function(cond1, cond2, phenotype) {
   pheno_condition2 <- phenotype[(phenotype$condition == cond2),]
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_id)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_id)]
+  print(dim(betas_condition1))
   if (nrow(pheno_condition1) == 1) {
-    betas_condition1['average'] <- betas_condition1[,1]
-    betas_condition2['average'] <- betas_condition2[,1]
+    betas_condition1['average'] <- betas_condition1[,1:ncol(betas_condition1)]
+    betas_condition2['average'] <- betas_condition2[,1:ncol(betas_condition2)]
   } else {
     betas_condition1['average'] <- rowSums(betas_condition1[,1:ncol(betas_condition1)])
     betas_condition2['average'] <- rowSums(betas_condition2[,1:ncol(betas_condition2)])
