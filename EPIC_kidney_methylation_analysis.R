@@ -515,9 +515,6 @@ for (outcome in eGFR_List) {
   
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
-  print(pheno$Basename)
-  print(colnames(m_values_condition))
-  q()
   
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
@@ -634,7 +631,93 @@ for (outcome in eGFR_List) {
   generate_man(DMPs4, 'K1_Low-K2_Low', outcome)
   generate_man(DMPs5, 'K1_High-K2_Low', outcome)
   generate_man(DMPs6, 'K1_Low-K2_High', outcome)
-
+  
+  library(DMRcate)
+  #1 DMRs - K1_Low-K1_High
+  if (nrow(DMPs1_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design, 
+                                 contrasts = TRUE, cont.matrix = contMatrix, 
+                                 coef = "K1_Low - K1_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    results.ranges <- extractRanges(DMRs, genome = "hg19")
+    output <- paste(outcome, "K1_Low-K1_High_DMRs.csv", sep="-")
+    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+  }
+  
+  #2 DMRs - K2_Low-K2_High
+  if (nrow(DMPs2_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design, 
+                                 contrasts = TRUE, cont.matrix = contMatrix, 
+                                 coef = "K2_Low - K2_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    results.ranges <- extractRanges(DMRs, genome = "hg19")
+    output <- paste(outcome, "K2_Low-K2_High_DMRs.csv", sep="-")
+    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+  }
+  
+  #3 DMRs - K1_High-K2_High
+  if (nrow(DMPs3_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design, 
+                                 contrasts = TRUE, cont.matrix = contMatrix, 
+                                 coef = "K1_High - K2_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    results.ranges <- extractRanges(DMRs, genome = "hg19")
+    output <- paste(outcome, "K1_High-K2_High_DMRs.csv", sep="-")
+    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+  }
+  
+  #4 DMRs - K1_Low-K2_Low
+  if (nrow(DMPs4_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design, 
+                                 contrasts = TRUE, cont.matrix = contMatrix, 
+                                 coef = "K1_Low - K2_Low", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    results.ranges <- extractRanges(DMRs, genome = "hg19")
+    output <- paste(outcome, "K1_Low-K2_Low_DMRs.csv", sep="-")
+    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+  }
+  
+  
+  #5 DMRs - K1_High-K2_Low
+  if (nrow(DMPs5_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design, 
+                                 contrasts = TRUE, cont.matrix = contMatrix, 
+                                 coef = "K1_High - K2_Low", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    results.ranges <- extractRanges(DMRs, genome = "hg19")
+    output <- paste(outcome, "K1_High-K2_Low_DMRs.csv", sep="-")
+    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+  }
+  
+  
+  #6 DMRs - K1_Low-K2_High
+  if (nrow(DMPs6_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design, 
+                                 contrasts = TRUE, cont.matrix = contMatrix, 
+                                 coef = "K1_Low - K2_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    results.ranges <- extractRanges(DMRs, genome = "hg19")
+    output <- paste(outcome, "K1_Low-K2_High_DMRs.csv", sep="-")
+    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+  }
 }
 
 q()
