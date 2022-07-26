@@ -247,178 +247,6 @@ pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "20225935
 
 m_values <- beta2m(beta_values_filtered)
 
-clustering <- function(pheno, month, comparison, betas) {
-  #Drop other columns and rename eGFR_month -> eGFR
-  if (month == 'eGFR_1month') {
-    pheno <- subset(pheno, select = -c(eGFR_12month, eGFR_24month))
-    pheno <- pheno %>% rename('eGFR' = 'eGFR_1month')
-  } else if (month == 'eGFR_12month') {
-    pheno <- subset(pheno, select = -c(eGFR_1month, eGFR_24month))
-    pheno <- pheno %>% rename('eGFR' = 'eGFR_12month')
-  } else {
-    pheno <- subset(pheno, select = -c(eGFR_1month, eGFR_12month))
-    pheno <- pheno %>% rename('eGFR' = 'eGFR_24month')
-  }
-  
-  #Filtering the dataframe down
-  if (comparison == 'K1_Low_K1_High') {
-    pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K1' & pheno$eGFR == 'High')),]
-  } else if (comparison == 'K2_Low_K2_High') {
-    pheno <- pheno[((pheno$time == 'K2' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
-  } else if (comparison == 'K1_High_K2_High') {
-    pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'High') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
-  } else if (comparison == 'K1_Low_K2_Low') {
-    pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'Low')),]
-  } else if (comparison == 'K1_High_K2_Low') {
-    pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'High') | (pheno$time == 'K2' & pheno$eGFR == 'Low')),]
-  } else if (comparison == 'K1_Low_K2_High') {
-    pheno <- pheno[((pheno$time == 'K1' & pheno$eGFR == 'Low') | (pheno$time == 'K2' & pheno$eGFR == 'High')),]
-  } else {
-    cat('Comparison request does not exist\n')
-  }
-  
-  #Filter beta dataframe using column names for the relevant comparison
-  beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno$Basename)]
-  # dim(beta_values_filtered)
-  
-  cat("PCA plots - Betas\n")
-  #Transpose betas and generate PCA plot
-  transposed_beta <- t(betas) #t(beta_values_case)
-  transposed_beta <- data.frame(transposed_beta)
-  pca_general <- prcomp(transposed_beta, center=TRUE)
-  var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
-  scores = as.data.frame(pca_general$x)
-  scores['Basename'] <- row.names(scores)
-  scores <- merge(scores, pheno, by = 'Basename')
-  output <- paste(month, "_", sep="")
-  output <- paste(output, comparison, sep="")
-  title <- paste(output, "_betas", sep="")
-  output_path <- paste(output_dir, title, sep="")
-  #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
-  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
-  #plot + geom_text(aes(label = sample_id), size=3.5) + xlim(-100, 400)
-  print(plot)
-  #dev.off()
-  #Converting NAs to 0 in donor_age
-  vec <- scores$donor_age
-  vec[is.na(vec)] <- 0
-  scores$donor_age <- vec
-  
-  if (length(unique(scores$donor_gender)) == 3) {
-    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 2, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " _PCA - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c("grey", pal[1], pal[2])) + theme_bw()
-  } else {
-    plot2 <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=donor_gender)) + geom_point(size = 2, alpha = 0.5) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + ggtitle(paste(title, " -PCA - donor gender and donor age", sep="")) + geom_text(aes(label=donor_age), size=1.75, colour="black") + scale_color_manual(values=c(pal[1], pal[2])) + theme_bw()
-  }
-  print(plot2)
-  
-  #m_values <- beta2m(betas)
-  # cat("PCA plots - m_values\n")
-  # #Transpose resulting PCA plot - m_values
-  # transposed_m <- t(m_values) 
-  # transposed_m <- data.frame(transposed_m)
-  # pca_general <- prcomp(transposed_m, center=TRUE)
-  # var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
-  # scores = as.data.frame(pca_general$x)
-  # scores['Basename'] <- row.names(scores)
-  # scores <- merge(scores, pheno, by = 'Basename')
-  # title <- paste(output, "_m", sep="")
-  # output_path <- paste(output_dir, title, sep="")
-  # #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
-  # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
-  # #plot + geom_text(aes(label = sample_id), size=3.5) + xlim(-100, 400)
-  # print(plot)
-  # #dev.off()
-  return('Clustering\n')
-}
-
-#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-#comp_List <- c('Low_High')
-eGFR_List <- c('eGFR_1month')
-comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
-
-
-# pdf(file = paste(output_dir, "eGFR1month_comparisons.pdf", sep=""))
-# for (comp in comp_List) {
-#   for (outcome in eGFR_List) {
-#     clustering(pheno_df, outcome, comp, beta_values_filtered)
-#   }
-# }
-# 
-# dev.off()
-
-#Generate dendrogram 
-generate_dendro <- function(beta, pheno, timepoint){
-  beta_t <- data.frame(t(beta))
-  row.names(pheno) <- pheno$Basename
-  if (timepoint == 'K1') {
-    pheno <- pheno[(pheno$time == 'K1'),]
-  } else if (timepoint == 'K2') {
-    pheno <- pheno[(pheno$time == 'K2'),]
-  } else {
-    cat("Skip filtering down")
-  }
-  
-  pheno <- pheno %>% select(c('sample_id', 'donor_age', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month'))
-  
-  final_beta <- merge(pheno, beta_t, by='row.names')
-  
-  #Creating new labels/corresponding columns and moving toward front of dataframe
-  final_beta['sample_id_age'] <- 'na'
-  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
-  final_beta['sample_id_eGFR1'] <- 'na'
-  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
-  final_beta['sample_id_eGFR12'] <- 'na'
-  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
-  final_beta['sample_id_eGFR24'] <- 'na'
-  final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
-  
-  #Filling these new columns
-  for (row in 1:nrow(final_beta)) {
-    age <- paste(final_beta[row, 'sample_id'], final_beta[row, 'donor_age'], sep = " ")
-    eGFR1 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_1month'], sep = " ")
-    eGFR12 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_12month'], sep = " ")
-    eGFR24 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_24month'], sep = " ")
-    final_beta[row, 'sample_id_age'] <- age
-    final_beta[row, 'sample_id_eGFR1'] <- eGFR1
-    final_beta[row, 'sample_id_eGFR12'] <- eGFR12
-    final_beta[row, 'sample_id_eGFR24'] <- eGFR24
-  }
-  
-  #Generate dendrograms for each label
-  dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
-  pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
-  row.names(final_beta) <- final_beta$sample_id_age
-  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  dend <- as.dendrogram(clusters)
-  dend <- set(dend, "labels_cex", 0.3)
-  plot(dend, xlab = "Sample ID and Donor Age", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
-  
-  row.names(final_beta) <- final_beta$sample_id_eGFR1
-  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  dend <- as.dendrogram(clusters)
-  dend <- set(dend, "labels_cex", 0.3)
-  plot(dend, xlab = "Sample ID and 1month eGFR Status", ylab="Height", main= paste(timepoint, "- eGFR 1month Dendrogram", sep = " "))
-  
-  row.names(final_beta) <- final_beta$sample_id_eGFR12
-  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  dend <- as.dendrogram(clusters)
-  dend <- set(dend, "labels_cex", 0.3)
-  plot(dend, xlab = "Sample ID and 12month eGFR Status", ylab="Height",  main= paste(timepoint, "- eGFR 12month Dendrogram", sep = " "))
-  
-  row.names(final_beta) <- final_beta$sample_id_eGFR24
-  clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
-  dend <- as.dendrogram(clusters)
-  dend <- set(dend, "labels_cex", 0.3)
-  plot(dend, xlab = "Sample ID and 24month eGFR Status", ylab="Height", main= paste(timepoint, "- eGFR 24month Dendrogram", sep = " "))
-  
-  dev.off()
-}
-
-# timeList <- c('K1-K2')
-# for (time in timeList) {
-#   generate_dendro(beta_values_filtered, pheno_df, time)
-# }
-
 #Function for generating manhattan plots
 library(qqman)
 library(DMRcate)
@@ -475,12 +303,12 @@ for (outcome in eGFR_List) {
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month-eGFR_12month') {
     pheno <- subset(pheno_df, select = -c(eGFR_24month))
-    pheno <- pheno %>% rename('eGFR1' = 'eGFR_1month')
-    pheno <- pheno %>% rename('eGFR2' == 'eGFR_12month')
+    pheno <- pheno %>% rename(eGFR1 = eGFR_1month)
+    pheno <- pheno %>% rename(eGFR2 == eGFR_12month)
   } else {
     pheno <- subset(pheno_df, select = -c(eGFR_1month))
-    pheno <- pheno %>% rename('eGFR1' = 'eGFR_12month')
-    pheno <- pheno %>% rename('eGFR2' == 'eGFR_24month')
+    pheno <- pheno %>% rename(eGFR1 = eGFR_12month)
+    pheno <- pheno %>% rename(eGFR2 == eGFR_24month)
   }
   
   #Addition of condition column 
