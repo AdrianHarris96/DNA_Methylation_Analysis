@@ -303,12 +303,10 @@ for (outcome in eGFR_List) {
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month-eGFR_12month') {
     pheno <- subset(pheno_df, select = -c(eGFR_24month))
-    pheno <- pheno %>% rename(eGFR1 = eGFR_1month)
-    pheno <- pheno %>% rename(eGFR2 == eGFR_12month)
+    pheno <- pheno %>% rename('eGFR1' = 'eGFR_1month', 'eGFR2' == 'eGFR_12month')
   } else {
     pheno <- subset(pheno_df, select = -c(eGFR_1month))
-    pheno <- pheno %>% rename(eGFR1 = eGFR_12month)
-    pheno <- pheno %>% rename(eGFR2 == eGFR_24month)
+    pheno <- pheno %>% rename('eGFR1' = 'eGFR_12month', 'eGFR2' == 'eGFR_24month')
   }
   
   #Addition of condition column 
