@@ -303,10 +303,10 @@ for (outcome in eGFR_List) {
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
   if (outcome == 'eGFR_1month-eGFR_12month') {
     pheno <- subset(pheno_df, select = -c(eGFR_24month))
-    pheno <- rename(pheno, 'eGFR1' = 'eGFR_1month', 'eGFR2' == 'eGFR_12month')
+    pheno <- rename(pheno, "first_status" = "eGFR_1month", "second_status" == "eGFR_12month")
   } else {
     pheno <- subset(pheno_df, select = -c(eGFR_1month))
-    pheno <- rename(pheno, 'eGFR1' = 'eGFR_12month', 'eGFR2' == 'eGFR_24month')
+    pheno <- rename(pheno, "first_status" = "eGFR_12month", "second_status" == "eGFR_24month")
   }
   
   #Addition of condition column 
@@ -315,23 +315,23 @@ for (outcome in eGFR_List) {
   #Filling of condition column
   for (row in 1:nrow(pheno)) {
     if (pheno[row, 'time'] == 'K1') {
-      if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'High') {
+      if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'High') {
         pheno[row, 'condition'] <- "K1_High_High"
-      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'High') {
+      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'High') {
         pheno[row, 'condition'] <- "K1_Low_High"
-      } else if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'Low') {
+      } else if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'Low') {
         pheno[row, 'condition'] <- "K1_High_Low"
-      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'Low') {
+      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'Low') {
         pheno[row, 'condition'] <- "K1_Low_Low"
       }
     } else {
-      if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'High') {
+      if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'High') {
         pheno[row, 'condition'] <- "K2_High_High"
-      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'High') {
+      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'High') {
         pheno[row, 'condition'] <- "K2_Low_High"
-      } else if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'Low') {
+      } else if (pheno[row, 'first_status'] == 'High' & pheno[row, 'second_status'] == 'Low') {
         pheno[row, 'condition'] <- "K2_High_Low"
-      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'Low') {
+      } else if (pheno[row, 'first_status'] == 'Low' & pheno[row, 'second_status'] == 'Low') {
         pheno[row, 'condition'] <- "K2_Low_Low"
       }
     }
