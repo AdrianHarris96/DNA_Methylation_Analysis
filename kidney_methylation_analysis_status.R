@@ -351,6 +351,10 @@ for (outcome in eGFR_List) {
   print(nrow(subset(pheno, condition == 'K1_Low_High')))
   print(nrow(subset(pheno, condition == 'K1_High_Low')))
   print(nrow(subset(pheno, condition == 'K1_Low_Low')))
+  print(nrow(subset(pheno, condition == 'K2_High_High')))
+  print(nrow(subset(pheno, condition == 'K2_Low_High')))
+  print(nrow(subset(pheno, condition == 'K2_High_Low')))
+  print(nrow(subset(pheno, condition == 'K2_Low_Low')))
   
   q()
   
@@ -409,18 +413,19 @@ for (outcome in eGFR_List) {
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_Low_High-K2_Low_High", sample_num, nrow(DMPs2_sig))
   
-  DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
-  DMPs3 <- data.frame(DMPs3)
-  deltaBeta_df <- get_deltaBeta("K1_High_Low", "K2_High_Low", pheno)
-  sample_num <- nrow(subset(pheno, (condition == 'K1_High_Low' | condition == 'K2_High_Low')))
-  DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
-  output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs.csv", sep="-")
-  write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
-  print(dim(DMPs3_sig))
-  output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs_sig.csv", sep="-")
-  write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-  log_df[nrow(log_df) + 1,] <- c("K1_High_Low-K2_High_Low", sample_num, nrow(DMPs3_sig))
+  #Comparison 3 commented out due to single pair 
+  # DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
+  # DMPs3 <- data.frame(DMPs3)
+  # deltaBeta_df <- get_deltaBeta("K1_High_Low", "K2_High_Low", pheno)
+  # sample_num <- nrow(subset(pheno, (condition == 'K1_High_Low' | condition == 'K2_High_Low')))
+  # DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
+  # output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs.csv", sep="-")
+  # write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  # DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
+  # print(dim(DMPs3_sig))
+  # output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs_sig.csv", sep="-")
+  # write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  # log_df[nrow(log_df) + 1,] <- c("K1_High_Low-K2_High_Low", sample_num, nrow(DMPs3_sig))
   
   DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
   DMPs4 <- data.frame(DMPs4)
