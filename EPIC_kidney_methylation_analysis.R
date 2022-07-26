@@ -643,9 +643,13 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K1_Low - K1_High", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    results.ranges <- extractRanges(DMRs, genome = "hg19")
-    output <- paste(outcome, "K1_Low-K1_High_DMRs.csv", sep="-")
-    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    if (is.null(DMRs)) {
+      ('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_Low-K1_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
   }
   
   #2 DMRs - K2_Low-K2_High
@@ -657,9 +661,13 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K2_Low - K2_High", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    results.ranges <- extractRanges(DMRs, genome = "hg19")
-    output <- paste(outcome, "K2_Low-K2_High_DMRs.csv", sep="-")
-    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    if (is.null(DMRs)) {
+      ('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K2_Low-K2_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
   }
   
   #3 DMRs - K1_High-K2_High
@@ -671,9 +679,13 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K1_High - K2_High", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    results.ranges <- extractRanges(DMRs, genome = "hg19")
-    output <- paste(outcome, "K1_High-K2_High_DMRs.csv", sep="-")
-    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    if (is.null(DMRs)) {
+      ('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_High-K2_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
   }
   
   #4 DMRs - K1_Low-K2_Low
@@ -685,9 +697,13 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K1_Low - K2_Low", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    results.ranges <- extractRanges(DMRs, genome = "hg19")
-    output <- paste(outcome, "K1_Low-K2_Low_DMRs.csv", sep="-")
-    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    if (is.null(DMRs)) {
+      ('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_Low-K2_Low_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
   }
   
   #5 DMRs - K1_High-K2_Low
@@ -699,10 +715,13 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K1_High - K2_Low", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    print(DMRs)
-    results.ranges <- extractRanges(DMRs, genome = "hg19")
-    output <- paste(outcome, "K1_High-K2_Low_DMRs.csv", sep="-")
-    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    if (is.null(DMRs)) {
+      ('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_High-K2_Low_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
   }
   
   #6 DMRs - K1_Low-K2_High
@@ -714,9 +733,13 @@ for (outcome in eGFR_List) {
                                  contrasts = TRUE, cont.matrix = contMatrix, 
                                  coef = "K1_Low - K2_High", arraytype = "EPIC")
     DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-    results.ranges <- extractRanges(DMRs, genome = "hg19")
-    output <- paste(outcome, "K1_Low-K2_High_DMRs.csv", sep="-")
-    write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    if (is.null(DMRs)) {
+      ('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_Low-K2_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
   }
 }
 
