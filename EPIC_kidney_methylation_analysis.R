@@ -469,8 +469,9 @@ library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 
 #Vector of eGFR statuses
-eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-#eGFR_List <- c('eGFR_1month')
+#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+eGFR_List <- c('eGFR_12month')
+#eGFR_List <- c('eGFR_24month')
 for (outcome in eGFR_List) {
   cat("Identify CpGs\n")
   log_df <- data.frame(comparison = character(), number_of_samples = double(), number_of_sig_DMPs = double())
@@ -689,7 +690,6 @@ for (outcome in eGFR_List) {
     write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
   }
   
-  
   #5 DMRs - K1_High-K2_Low
   if (nrow(DMPs5_sig) == 0) {
     print('Skip writing DMRs CSV - no significant DMPs')
@@ -703,7 +703,6 @@ for (outcome in eGFR_List) {
     output <- paste(outcome, "K1_High-K2_Low_DMRs.csv", sep="-")
     write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
   }
-  
   
   #6 DMRs - K1_Low-K2_High
   if (nrow(DMPs6_sig) == 0) {
