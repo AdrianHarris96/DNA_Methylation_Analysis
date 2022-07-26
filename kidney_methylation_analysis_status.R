@@ -347,16 +347,14 @@ for (outcome in eGFR_List) {
   pheno <- pheno[!(pheno$condition == 'NA'),]
   
   #Subset to check numbers for each condition
-  print(nrow(subset(pheno, condition == 'K1_High_High')))
-  print(nrow(subset(pheno, condition == 'K1_Low_High')))
-  print(nrow(subset(pheno, condition == 'K1_High_Low')))
-  print(nrow(subset(pheno, condition == 'K1_Low_Low')))
-  print(nrow(subset(pheno, condition == 'K2_High_High')))
-  print(nrow(subset(pheno, condition == 'K2_Low_High')))
-  print(nrow(subset(pheno, condition == 'K2_High_Low')))
-  print(nrow(subset(pheno, condition == 'K2_Low_Low')))
-  
-  q()
+  # print(nrow(subset(pheno, condition == 'K1_High_High')))
+  # print(nrow(subset(pheno, condition == 'K1_Low_High')))
+  # print(nrow(subset(pheno, condition == 'K1_High_Low')))
+  # print(nrow(subset(pheno, condition == 'K1_Low_Low')))
+  # print(nrow(subset(pheno, condition == 'K2_High_High')))
+  # print(nrow(subset(pheno, condition == 'K2_Low_High')))
+  # print(nrow(subset(pheno, condition == 'K2_High_Low')))
+  # print(nrow(subset(pheno, condition == 'K2_Low_Low')))
   
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
