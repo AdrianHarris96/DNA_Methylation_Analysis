@@ -462,8 +462,8 @@ library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann450k <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 
 #Vector of eGFR statuses
-#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-eGFR_List <- c('eGFR_12month')
+eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+#eGFR_List <- c('eGFR_12month')
 #eGFR_List <- c('eGFR_24month')
 for (outcome in eGFR_List) {
   cat("Identify CpGs\n")
