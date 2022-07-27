@@ -517,6 +517,9 @@ for (outcome in eGFR_List) {
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   
+  # Probe-wise differential methylation analysis
+  condition <- factor(pheno$condition)
+  
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
   colnames(design) <- c("K1_High", "K1_Low", "K2_High", "K2_Low")
