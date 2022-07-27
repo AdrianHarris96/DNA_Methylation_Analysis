@@ -240,10 +240,10 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # print(pheno_df$Basename)
 # print(colnames(beta_values_filtered))
 
-#Exclude DCD samples - Kidney data
-beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
+#Exclude DCD samples - Kidney data - Do not remove the DCD samples for kidney after speaking with Haseeb
+#beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
 #Removing rows based on the sample_name column in phenotype dataframe
-pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
+#pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
 
 m_values <- beta2m(beta_values_filtered)
 
@@ -331,9 +331,9 @@ clustering <- function(pheno, month, comparison, betas) {
   return('Clustering\n')
 }
 
-#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
 #comp_List <- c('Low_High')
-eGFR_List <- c('eGFR_1month')
+#eGFR_List <- c('eGFR_1month')
 comp_List <- c('K1_Low_K1_High', 'K2_Low_K2_High', 'K1_High_K2_High', 'K1_Low_K2_Low', 'K1_High_K2_Low', 'K1_Low_K2_High')
 
 
@@ -469,8 +469,8 @@ library(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 annEPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
 
 #Vector of eGFR statuses
-#eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
-eGFR_List <- c('eGFR_12month')
+eGFR_List <- c('eGFR_1month', 'eGFR_12month', 'eGFR_24month')
+#eGFR_List <- c('eGFR_12month')
 #eGFR_List <- c('eGFR_24month')
 for (outcome in eGFR_List) {
   cat("Identify CpGs\n")
