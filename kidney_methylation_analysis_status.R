@@ -278,7 +278,7 @@ get_deltaBeta <- function(cond1, cond2, phenotype) {
   pheno_condition2 <- phenotype[(phenotype$condition == cond2),]
   betas_condition1 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition1$sample_id)]
   betas_condition2 <- newBeta_df[,(colnames(newBeta_df) %in% pheno_condition2$sample_id)]
-  print(dim(betas_condition1))
+  #print(dim(betas_condition1))
   if (nrow(pheno_condition1) == 1) {
     betas_condition1['average'] <- betas_condition1[,1:ncol(betas_condition1)]
     betas_condition2['average'] <- betas_condition2[,1:ncol(betas_condition2)]
@@ -427,9 +427,63 @@ for (outcome in eGFR_List) {
   final_title <- paste(outcome, "_EPIC_kidney_status_log.csv", sep="")
   write.csv(log_df, file = paste(output_dir, final_title, sep=""), row.names = FALSE)
   
-  generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
-  generate_man(DMPs2, 'K1_Low_Low-K2_Low_Low', outcome)
-  generate_man(DMPs3, 'K1_Low_Low-K1_High_High', outcome)
+  # generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
+  # generate_man(DMPs2, 'K1_Low_Low-K2_Low_Low', outcome)
+  # generate_man(DMPs3, 'K1_Low_Low-K1_High_High', outcome)
+  
+  #1 DMRs - K1_High_High-K2_High_High
+  if (nrow(DMPs1_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design,
+                                 contrasts = TRUE, cont.matrix = contMatrix,
+                                 coef = "K1_High_High - K2_High_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    if (is.null(DMRs)) {
+      print('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_High_High-K2_High_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
+  }
+
+  #2 DMRs - K1_Low_Low-K2_Low_Low
+  if (nrow(DMPs2_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design,
+                                 contrasts = TRUE, cont.matrix = contMatrix,
+                                 coef = "K1_Low_Low - K2_Low_Low", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    if (is.null(DMRs)) {
+      print('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_Low_Low-K2_Low_Low_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
+  }
+
+  #3 DMRs - K1_Low_Low-K1_High_High
+  if (nrow(DMPs3_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design,
+                                 contrasts = TRUE, cont.matrix = contMatrix,
+                                 coef = "K1_Low_Low - K1_High_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    if (is.null(DMRs)) {
+      print('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K1_Low_Low-K1_High_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
+  }
   
 }
 
