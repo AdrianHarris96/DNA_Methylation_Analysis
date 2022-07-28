@@ -405,7 +405,11 @@ generate_dendro <- function(beta, pheno, timepoint){
   
   #Filling these new columns
   for (row in 1:nrow(final_beta)) {
-    cit <- paste(final_beta[row, 'sample_id'], final_beta[row, 'ICT'], sep = " ")
+    if (final_beta[row, 'ICT'] == '') {
+      cit <- final_beta[row, 'sample_id']
+    } else {
+      cit <- paste(final_beta[row, 'sample_id'], final_beta[row, 'ICT'], sep = " ")
+    }
     eGFR1 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_1month'], sep = " ")
     eGFR12 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_12month'], sep = " ")
     eGFR24 <- paste(final_beta[row, 'sample_id'], final_beta[row, 'eGFR_24month'], sep = " ")
