@@ -689,15 +689,15 @@ generate_man <- function(DMPs, comp) {
   return("Done with manhattan plot")
 }
 
-# generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
-# generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
-# generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
-# generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
-# generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
-# generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
-# generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
-# generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
-# generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
+generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
+generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
+generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
+generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
+generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
+generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
+generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
+generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
+generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
 
 library(DMRcate)
 #Specify groups for DMR.plot 
