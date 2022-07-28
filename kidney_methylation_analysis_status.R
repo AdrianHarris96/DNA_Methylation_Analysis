@@ -241,9 +241,9 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # print(colnames(beta_values_filtered))
 
 #Exclude DCD samples - Kidney data
-beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
-#Removing rows based on the sample_name column in phenotype dataframe
-pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
+# beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
+# #Removing rows based on the sample_name column in phenotype dataframe
+# pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
 
 m_values <- beta2m(beta_values_filtered)
 
@@ -329,20 +329,12 @@ for (outcome in eGFR_List) {
     if (pheno[row, 'time'] == 'K1') {
       if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'High') {
         pheno[row, 'condition'] <- "K1_High_High"
-      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'High') {
-        pheno[row, 'condition'] <- "K1_Low_High"
-      } else if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'Low') {
-        pheno[row, 'condition'] <- "K1_High_Low"
       } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'Low') {
         pheno[row, 'condition'] <- "K1_Low_Low"
       }
     } else {
       if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'High') {
         pheno[row, 'condition'] <- "K2_High_High"
-      } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'High') {
-        pheno[row, 'condition'] <- "K2_Low_High"
-      } else if (pheno[row, 'eGFR1'] == 'High' & pheno[row, 'eGFR2'] == 'Low') {
-        pheno[row, 'condition'] <- "K2_High_Low"
       } else if (pheno[row, 'eGFR1'] == 'Low' & pheno[row, 'eGFR2'] == 'Low') {
         pheno[row, 'condition'] <- "K2_Low_Low"
       }
@@ -365,20 +357,22 @@ for (outcome in eGFR_List) {
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   
+  # Probe-wise differential methylation analysis
+  condition <- factor(pheno$condition)
+  
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
-  colnames(design) <- c("K1_High_High", "K1_Low_High", "K1_High_Low", "K1_Low_Low", "K2_High_High", "K2_Low_High", "K2_High_Low", "K2_Low_Low")
+  colnames(design) <- c("K1_High_High", "K1_Low_Low", "K2_High_High", "K2_Low_Low")
   
   # fit the linear model 
   fit1 <- lmFit(m_values_condition, design)
   # create a contrast matrix for specific comparisons
   contMatrix <- makeContrasts(K1_High_High-K2_High_High,
-                              K1_Low_High-K2_Low_High,
-                              K1_High_Low-K2_High_Low,
                               K1_Low_Low-K2_Low_Low,
+                              K1_Low_Low-K1_High_High,
                               levels=design)
   
-  contMatrix
+  #contMatrix
   
   # fit the contrasts
   fit2 <- contrasts.fit(fit1, contMatrix)
@@ -406,50 +400,36 @@ for (outcome in eGFR_List) {
   
   DMPs2 <- topTable(fit2, num=Inf, coef=2, genelist=annEPICSub)
   DMPs2 <- data.frame(DMPs2)
-  deltaBeta_df <- get_deltaBeta("K1_Low_High", "K2_Low_High", pheno)
-  sample_num <- nrow(subset(pheno, (condition == 'K1_Low_High' | condition == 'K2_Low_High')))
+  deltaBeta_df <- get_deltaBeta("K1_Low_Low", "K2_Low_Low", pheno)
+  sample_num <- nrow(subset(pheno, (condition == 'K1_Low_Low' | condition == 'K2_Low_Low')))
   DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
-  output <- paste(outcome, "K1_Low_High-K2_Low_High_DMPs.csv", sep="-")
+  output <- paste(outcome, "K1_Low_Low-K2_Low_Low_DMPs.csv", sep="-")
   write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
   print(dim(DMPs2_sig))
-  output <- paste(outcome, "K1_Low_High-K2_Low_High_DMPs_sig.csv", sep="-")
+  output <- paste(outcome, "K1_Low_Low-K2_Low_Low_DMPs_sig.csv", sep="-")
   write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-  log_df[nrow(log_df) + 1,] <- c("K1_Low_High-K2_Low_High", sample_num, nrow(DMPs2_sig))
+  log_df[nrow(log_df) + 1,] <- c("K1_Low_Low-K2_Low_Low", sample_num, nrow(DMPs2_sig))
   
   DMPs3 <- topTable(fit2, num=Inf, coef=3, genelist=annEPICSub)
   DMPs3 <- data.frame(DMPs3)
-  deltaBeta_df <- get_deltaBeta("K1_High_Low", "K2_High_Low", pheno)
-  sample_num <- nrow(subset(pheno, (condition == 'K1_High_Low' | condition == 'K2_High_Low')))
+  deltaBeta_df <- get_deltaBeta("K1_Low_Low", "K1_High_High", pheno)
+  sample_num <- nrow(subset(pheno, (condition == 'K1_Low_Low' | condition == 'K1_High_High')))
   DMPs3 <- merge(DMPs3, deltaBeta_df, by = 'Name')
-  output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs.csv", sep="-")
-  write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  output <- paste(outcome, "K1_Low_Low-K1_High_High_DMPs.csv", sep="-")
+  write.csv(DMPs3, file = paste(output_dir, output, sep=""), row.names = FALSE) 
   DMPs3_sig <- DMPs3[(DMPs3$adj.P.Val < 0.05),]
   print(dim(DMPs3_sig))
-  output <- paste(outcome, "K1_High_Low-K2_High_Low_DMPs_sig.csv", sep="-")
+  output <- paste(outcome, "K1_Low_Low-K1_High_High_DMPs_sig.csv", sep="-")
   write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-  log_df[nrow(log_df) + 1,] <- c("K1_High_Low-K2_High_Low", sample_num, nrow(DMPs3_sig))
+  log_df[nrow(log_df) + 1,] <- c("K1_Low_Low-K1_High_High", sample_num, nrow(DMPs3_sig))
   
-  DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
-  DMPs4 <- data.frame(DMPs4)
-  deltaBeta_df <- get_deltaBeta("K1_Low_Low", "K2_Low_Low", pheno)
-  sample_num <- nrow(subset(pheno, (condition == 'K1_Low_Low' | condition == 'K2_Low_Low')))
-  DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
-  output <- paste(outcome, "K1_Low_Low-K2_Low_Low_DMPs.csv", sep="-")
-  write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
-  print(dim(DMPs4_sig))
-  output <- paste(outcome, "K1_Low_Low-K2_Low_Low_DMPs_sig.csv", sep="-")
-  write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
-  log_df[nrow(log_df) + 1,] <- c("K1_Low_Low-K2_Low_Low", sample_num, nrow(DMPs4_sig))
-  
-  final_title <- paste(outcome, "_EPIC_kidney_log.csv", sep="")
+  final_title <- paste(outcome, "_EPIC_kidney_status_log.csv", sep="")
   write.csv(log_df, file = paste(output_dir, final_title, sep=""), row.names = FALSE)
   
   generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
-  generate_man(DMPs2, 'K1_Low_High-K2_Low_High', outcome)
-  generate_man(DMPs3, 'K1_High_Low-K2_High_Low', outcome)
-  generate_man(DMPs4, 'K1_Low_Low-K2_Low_Low', outcome)
+  generate_man(DMPs2, 'K1_Low_Low-K2_Low_Low', outcome)
+  generate_man(DMPs3, 'K1_Low_Low-K1_High_High', outcome)
   
 }
 
