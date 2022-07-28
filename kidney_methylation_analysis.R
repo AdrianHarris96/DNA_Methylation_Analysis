@@ -6,6 +6,7 @@ library(tidyverse)
 library(RColorBrewer)
 library(limma)
 library(dendextend)
+library(sva)
 
 #Example input: Rscript methylation_analysis.R <pheno_file> <paired_pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
