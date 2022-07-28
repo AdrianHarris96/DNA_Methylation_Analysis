@@ -233,10 +233,10 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 # print(pheno_df$Basename)
 # print(colnames(beta_values_filtered))
 
-#Exclude DCD samples - Kidney data
-beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
-#Removing rows based on the sample_name column in phenotype dataframe
-pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
+#Exclude DCD samples - Kidney data - Do not remove per Haseeb's request
+# beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
+# #Removing rows based on the sample_name column in phenotype dataframe
+# pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
 
 m_values <- beta2m(beta_values_filtered)
 
@@ -509,6 +509,9 @@ for (outcome in eGFR_List) {
   
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
+  
+  # Probe-wise differential methylation analysis
+  condition <- factor(pheno$condition)
   
   # create design matrix
   design <- model.matrix(~0+condition, data=pheno)
