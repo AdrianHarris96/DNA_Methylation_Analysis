@@ -520,7 +520,7 @@ sample_num <- nrow(subset(pheno_df, (condition == 'DD_HI_L1' | condition == 'DD_
 DMPs1 <- merge(DMPs1, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_HI_L2_DMPs.csv"
 write.csv(DMPs1, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05 & abs(DMPs1$deltaBeta) > 0.15),]
+DMPs1_sig <- DMPs1[(DMPs1$adj.P.Val < 0.05),]
 print(dim(DMPs1_sig))
 output <- "DD_HI_L1-DD_HI_L2_DMPs_sig.csv"
 write.csv(DMPs1_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -533,7 +533,7 @@ sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L1" | condition == "DD_
 DMPs2 <- merge(DMPs2, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L1-DD_LI_L1_DMPs.csv"
 write.csv(DMPs2, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05 & abs(DMPs2$deltaBeta) > 0.15),]
+DMPs2_sig <- DMPs2[(DMPs2$adj.P.Val < 0.05),]
 print(dim(DMPs2_sig))
 output <- "DD_HI_L1-DD_LI_L1_DMPs_sig.csv"
 write.csv(DMPs2_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -546,7 +546,7 @@ sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "DD_
 DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
 output <- "DD_HI_L2-DD_LI_L2_DMPs.csv"
 write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05 & abs(DMPs4$deltaBeta) > 0.15),]
+DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
 print(dim(DMPs4_sig))
 output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -559,7 +559,7 @@ sample_num <- nrow(subset(pheno_df, (condition == "DD_LI_L1" | condition == "DD_
 DMPs6 <- merge(DMPs6, deltaBeta_df, by = 'Name')
 output <- "DD_LI_L1-DD_LI_L2_DMPs.csv"
 write.csv(DMPs6, file = paste(output_dir, output, sep=""), row.names = FALSE) 
-DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05 & abs(DMPs6$deltaBeta) > 0.15),]
+DMPs6_sig <- DMPs6[(DMPs6$adj.P.Val < 0.05),]
 print(dim(DMPs6_sig))
 output <- "DD_LI_L1-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs6_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
@@ -588,12 +588,6 @@ generate_man <- function(DMPs, comp) {
   dev.off()
   return("Done with manhattan plot")
 }
-
-DMPs1$deltaBeta <- abs(DMPs1$deltaBeta)
-DMPs2$deltaBeta <- abs(DMPs2$deltaBeta)
-DMPs4$deltaBeta <- abs(DMPs4$deltaBeta)
-DMPs6$deltaBeta <- abs(DMPs6$deltaBeta)
-
 
 generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
 generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
