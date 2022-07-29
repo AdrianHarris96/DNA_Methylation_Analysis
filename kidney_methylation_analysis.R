@@ -265,7 +265,7 @@ pheno_df <- pheno_df %>%
 
 #Changing Blanks to []
 pheno_df <- pheno_df %>% 
-  mutate(CIT = ifelse(as.character(CIT) == "", "[]", as.character(CIT)))
+  mutate(CIT = ifelse(as.character(CIT) == "", "Unknown", as.character(CIT)))
 
 print(pheno_df)
 q()
