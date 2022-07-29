@@ -263,10 +263,6 @@ pheno_df <- paired_pheno
 pheno_df <- pheno_df %>% 
   mutate(CIT = ifelse(as.character(CIT) == "??", "", as.character(CIT)))
 
-#Changing Blanks to []
-pheno_df <- pheno_df %>% 
-  mutate(CIT = ifelse(as.character(CIT) == "", "Unknown", as.character(CIT)))
-
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 # print(pheno_df$Basename)
 # print(colnames(beta_values_filtered))
@@ -411,6 +407,9 @@ generate_dendro <- function(beta, pheno, timepoint){
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
   final_beta['sample_id_eGFR24'] <- 'na'
   final_beta <- final_beta[,c(ncol(final_beta),1:(ncol(final_beta)-1))]
+  
+  print(final_beta[1:20,1:ncol(final_beta)])
+  q()
   
   #Filling these new columns
   for (row in 1:nrow(final_beta)) {
