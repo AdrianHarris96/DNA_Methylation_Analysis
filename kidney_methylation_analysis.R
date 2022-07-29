@@ -259,9 +259,13 @@ paired_pheno <- paired_pheno[match(pheno_df$Basename,paired_pheno$Basename),]
 paired_pheno <- paired_pheno[!is.na(paired_pheno$Basename),]
 pheno_df <- paired_pheno
 
-#Changing 
+#Changing ?? to Blanks
 pheno_df <- pheno_df %>% 
   mutate(CIT = ifelse(as.character(CIT) == "??", "", as.character(CIT)))
+
+#Changing Blanks to []
+pheno_df <- pheno_df %>% 
+  mutate(CIT = ifelse(as.character(CIT) == "", "[]", as.character(CIT)))
 
 print(pheno_df)
 q()
@@ -397,7 +401,7 @@ generate_dendro <- function(beta, pheno, timepoint){
     cat("Skip filtering down")
   }
   
-  pheno <- pheno %>% select(c('sample_id', 'ICT', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month'))
+  pheno <- pheno %>% select(c('sample_id', 'CIT', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month'))
   
   final_beta <- merge(pheno, beta_t, by='row.names')
   
