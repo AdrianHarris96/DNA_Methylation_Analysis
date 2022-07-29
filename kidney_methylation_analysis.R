@@ -258,6 +258,14 @@ paired_pheno <- paired_pheno[!(paired_pheno$sample_id == 'KUT4_K2' | paired_phen
 paired_pheno <- paired_pheno[match(pheno_df$Basename,paired_pheno$Basename),]
 paired_pheno <- paired_pheno[!is.na(paired_pheno$Basename),]
 pheno_df <- paired_pheno
+
+#Changing 
+pheno_df <- pheno_df %>% 
+  mutate(CIT = ifelse(as.character(CIT) == "??", "", as.character(CIT)))
+
+print(pheno_df)
+q()
+
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 # print(pheno_df$Basename)
 # print(colnames(beta_values_filtered))
@@ -449,7 +457,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   dev.off()
 }
 
-timeList <- c('K1-K2')
+timeList <- c('K1', 'K2', 'K1-K2')
 for (time in timeList) {
   generate_dendro(beta_values_filtered, pheno_df, time)
 }
