@@ -1,4 +1,4 @@
-Basename,sample_id,sample_well,sample_plate,sentrix_ID,sentrix_position,time,array_type,donor_gender,recipient_gender,eGFR_1month,eGFR_12month,eGFR_24month,ICT,DGF_status,DCD_status
+Basename,sample_id,sample_well,sample_plate,sentrix_ID,sentrix_position,time,array_type,donor_gender,recipient_gender,eGFR_1month,eGFR_12month,eGFR_24month,CIT,DGF_status,DCD_status
 100896160078_R04C02,10_K1,B02,VRM5,100896160078,R04C02,K1,450K,F,M,Low,Low,Low,1355,1,no
 202702240117_R06C01,108_K1,F03,VRM13,202702240117,R06C01,K1,EPIC,F,M,High,High,,875,0,no
 200687170063_R04C01,109_K1,H02,VRM6_01,200687170063,R04C01,K1,450K,M,M,High,High,High,607,1,no

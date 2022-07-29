@@ -1,4 +1,4 @@
-Basename,sample_id,sample_well,sample_plate,sentrix_ID,sentrix_position,time,array_type,donor_gender,recipient_gender,eGFR_1month,eGFR_12month,eGFR_24month,ICT,DGF_status,DCD_status,donor_age,donor_race,recipient_age,recipient_race
+Basename,sample_id,sample_well,sample_plate,sentrix_ID,sentrix_position,time,array_type,donor_gender,recipient_gender,eGFR_1month,eGFR_12month,eGFR_24month,CIT,DGF_status,DCD_status,donor_age,donor_race,recipient_age,recipient_race
 200687170063_R04C01,109_K1,H02,VRM6_01,200687170063,R04C01,K1,450K,M,M,High,High,High,607,1,no,24,C,29,B
 200687170063_R06C01,151_K1,B03,VRM6_01,200687170063,R06C01,K1,450K,M,F,High,High,High,968,1,no,30,C,76,B
 200687170063_R02C02,157_K1,D03,VRM6_01,200687170063,R02C02,K1,450K,F,M,Low,High,High,631,1,no,47,C,55,B
