@@ -426,11 +426,11 @@ generate_dendro <- function(beta, pheno, timepoint){
   #Generate dendrograms for each label
   dendro_out <- paste(timepoint, 'dendrograms.pdf', sep=" ")
   pdf(file = paste(output_dir, dendro_out, sep=""), width = 12, height = 8)
-  row.names(final_beta) <- final_beta$sample_id_age
+  row.names(final_beta) <- final_beta$sample_id_CIT
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
   dend <- as.dendrogram(clusters)
   dend <- set(dend, "labels_cex", 0.3)
-  plot(dend, xlab = "Sample ID and CIT", ylab="Height", main= paste(timepoint, "- age Dendrogram", sep = " "))
+  plot(dend, xlab = "Sample ID and CIT", ylab="Height", main= paste(timepoint, "- CIT Dendrogram", sep = " "))
   
   row.names(final_beta) <- final_beta$sample_id_eGFR1
   clusters <- hclust(dist(final_beta[, 11:ncol(final_beta)]))
