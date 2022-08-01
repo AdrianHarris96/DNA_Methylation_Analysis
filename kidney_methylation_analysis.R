@@ -397,6 +397,7 @@ generate_dendro <- function(beta, pheno, timepoint){
   pheno <- pheno %>% select(c('sample_id', 'CIT', 'eGFR_1month', 'eGFR_12month', 'eGFR_24month'))
   print(pheno)
   final_beta <- merge(pheno, beta_t, by='row.names')
+  print(final_beta)
   
   #Creating new labels/corresponding columns and moving toward front of dataframe - Swapped age for CIT
   final_beta['sample_id_CIT'] <- 'na'
