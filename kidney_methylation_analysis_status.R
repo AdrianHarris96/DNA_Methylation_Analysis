@@ -346,12 +346,8 @@ for (outcome in eGFR_List) {
   
   #Subset to check numbers for each condition
   # print(nrow(subset(pheno, condition == 'K1_High_High')))
-  # print(nrow(subset(pheno, condition == 'K1_Low_High')))
-  # print(nrow(subset(pheno, condition == 'K1_High_Low')))
   # print(nrow(subset(pheno, condition == 'K1_Low_Low')))
   # print(nrow(subset(pheno, condition == 'K2_High_High')))
-  # print(nrow(subset(pheno, condition == 'K2_Low_High')))
-  # print(nrow(subset(pheno, condition == 'K2_High_Low')))
   # print(nrow(subset(pheno, condition == 'K2_Low_Low')))
   
   #m_values filtered using new pheno 
@@ -370,6 +366,7 @@ for (outcome in eGFR_List) {
   contMatrix <- makeContrasts(K1_High_High-K2_High_High,
                               K1_Low_Low-K2_Low_Low,
                               K1_Low_Low-K1_High_High,
+                              K2_Low_Low-K2_High_High,
                               levels=design)
   
   #contMatrix
@@ -424,12 +421,26 @@ for (outcome in eGFR_List) {
   write.csv(DMPs3_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
   log_df[nrow(log_df) + 1,] <- c("K1_Low_Low-K1_High_High", sample_num, nrow(DMPs3_sig))
   
+  DMPs4 <- topTable(fit2, num=Inf, coef=4, genelist=annEPICSub)
+  DMPs4 <- data.frame(DMPs4)
+  deltaBeta_df <- get_deltaBeta("K2_Low_Low", "K2_High_High", pheno)
+  sample_num <- nrow(subset(pheno, (condition == 'K2_Low_Low' | condition == 'K2_High_High')))
+  DMPs4 <- merge(DMPs4, deltaBeta_df, by = 'Name')
+  output <- paste(outcome, "K2_Low_Low-K2_High_High_DMPs.csv", sep="-")
+  write.csv(DMPs4, file = paste(output_dir, output, sep=""), row.names = FALSE) 
+  DMPs4_sig <- DMPs4[(DMPs4$adj.P.Val < 0.05),]
+  print(dim(DMPs4_sig))
+  output <- paste(outcome, "K2_Low_Low-K2_High_High_DMPs_sig.csv", sep="-")
+  write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
+  log_df[nrow(log_df) + 1,] <- c("K2_Low_Low-K2_High_High", sample_num, nrow(DMPs4_sig))
+  
   final_title <- paste(outcome, "_EPIC_kidney_status_log.csv", sep="")
   write.csv(log_df, file = paste(output_dir, final_title, sep=""), row.names = FALSE)
   
-  # generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
-  # generate_man(DMPs2, 'K1_Low_Low-K2_Low_Low', outcome)
-  # generate_man(DMPs3, 'K1_Low_Low-K1_High_High', outcome)
+  generate_man(DMPs1, 'K1_High_High-K2_High_High', outcome)
+  generate_man(DMPs2, 'K1_Low_Low-K2_Low_Low', outcome)
+  generate_man(DMPs3, 'K1_Low_Low-K1_High_High', outcome)
+  generate_man(DMPs4, 'K2_Low_Low-K2_High_High', outcome)
   
   #1 DMRs - K1_High_High-K2_High_High
   if (nrow(DMPs1_sig) == 0) {
@@ -481,6 +492,24 @@ for (outcome in eGFR_List) {
     } else {
       results.ranges <- extractRanges(DMRs, genome = "hg19")
       output <- paste(outcome, "K1_Low_Low-K1_High_High_DMRs.csv", sep="-")
+      write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
+    }
+  }
+  
+  #3 DMRs - K1_Low_Low-K1_High_High
+  if (nrow(DMPs4_sig) == 0) {
+    print('Skip writing DMRs CSV - no significant DMPs')
+  } else {
+    myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values_condition), what = "M",
+                                 analysis.type = "differential", design = design,
+                                 contrasts = TRUE, cont.matrix = contMatrix,
+                                 coef = "K2_Low_Low - K2_High_High", arraytype = "EPIC")
+    DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+    if (is.null(DMRs)) {
+      print('Probes spaced beyond 1000 nucleotides')
+    } else {
+      results.ranges <- extractRanges(DMRs, genome = "hg19")
+      output <- paste(outcome, "K2_Low_Low-K2_High_High_DMRs.csv", sep="-")
       write.csv(results.ranges, file=paste(output_dir, output, sep=""), row.names=FALSE)
     }
   }
