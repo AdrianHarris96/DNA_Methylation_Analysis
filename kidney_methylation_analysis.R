@@ -529,7 +529,7 @@ for (outcome in eGFR_List) {
     pheno <- subset(pheno_df, select = -c(eGFR_1month, eGFR_12month))
     pheno <- pheno %>% rename('eGFR' = 'eGFR_24month')
   }
-  
+  print(pheno)
   #Addition of condition column 
   pheno$condition <- 'NA'
   
@@ -545,7 +545,7 @@ for (outcome in eGFR_List) {
       pheno[row, 'condition'] <- "K2_Low"
     }
   }
-  
+  print(pheno)
   print("K1_High")
   print(nrow(subset(pheno, condition == "K1_High")))
   print("K1_Low")
