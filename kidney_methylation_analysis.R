@@ -283,6 +283,11 @@ modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
 
+#Drop samples lacking CIT information and correct with Combat
+pheno_df <- subset(pheno_df, CIT != '??')
+print(pheno_df)
+q()
+
 clustering <- function(pheno, month, comparison, betas) {
   #Drop other columns and rename eGFR_month -> eGFR
   if (month == 'eGFR_1month') {
