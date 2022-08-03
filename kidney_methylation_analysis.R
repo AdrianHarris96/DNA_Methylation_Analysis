@@ -283,10 +283,10 @@ modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
 
-#Drop samples lacking CIT information and correct with Combat
+#Drop samples lacking CIT information and correct CIT with Combat
 pheno_df <- subset(pheno_df, CIT != '')
-print(pheno_df)
-q()
+beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
+m_values <- beta2m(beta_values_filtered)
 
 clustering <- function(pheno, month, comparison, betas) {
   #Drop other columns and rename eGFR_month -> eGFR
@@ -561,9 +561,14 @@ for (outcome in eGFR_List) {
   #m_values filtered using new pheno 
   m_values_condition <- m_values[,(colnames(m_values) %in% pheno$Basename)]
   
+  # Probe-wise differential methylation analysis
+  condition <- factor(pheno$condition)
+  
+  #Addition of covariate, Cold Ischemia Time
+  CIT <- as.numeric(pheno$CIT)
   
   # create design matrix
-  design <- model.matrix(~0+condition, data=pheno)
+  design <- model.matrix(~0+condition+CIT, data=pheno)
   colnames(design) <- c("K1_High", "K1_Low", "K2_High", "K2_Low")
   
   # fit the linear model 
