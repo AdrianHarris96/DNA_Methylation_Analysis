@@ -241,6 +241,7 @@ if (file.exists(paste(output_dir, "beta_values.csv", sep=""))) {
   write.csv(beta_values_filtered, file = paste(output_dir, "beta_values.csv", sep=""), row.names = TRUE)
 } 
 
+prin
 #Loading lumi and converting beta2m 
 library(lumi)
 m_values <- beta2m(beta_values_filtered)
@@ -282,9 +283,9 @@ batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
-
-print(dim(beta_values_filtered))
+name(beta_values_filtered) <- substring(names(beta_values_filtered), 2)
 print(colnames(beta_values_filtered))
+
 #Drop samples lacking CIT information and correct CIT with Combat
 pheno_df <- subset(pheno_df, CIT != '')
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
@@ -486,8 +487,6 @@ generate_man <- function(DMPs, comp, status) {
 
 #Copying of the betas dataframe
 newBeta_df <- beta_values_filtered
-print(dim(newBeta_df))
-print(dim(pheno_df))
 
 #Changing the column names to sample_id
 colnames(newBeta_df) <- pheno_df$sample_id
