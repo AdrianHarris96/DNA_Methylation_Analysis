@@ -214,44 +214,88 @@ heatmap.2(x=as.matrix(liver_betas7),
 dev.off()
 
 #Kidney heatmaps
+rm(list = ls())
 kidney_betas <- import('/Users/adrianharris/Desktop/kidney_combined_beta_dir/beta_values.csv')
 kidney_betas <- kidney_betas %>% rename(ProbeID = V1)
+rownames(kidney_betas) <- kidney_betas$ProbeID
 
-pheno_df <- import('/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv')
+kidney_pheno <- import('/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv')
 
-rownames(betas) <- betas$ProbeID
-betas <- betas[, colnames(betas) %in% pheno_df$Basename]
-m_values <- beta2m(betas)
+#Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
+kidney_pheno <- kidney_pheno[!(kidney_pheno$Basename == '203504430032_R01C01' | kidney_pheno$Basename == '203504430032_R02C01'),]
 
-pheno <- subset(pheno_df, select = -c(eGFR_1month, eGFR_24month))
-pheno <- pheno %>% rename('eGFR' = 'eGFR_12month')
+#Drop other outlier sample 
+kidney_pheno <- kidney_pheno[!(kidney_pheno$sample_id == 'KUT4_K2' | kidney_pheno$sample_id == 'KUT4_K1'),]
 
 #Addition of condition column 
-pheno$condition <- 'NA'
+kidney_pheno$condition <- 'NA'
+
+kidney_pheno <- subset(kidney_pheno, select = -c(eGFR_1month, eGFR_24month))
+kidney_pheno <- kidney_pheno %>% rename('eGFR' = 'eGFR_12month')
 
 #Filling of condition column
-for (row in 1:nrow(pheno)) {
-  if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'High') {
-    pheno[row, 'condition'] <- "K1_High"
-  } else if (pheno[row, 'time'] == 'K1' & pheno[row, 'eGFR'] == 'Low') {
-    pheno[row, 'condition'] <- "K1_Low"
-  } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'High') {
-    pheno[row, 'condition'] <- "K2_High"
-  } else if (pheno[row, 'time'] == 'K2' & pheno[row, 'eGFR'] == 'Low') {
-    pheno[row, 'condition'] <- "K2_Low"
+for (row in 1:nrow(kidney_pheno)) {
+  if (kidney_pheno[row, 'time'] == 'K1' & kidney_pheno[row, 'eGFR'] == 'High') {
+    kidney_pheno[row, 'condition'] <- "K1_High"
+  } else if (kidney_pheno[row, 'time'] == 'K1' & kidney_pheno[row, 'eGFR'] == 'Low') {
+    kidney_pheno[row, 'condition'] <- "K1_Low"
+  } else if (kidney_pheno[row, 'time'] == 'K2' & kidney_pheno[row, 'eGFR'] == 'High') {
+    kidney_pheno[row, 'condition'] <- "K2_High"
+  } else if (kidney_pheno[row, 'time'] == 'K2' & kidney_pheno[row, 'eGFR'] == 'Low') {
+    kidney_pheno[row, 'condition'] <- "K2_Low"
   }
 }
 
 #if condition is empty, drop it
-pheno <- pheno[!(pheno$condition == 'NA'),]
+kidney_pheno <- kidney_pheno[!(kidney_pheno$condition == 'NA'),]
 
-#m_values filtered using new pheno 
-m_values <- m_values[,(colnames(m_values) %in% pheno$Basename)]
+#Load probes 
+rm(row)
 
-pheno <- subset(pheno, (condition == 'K2_Low' | condition == 'K2_High'))
+probes1 <- import('/Users/adrianharris/Desktop/kidney_csvs_combined0728/eGFR_12month-K1_Low-K1_High_DMPs_sig.csv')
+probes1 <- probes1$Name
 
-m_values <- m_values[,(colnames(m_values) %in% pheno$Basename)]
-probes <- import('/Users/adrianharris/Desktop/kidney_csvs_combined0728/eGFR_12month-K2_Low-K2_High_DMPs_sig.csv')
-probes <- probes$Name
-m_values <- m_values[rownames(m_values) %in% probes,]
-heatmap(as.matrix(m_values))
+probes2 <- import('/Users/adrianharris/Desktop/kidney_csvs_combined0728/eGFR_12month-K2_Low-K2_High_DMPs_sig.csv')
+probes2 <- probes2$Name
+
+#Filter down datasets 
+kidney_pheno1 <- kidney_pheno[(kidney_pheno$condition == 'K1_Low' | kidney_pheno$condition == 'K1_High'),]
+kidney_pheno1 <- kidney_pheno1 %>% arrange(condition)
+
+kidney_pheno2 <- kidney_pheno[(kidney_pheno$condition == 'K2_Low' | kidney_pheno$condition == 'K2_High'),]
+kidney_pheno2 <- kidney_pheno2 %>% arrange(condition)
+
+#Filter down betas given the dataset and match order
+kidney_betas1 <- kidney_betas[,match(kidney_pheno1$Basename, colnames(kidney_betas))]
+colnames(kidney_betas1) <- kidney_pheno1$sample_id
+
+kidney_betas2 <- kidney_betas[,match(kidney_pheno2$Basename, colnames(kidney_betas))]
+colnames(kidney_betas2) <- kidney_pheno2$sample_id
+
+kidney_betas1 <- kidney_betas1[rownames(kidney_betas1) %in% probes1,]
+kidney_betas2 <- kidney_betas2[rownames(kidney_betas2) %in% probes2,]
+
+pdf('/Users/adrianharris/Desktop/kidney_heatmaps.pdf')
+heatmap.2(x=as.matrix(kidney_betas1), 
+          Colv=FALSE, 
+          dendrogram="none",
+          scale="row",
+          col="bluered",
+          trace="none",
+          labRow=TRUE,
+          main="eGFR_12month-K1_Low-K1_High",
+          ylab="Probes",
+          xlab="Samples")
+
+heatmap.2(x=as.matrix(kidney_betas2), 
+          Colv=FALSE, 
+          dendrogram="none",
+          scale="row",
+          col="bluered",
+          trace="none",
+          labRow=TRUE,
+          main="eGFR_12month-K2_Low-K2_High",
+          ylab="Probes",
+          xlab="Samples")
+
+dev.off()
