@@ -448,15 +448,6 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
-#Correction with combat()
-# pheno_df$Basename 
-# colnames(m_values)
-print(dim(m_values))
-batch <- pheno_df$array_type
-modCombat <- model.matrix(~1, data=pheno_df)
-m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
-beta_values_filtered <- data.frame(m2beta(m_values))
-
 #Copying of the betas dataframe
 newBeta_df <- beta_values_filtered
 
@@ -517,8 +508,16 @@ for (row in 1:nrow(pheno_df)) {
   }
 }
 
+#Loading methylclock and use Horvath's method 
+library(methylclock)
+age <- DNAmAge(beta_values_filtered)
+age <- age %>% rename(Basename = id)
+print(age)
+q()
+
 # Probe-wise differential methylation analysis
 condition <- factor(pheno_df$condition)
+age <- as.numeric()
 
 # create design matrix
 design <- model.matrix(~0+condition, data=pheno_df)
