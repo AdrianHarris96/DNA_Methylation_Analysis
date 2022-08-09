@@ -507,7 +507,7 @@ for (row in 1:nrow(pheno_df)) {
     pheno_df[row, 'condition'] <- "LD_LI_L2"
   }
 }
-
+print(pheno_df)
 #Preparation for model matrix (multiple regression)
 condition <- factor(pheno_df$condition)
 age <- as.numeric(pheno_df$Horvath)
