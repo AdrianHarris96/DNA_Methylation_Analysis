@@ -508,19 +508,8 @@ for (row in 1:nrow(pheno_df)) {
   }
 }
 
-#Loading methylclock and use Horvath's method 
-library(methylclock)
-age <- DNAmAge(beta_values_filtered)
-age <- age %>% rename(Basename = id)
-print(age)
-q()
-
-# Probe-wise differential methylation analysis
-condition <- factor(pheno_df$condition)
-age <- as.numeric()
-
 # create design matrix
-design <- model.matrix(~0+condition, data=pheno_df)
+design <- model.matrix(~0+condition+Horvath, data=pheno_df)
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 
 # fit the linear model 
