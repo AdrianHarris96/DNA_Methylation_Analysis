@@ -511,6 +511,8 @@ for (row in 1:nrow(pheno_df)) {
 #Preparation for model matrix (multiple regression)
 condition <- factor(pheno_df$condition)
 age <- as.numeric(pheno_df$Horvath)
+print(length(condition))
+print(length(age))
 
 print('Begin regression model')
 # create design matrix
