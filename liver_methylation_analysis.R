@@ -508,8 +508,12 @@ for (row in 1:nrow(pheno_df)) {
   }
 }
 
+#Preparation for model matrix (multiple regression)
+condition <- factor(pheno_df$condition)
+age <- as.numeric(pheno_df$Horvath)
+
 # create design matrix
-design <- model.matrix(~0+condition+Horvath, data=pheno_df)
+design <- model.matrix(~0+condition+age, data=pheno_df)
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 
 # fit the linear model 
