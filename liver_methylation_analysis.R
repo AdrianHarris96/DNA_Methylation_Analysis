@@ -272,6 +272,7 @@ batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
+write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
 
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
@@ -350,7 +351,7 @@ generate_dendro <- function(beta, pheno, timepoint){
 #   generate_dendro(beta_values_filtered, pheno_df, time)
 # }
 
-clustering <- function(pheno, condition1, condition2, betas) {
+clustering <- function(pheno, condition1, condition2, beta) {
   #Filter down according to conditon1
   if (condition1 == "DD_HI_L1") {
     pheno1 <- pheno[(pheno$donor_type == 'DD' & pheno$sample_group == 'High' & pheno$collection == 'L1'),]
@@ -404,7 +405,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
   title <- paste(output, "_betas", sep="")
   output_path <- paste(output_dir, title, sep="")
   jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
-  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=sample_group)) +theme_bw() + geom_point(aes(shape=collection), alpha=0.5, size=2) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
+  plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=sample_group)) +theme_bw() + geom_point(aes(shape=collection), alpha=0.5, size=2) + labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_name), size=1.75, colour="black")
   print(plot)
   #dev.off()
   #Converting NAs to 0 in donor_age
@@ -431,7 +432,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
   # title <- paste(output, "_m", sep="")
   # output_path <- paste(output_dir, title, sep="")
   # #jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
-  # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_id), size=1.75, colour="black")
+  # plot <- ggplot(data=scores, mapping = aes(x = PC1, y = PC2, color=eGFR)) +theme_bw() + geom_point(aes(shape=time), alpha=0.5, size=2)+ labs(x=paste0("PC1: ",round(var_explained[1]*100,1),"%"), y=paste0("PC2: ",round(var_explained[2]*100,1),"%")) + scale_color_manual(values=pal) + ggtitle(paste(title, "_PCA", sep="")) + geom_text(aes(label = sample_name), size=1.75, colour="black")
   # #plot + geom_text(aes(label = sample_name), size=3.5) + xlim(-100, 400)
   # print(plot)
   dev.off()
@@ -510,7 +511,7 @@ for (row in 1:nrow(pheno_df)) {
 
 #Preparation for model matrix (multiple regression)
 condition <- factor(pheno_df$condition)
-Horvath <- as.numeric(pheno_df$Horvath)
+phenoHorvath <- as.numeric(pheno_df$Horvath) #Try the median cutoff
 
 print('Begin regression model')
 # create design matrix
