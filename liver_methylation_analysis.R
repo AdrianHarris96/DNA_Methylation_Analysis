@@ -272,7 +272,7 @@ batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
-write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
+#write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
 
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
@@ -511,11 +511,10 @@ for (row in 1:nrow(pheno_df)) {
 
 #Preparation for model matrix (multiple regression)
 condition <- factor(pheno_df$condition)
-phenoHorvath <- as.numeric(pheno_df$Horvath) #Try the median cutoff
 
 print('Begin regression model')
 # create design matrix
-design <- model.matrix(~condition+Horvath, data=pheno_df)
+design <- model.matrix(~condition+as.numeric(Horvath), data=pheno_df)
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 
 # fit the linear model 
