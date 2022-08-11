@@ -513,6 +513,7 @@ condition <- factor(pheno_df$condition)
 age <- as.numeric(pheno_df$Horvath)
 print(length(condition))
 print(length(age))
+print(dim(pheno_df))
 
 print('Begin regression model')
 # create design matrix
