@@ -533,6 +533,10 @@ print('Begin regression model')
 # create design matrix
 design <- model.matrix(~condition, data=pheno_df)
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
+m_values <- removeBatchEffect(m_values, batch=pheno_df$Horvath)
+beta_values_filtered <- data.frame(m2beta(m_values))
+write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_age.csv", sep=""), row.names = TRUE)
+
 
 # fit the linear model 
 fit1 <- lmFit(m_values, design)
