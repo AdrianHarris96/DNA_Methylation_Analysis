@@ -275,21 +275,21 @@ beta_values_filtered <- data.frame(m2beta(m_values))
 #write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
 
 #Horvath to categorical - Second Combat adjustment (according to old posts on biocond.)
-med <- median(as.numeric(pheno_df$Horvath))
-print(med)
-for (row in 1:nrow(pheno_df)) {
-  if (as.numeric(pheno_df[row, 'Horvath']) < med) {
-    pheno_df[row, 'Horvath'] <- 'Low'
-  } else {
-    pheno_df[row, 'Horvath'] <- 'High'
-  }
-}
-
-batch <- pheno_df$Horvath
-modCombat <- model.matrix(~1, data=pheno_df)
-m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
-beta_values_filtered <- data.frame(m2beta(m_values))
-write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_age.csv", sep=""), row.names = TRUE)
+# med <- median(as.numeric(pheno_df$Horvath))
+# print(med)
+# for (row in 1:nrow(pheno_df)) {
+#   if (as.numeric(pheno_df[row, 'Horvath']) < med) {
+#     pheno_df[row, 'Horvath'] <- 'Low'
+#   } else {
+#     pheno_df[row, 'Horvath'] <- 'High'
+#   }
+# }
+# 
+# batch <- pheno_df$Horvath
+# modCombat <- model.matrix(~1, data=pheno_df)
+# m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
+# beta_values_filtered <- data.frame(m2beta(m_values))
+# write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_age.csv", sep=""), row.names = TRUE)
 
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
@@ -529,9 +529,12 @@ for (row in 1:nrow(pheno_df)) {
 #Preparation for model matrix (multiple regression)
 condition <- factor(pheno_df$condition)
 
+#Removing the effects of the covariates 
+m_values <- removeBatchEffect(m_values, covariates=as.numeric(pheno_df$Horvath))
+
 print('Begin regression model')
 # create design matrix
-design <- model.matrix(~condition, data=pheno_df)
+design <- model.matrix(~condition+age, data=pheno_df)
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 m_values <- removeBatchEffect(m_values, batch=pheno_df$Horvath)
 beta_values_filtered <- data.frame(m2beta(m_values))
