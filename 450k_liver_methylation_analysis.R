@@ -570,7 +570,7 @@ output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
-DMPs5 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
+DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
 DMPs5 <- data.frame(DMPs5)
 deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")
 sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "LD_LI_L2")))
@@ -654,14 +654,144 @@ generate_man <- function(DMPs, comp) {
   return("Done with manhattan plot")
 }
 
-generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
-generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
-generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
-generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
-generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
-generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
-generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
-generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
-generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
+#Comment out if these have already been produced
+# generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
+# generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
+# generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
+# generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
+# generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
+# generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
+# generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
+# generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
+# generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
 
+library(DMRcate)
+#Specify groups for DMR.plot 
+groups <- pal[1:length(unique(pheno_df$condition))]
+names(groups) <- levels(factor(pheno_df$condition))
+cols <- groups[as.character(factor(pheno_df$condition))]
+samps <- 1:nrow(pheno_df)
+
+#1 DMRs - DD_HI_L1-DD_HI_L2
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_HI_L1 - DD_HI_L2", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-DD_HI_L2_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_HI_L1-DD_HI_L2_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#2 DMRs - DD_HI_L1-DD_LI_L1
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_HI_L1 - DD_LI_L1", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#3 DMRs - DD_HI_L1-LD_LI_L1
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_HI_L1 - LD_LI_L1", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-LD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_HI_L1-LD_LI_L1_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#4 DMRs - DD_HI_L2-DD_LI_L2 - No sig. DMPs
+# myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+#                              analysis.type = "differential", design = design, 
+#                              contrasts = TRUE, cont.matrix = contMatrix, 
+#                              coef = "DD_HI_L2 - DD_LI_L2", arraytype = "450K")
+# DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+# results.ranges <- extractRanges(DMRs, genome = "hg19")
+# write.csv(results.ranges, file=paste(output_dir, "DD_HI_L2-DD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
+
+#5 DMRs - DD_HI_L2-LD_LI_L2
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_HI_L2 - LD_LI_L2", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_HI_L2-LD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_HI_L2-LD_LI_L2_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#6 DMRs - DD_LI_L1-DD_LI_L2
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_LI_L1 - DD_LI_L2", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_LI_L1-DD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_LI_L1-DD_LI_L2_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#7 DMRs - DD_LI_L1-LD_LI_L1
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_LI_L1 - LD_LI_L1", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_LI_L1-LD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_LI_L1-LD_LI_L1_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#8 DMRs - DD_LI_L2-LD_LI_L2
+myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+                             analysis.type = "differential", design = design, 
+                             contrasts = TRUE, cont.matrix = contMatrix, 
+                             coef = "DD_LI_L2 - LD_LI_L2", arraytype = "450K")
+DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+results.ranges <- extractRanges(DMRs, genome = "hg19")
+write.csv(results.ranges, file=paste(output_dir, "DD_LI_L2-LD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
+
+# draw the plot for the top DMR
+jpeg(file=paste(output_dir, "DD_LI_L2-LD_LI_L2_DMR.jpeg", sep=""), quality = 100)
+DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+dev.off
+
+#9 DMRs - LD_LI_L1-LD_LI_L2 - No sig. DMPs
+# myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+#                              analysis.type = "differential", design = design, 
+#                              contrasts = TRUE, cont.matrix = contMatrix, 
+#                              coef = "LD_LI_L1 - LD_LI_L2", arraytype = "450K")
+# DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+# results.ranges <- extractRanges(DMRs, genome = "hg19")
+# write.csv(results.ranges, file=paste(output_dir, "LD_LI_L1-LD_LI_L2_DMRs.csv", sep=""), row.names=FALSE)
 q()
