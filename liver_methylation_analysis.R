@@ -534,7 +534,7 @@ m_values <- removeBatchEffect(m_values, covariates=as.numeric(pheno_df$Horvath))
 
 print('Begin regression model')
 # create design matrix
-design <- model.matrix(~condition+age, data=pheno_df)
+design <- model.matrix(~condition, data=pheno_df)
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 m_values <- removeBatchEffect(m_values, batch=pheno_df$Horvath)
 beta_values_filtered <- data.frame(m2beta(m_values))
