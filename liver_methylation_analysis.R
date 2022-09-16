@@ -534,7 +534,7 @@ print('Begin regression model')
 design <- model.matrix(~0+condition+as.numeric(Horvath), data=pheno_df)
 print(design)
 q()
-colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
+colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age")
 
 # fit the linear model 
 fit1 <- lmFit(m_values, design)
