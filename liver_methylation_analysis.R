@@ -532,6 +532,8 @@ condition <- factor(pheno_df$condition)
 print('Begin regression model')
 # create design matrix
 design <- model.matrix(~0+condition+as.numeric(Horvath), data=pheno_df)
+print(design)
+q()
 colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 
 # fit the linear model 
