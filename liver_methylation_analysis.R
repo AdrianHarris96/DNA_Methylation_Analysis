@@ -529,10 +529,10 @@ for (row in 1:nrow(pheno_df)) {
 #Calculate median age and prepare for model matrix 
 med_age <- median(pheno_df$Horvath)
 for (row in 1:nrow(pheno_df)) {
-  if (pheno_df[row, "Horvarth"] < med_age) {
-    pheno_df[row, "Horvarth"] <- "L"
+  if (pheno_df[row, "Horvath"] < med_age) {
+    pheno_df[row, "Horvath"] <- "L"
   } else {
-    pheno_df[row, "Horvarth"] <- "H"
+    pheno_df[row, "Horvath"] <- "H"
   }
 }
 
