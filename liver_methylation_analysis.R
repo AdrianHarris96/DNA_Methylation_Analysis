@@ -526,6 +526,19 @@ for (row in 1:nrow(pheno_df)) {
   }
 }
 
+#Calculate median age and prepare for model matrix 
+med_age <- median(pheno_df$Horvath)
+for (row in 1:nrow(pheno_df)) {
+  if (pheno_df[row, "Horvarth"] < med_age) {
+    pheno_df[row, "Horvarth"] <- "L"
+  } else {
+    pheno_df[row, "Horvarth"] <- "H"
+  }
+}
+
+print(pheno_df$Horvath)
+q()
+
 #Preparation for model matrix (multiple regression)
 condition <- factor(pheno_df$condition)
 
@@ -536,7 +549,6 @@ colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD
 m_values <- removeBatchEffect(m_values, batch=pheno_df$Horvath)
 beta_values_filtered <- data.frame(m2beta(m_values))
 write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_age.csv", sep=""), row.names = TRUE)
-
 
 # fit the linear model 
 fit1 <- lmFit(m_values, design)
@@ -619,7 +631,7 @@ output <- "DD_HI_L2-DD_LI_L2_DMPs_sig.csv"
 write.csv(DMPs4_sig, file = paste(output_dir, output, sep=""), row.names = FALSE)
 log_df[nrow(log_df) + 1,] <- c("DD_HI_L2-DD_LI_L2", sample_num, nrow(DMPs4_sig))
 
-DMPs5 <- topTable(fit2, num=Inf, coef=6, genelist=ann450kSub)
+DMPs5 <- topTable(fit2, num=Inf, coef=5, genelist=ann450kSub)
 DMPs5 <- data.frame(DMPs5)
 deltaBeta_df <- get_deltaBeta("DD_HI_L2", "LD_LI_L2")
 sample_num <- nrow(subset(pheno_df, (condition == "DD_HI_L2" | condition == "LD_LI_L2")))
