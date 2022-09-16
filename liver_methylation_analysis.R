@@ -526,6 +526,7 @@ for (row in 1:nrow(pheno_df)) {
   }
 }
 
+print(colnames(pheno_df))
 #Calculate median age and prepare for model matrix 
 med_age <- median(pheno_df$Horvath)
 for (row in 1:nrow(pheno_df)) {
