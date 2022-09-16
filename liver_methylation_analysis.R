@@ -74,7 +74,7 @@ if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
   rm(rgSetEPIC)
 }
 
-#Simply ensure the correct order 
+#Simply ensure the correct order - If you ever run with a new pheno_df, a new rgSet should be created
 pheno_df <- data.frame(pData(rgSet))
 
 #Color scheme defined 
