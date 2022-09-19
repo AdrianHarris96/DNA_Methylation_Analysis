@@ -272,7 +272,7 @@ batch <- pheno_df$array_type
 modCombat <- model.matrix(~1, data=pheno_df)
 m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
-#write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
+write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
 
 #Horvath to categorical - Second Combat adjustment (according to old posts on biocond.)
 # med <- median(as.numeric(pheno_df$Horvath))
