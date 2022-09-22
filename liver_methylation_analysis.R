@@ -258,6 +258,10 @@ pheno_df <- pheno_df[!(pheno_df$Basename %in% c('200999740023_R05C02', '20099974
 #Drop the one unpaired samples
 pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
 
+#Drop two samples Haseeb dropped 
+pheno_df <- pheno_df[!(pheno_df$sample_name == 'V024L1' | pheno_df$sample_name == 'V024L2'),]
+pheno_df <- pheno_df[!(pheno_df$sample_name == 'V050 L1' | pheno_df$sample_name == 'V050'),]
+
 #Drop DCD samples
 pheno_df = pheno_df[!(pheno_df$donor_type == 'DCD'),]
 
