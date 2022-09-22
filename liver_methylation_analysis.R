@@ -738,20 +738,20 @@ DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols
          what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
 dev.off
 
-#2 DMRs - DD_HI_L1-DD_LI_L1
-myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
-                             analysis.type = "differential", design = design, 
-                             contrasts = TRUE, cont.matrix = contMatrix, 
-                             coef = "DD_HI_L1 - DD_LI_L1", arraytype = "450K")
-DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
-results.ranges <- extractRanges(DMRs, genome = "hg19")
-write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
-
-# draw the plot for the top DMR
-jpeg(file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMR.jpeg", sep=""), quality = 100)
-DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
-         what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
-dev.off
+# #2 DMRs - DD_HI_L1-DD_LI_L1
+# myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
+#                              analysis.type = "differential", design = design, 
+#                              contrasts = TRUE, cont.matrix = contMatrix, 
+#                              coef = "DD_HI_L1 - DD_LI_L1", arraytype = "450K")
+# DMRs <- dmrcate(myAnnotation, lambda=1000, C=2)
+# results.ranges <- extractRanges(DMRs, genome = "hg19")
+# write.csv(results.ranges, file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMRs.csv", sep=""), row.names=FALSE)
+# 
+# # draw the plot for the top DMR
+# jpeg(file=paste(output_dir, "DD_HI_L1-DD_LI_L1_DMR.jpeg", sep=""), quality = 100)
+# DMR.plot(ranges = results.ranges, dmr=1, CpGs=as.matrix(m_values), phen.col=cols, 
+#          what="Beta", arraytype="450K", genome="hg19", cex=0.5, pch=16, toscale=TRUE, plotmedians=TRUE, samps=samps)
+# dev.off
 
 #3 DMRs - DD_HI_L1-LD_LI_L1
 # myAnnotation <- cpg.annotate(datatype = "array", object = as.matrix(m_values), what = "M",
