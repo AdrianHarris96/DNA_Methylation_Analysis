@@ -243,6 +243,10 @@ pheno_df <- pheno_df[!(pheno_df$sample_name == 'V037L1'),]
 #Drop DCD samples
 pheno_df = pheno_df[!(pheno_df$donor_type == 'DCD'),]
 
+#Drop two samples Haseeb dropped 
+pheno_df <- pheno_df[!(pheno_df$sample_name == 'V024L1' | pheno_df$sample_name == 'V024L2'),]
+pheno_df <- pheno_df[!(pheno_df$sample_name == 'V050 L1' | pheno_df$sample_name == 'V050'),]
+
 #Exclude control and DCD samples for liver data 
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 m_values <- m_values[, colnames(m_values) %in% colnames(beta_values_filtered)]
@@ -486,8 +490,8 @@ for (row in 1:nrow(pheno_df)) {
 condition <- factor(pheno_df$condition)
 
 # create design matrix
-design <- model.matrix(~0+condition, data=pheno_df)
-colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
+design <- model.matrix(~0+condition+as.numeric(Horvath), data=pheno_df)
+colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age")
 
 # fit the linear model 
 fit1 <- lmFit(m_values, design)
@@ -655,15 +659,15 @@ generate_man <- function(DMPs, comp) {
 }
 
 #Comment out if these have already been produced
-# generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
-# generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
-# generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
-# generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
-# generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
-# generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
-# generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
-# generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
-# generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
+generate_man(DMPs1, 'DD_HI_L1-DD_HI_L2')
+generate_man(DMPs2, 'DD_HI_L1-DD_LI_L1')
+generate_man(DMPs3, 'DD_HI_L1-LD_LI_L1')
+generate_man(DMPs4, 'DD_HI_L2-DD_LI_L2')
+generate_man(DMPs5, 'DD_HI_L2-LD_LI_L2')
+generate_man(DMPs6, 'DD_LI_L1-DD_LI_L2')
+generate_man(DMPs7, 'DD_LI_L1-LD_LI_L1')
+generate_man(DMPs8, 'DD_LI_L2-LD_LI_L2')
+generate_man(DMPs9, 'LD_LI_L1-LD_LI_L2')
 
 library(DMRcate)
 #Specify groups for DMR.plot 
