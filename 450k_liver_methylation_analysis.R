@@ -53,7 +53,7 @@ dir450k <- paste(base_dir, "450k_array", sep="")
 
 #Load or generate the rgSet if necessary
 if (file.exists(paste(output_dir, "rgSet.RDS", sep=""))) {
-  cat('Loading in rgSet (combined)\n')
+  cat('Loading in rgSet')
   rgSet <- readRDS(paste(output_dir, "rgSet.RDS", sep=""))
 } else {
   cat('Generate rgSet\n')
