@@ -535,14 +535,45 @@ condition <- factor(pheno_df$condition)
 
 print('Begin regression model')
 # create design matrix
-design <- model.matrix(~0+condition+as.numeric(Horvath), data=pheno_df)
-#design <- model.matrix(~0+condition, data=pheno_df)
+design1 <- model.matrix(~0+condition, data=pheno_df)
+design2 <- model.matrix(~0+condition+as.numeric(Horvath), data=pheno_df)
 
-colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age")
-#colnames(design) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
+#Drop NA for other covariates (donor gender, donor race)
+pheno_df <- pheno_df[!is.na(pheno_df$donor_gender),]
+gender <- factor(pheno_df$donor_gender)
+design3 <- model.matrix(~0+condition+as.numeric(Horvath)+gender, data=pheno_df)
+
+pheno_df <- pheno_df[!is.na(pheno_df$donor_race),]
+race <- factor(pheno_df$donor_race)
+design4 <- model.matrix(~0+condition+as.numeric(Horvath)+gender+race, data=pheno_df)
+
+design5 <- model.matrix(~0+condition+as.numeric(Horvath)+race, data=pheno_df)
+
+colnames(design1) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
+colnames(design2) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age")
+colnames(design3) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age", "Gender")
+colnames(design4) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age", "Gender", "Race")
+colnames(design5) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age", "Race")
 
 # fit the linear model 
-fit1 <- lmFit(m_values, design)
+fit1 <- lmFit(m_values, design1)
+fit2 <- lmFit(m_values, design2)
+fit3 <- lmFit(m_values, design3)
+fit4 <- lmFit(m_values, design4)
+fit5 <- lmFit(m_values, design5)
+
+library(AICcmodavg)
+#define list of models
+models <- list(fit1, fit2, fit3, fit4, fit5)
+
+#specify model names
+mod.names <- c('condition_fit', 'condition_age_fit', 'condition_age_gender_fit', 'condition_age_gender_race_fit', 'condition_age_race_fit')
+
+#calculate AIC of each model
+aictab(cand.set = models, modnames = mod.names)
+
+q()
+
 # create a contrast matrix for specific comparisons
 contMatrix <- makeContrasts(DD_HI_L1-DD_HI_L2,
                             DD_HI_L1-DD_LI_L1,
