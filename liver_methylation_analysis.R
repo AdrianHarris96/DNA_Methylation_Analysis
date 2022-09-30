@@ -573,10 +573,10 @@ library(AICcmodavg)
 models <- list(fit1, fit2, fit3, fit4, fit5)
 
 #specify model names
-mod.names <- c('condition_fit', 'condition_age_fit', 'condition_age_gender_fit', 'condition_age_gender_race_fit', 'condition_age_race_fit')
+# mod.names <- c('condition.fit', 'condition.age.fit', 'condition.age.gender.fit', 'condition.age_gender_race_fit', 'condition_age_race_fit')
 
 #calculate AIC of each model
-aictab(cand.set = models, modnames = mod.names)
+aictab(cand.set = models)
 
 q()
 
