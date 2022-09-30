@@ -549,6 +549,12 @@ design4 <- model.matrix(~0+condition+as.numeric(Horvath)+gender+race, data=pheno
 
 design5 <- model.matrix(~0+condition+as.numeric(Horvath)+race, data=pheno_df)
 
+print(design1)
+print(design2)
+print(design3)
+print(design4)
+print(design5)
+
 colnames(design1) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2")
 colnames(design2) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age")
 colnames(design3) <- c("DD_HI_L1","DD_HI_L2","DD_LI_L1","DD_LI_L2","LD_LI_L1","LD_LI_L2", "Age", "Gender")
