@@ -283,7 +283,7 @@ write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv
 library(EpiDISH)
 
 bloodRef <- data(centBloodSub.m)
-output <-  epidish(beta_values_filtered, bloodRef, method = c("RPC", "CBS", "CP"))
+output <-  epidish(beta_values_filtered, bloodRef[,1:6], method = c("RPC", "CBS", "CP"))
 print(output)
 
 q()
