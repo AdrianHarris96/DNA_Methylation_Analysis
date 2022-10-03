@@ -569,6 +569,12 @@ fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
 
 library(stats)
+fit1 <- logLik(fit1)
+fit2 <- logLik(fit2)
+fit3 <- logLik(fit3)
+fit4 <- logLik(fit4)
+fit5 <- logLik(fit5)
+
 extractAIC(fit1, fit2, fit3, fit4, fit5, k=2)
 
 q()
