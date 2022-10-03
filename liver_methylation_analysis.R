@@ -568,15 +568,8 @@ fit3 <- lmFit(m_values, design3)
 fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
 
-library(AICcmodavg)
-#define list of models
-models <- list(fit1, fit2, fit3, fit4, fit5)
-
-#specify model names
-# mod.names <- c('condition.fit', 'condition.age.fit', 'condition.age.gender.fit', 'condition.age_gender_race_fit', 'condition_age_race_fit')
-
-#calculate AIC of each model
-aictab(cand.set = models)
+library(stats)
+AIC(fit1, fit2, fit3, fit4, fit5, k=2)
 
 q()
 
