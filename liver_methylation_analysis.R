@@ -284,6 +284,7 @@ library(EpiDISH)
 
 data(centBloodSub.m)
 output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
+colnames(output) <- substring(colnames(output), 2)
 write.csv(output, file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
 
 q()
