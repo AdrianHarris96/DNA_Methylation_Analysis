@@ -278,6 +278,17 @@ m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
 write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
 
+
+#EpiDISH run with blood reference
+library(EpiDISH)
+
+bloodRef <- data(centBloodSub.m)
+output <-  epidish(beta_values_filtered, bloodRef, method = c("RPC", "CBS", "CP"))
+print(output)
+
+q()
+
+
 #Horvath to categorical - Second Combat adjustment (according to old posts on biocond.)
 # med <- median(as.numeric(pheno_df$Horvath))
 # print(med)
