@@ -278,21 +278,17 @@ m_values <- ComBat(dat=m_values, batch=batch, mod=modCombat)
 beta_values_filtered <- data.frame(m2beta(m_values))
 write.csv(beta_values_filtered, file = paste(output_dir, "beta_values_combat.csv", sep=""), row.names = TRUE)
 
-
-#EpiDISH run with blood reference
-library(EpiDISH)
-
-data(centBloodSub.m)
-#output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
-output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
-output <- output$estF
-output <- as.matrix(output)
-rownames(output) <- substring(rownames(output), 2)
-print(output)
-
-#write.csv(output, file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
-
-q()
+#EpiDISH run with blood reference - Remove comment whenever EpiDISH is needed (perhaps, change to function)
+# library(EpiDISH)
+# 
+# data(centBloodSub.m)
+# #output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
+# output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
+# output <- output$estF
+# output <- as.matrix(output)
+# rownames(output) <- substring(rownames(output), 2)
+# 
+# write.csv(as.data.frame(output), file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
 
 #Horvath to categorical - Second Combat adjustment (according to old posts on biocond.)
 # med <- median(as.numeric(pheno_df$Horvath))
