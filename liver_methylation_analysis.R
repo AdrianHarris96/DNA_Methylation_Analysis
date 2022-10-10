@@ -284,7 +284,7 @@ library(EpiDISH)
 
 data(centBloodSub.m)
 output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
-print(typeof(output))
+print(output)
 
 q()
 
