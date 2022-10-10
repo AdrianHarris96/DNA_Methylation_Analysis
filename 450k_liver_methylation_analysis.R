@@ -259,7 +259,6 @@ data(centBloodSub.m)
 output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
 output <- output$estF
 output <- as.matrix(output)
-rownames(output) <- substring(rownames(output), 2)
 
 write.csv(as.data.frame(output), file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
 
