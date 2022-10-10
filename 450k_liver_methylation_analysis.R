@@ -251,6 +251,20 @@ pheno_df <- pheno_df[!(pheno_df$sample_name == 'V050 L1' | pheno_df$sample_name 
 beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %in% pheno_df$Basename)]
 m_values <- m_values[, colnames(m_values) %in% colnames(beta_values_filtered)]
 
+#EpiDISH run with blood reference - Remove comment whenever EpiDISH is needed (perhaps, change to function)
+library(EpiDISH)
+
+data(centBloodSub.m)
+#output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
+output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
+output <- output$estF
+output <- as.matrix(output)
+rownames(output) <- substring(rownames(output), 2)
+
+write.csv(as.data.frame(output), file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
+
+q()
+
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
   cat('Generating dendrograms\n')
