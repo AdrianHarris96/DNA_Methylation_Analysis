@@ -284,7 +284,7 @@ library(EpiDISH)
 
 data(centBloodSub.m)
 output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
-output <- as.data.frame(output)
+output <- as.matrix(output)
 colnames(output) <- substring(colnames(output), 2)
 print(output)
 
