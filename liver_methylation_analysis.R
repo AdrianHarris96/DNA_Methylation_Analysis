@@ -288,10 +288,11 @@ output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
 output <- output$estF
 output <- as.matrix(output)
 rownames(output) <- substring(rownames(output), 2)
-write.csv(output, file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
+print(output)
+
+#write.csv(output, file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
 
 q()
-
 
 #Horvath to categorical - Second Combat adjustment (according to old posts on biocond.)
 # med <- median(as.numeric(pheno_df$Horvath))
