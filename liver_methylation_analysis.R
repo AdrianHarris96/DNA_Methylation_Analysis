@@ -7,7 +7,7 @@ library(RColorBrewer)
 library(dendextend)
 library(limma)
 library(sva)
-sessionInfo()
+#sessionInfo()
 
 #Example input: Rscript liver_methylation_analysis.R <pheno_file> <base_dir> <git_dir> <output_dir>
 args=commandArgs(trailingOnly=TRUE)
@@ -284,7 +284,10 @@ library(EpiDISH)
 
 data(centBloodSub.m)
 output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
-output <- as.data.frame(output)
+print(typeof(output))
+
+q()
+
 colnames(output) <- substring(colnames(output), 2)
 write.csv(output, file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
 
