@@ -579,6 +579,8 @@ fit2 <- lmFit(m_values, design2)
 fit3 <- lmFit(m_values, design3)
 fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
+print(fit1$MArrayLM)
+q()
 
 library(stats)
 fit1 <- logLik(fit1)
