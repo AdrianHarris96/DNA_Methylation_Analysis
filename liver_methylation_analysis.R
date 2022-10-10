@@ -284,10 +284,13 @@ library(EpiDISH)
 
 data(centBloodSub.m)
 #output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
-output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC"))
-print(output$estF)
+output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
+output <- output$estF
+output <- as.matrix(output)
+print(rownames(output))
 q()
 
+#Convert to matrix and cleanup the colnames
 output <- as.matrix(output)
 colnames(output) <- substring(colnames(output), 2)
 print(output)
