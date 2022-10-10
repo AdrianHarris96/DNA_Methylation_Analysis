@@ -580,6 +580,11 @@ fit3 <- lmFit(m_values, design3)
 fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
 print(fit1$MArrayLM)
+print(fit1$list)
+print(fit1$LargeDataObject)
+print(fit1$vector)
+
+q()
 
 library(stats)
 fit1 <- logLik(fit1)
