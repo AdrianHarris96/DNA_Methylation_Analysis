@@ -561,7 +561,7 @@ design4 <- model.matrix(~0+condition+as.numeric(Horvath)+gender+race, data=pheno
 
 design5 <- model.matrix(~0+condition+as.numeric(Horvath)+race, data=pheno_df)
 
-print(design1)
+#print(design1)
 # print(design2)
 # print(design3)
 # print(design4)
@@ -579,10 +579,7 @@ fit2 <- lmFit(m_values, design2)
 fit3 <- lmFit(m_values, design3)
 fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
-print(fit1@MArrayLM)
-print(fit1@list)
-print(fit1@LargeDataObject)
-print(fit1@vector)
+print(typeof(fit1))
 
 q()
 
