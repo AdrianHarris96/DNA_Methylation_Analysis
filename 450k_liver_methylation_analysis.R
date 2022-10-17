@@ -399,7 +399,9 @@ clustering <- function(pheno, condition1, condition2, betas) {
   
   #Create dataframe for variance explained
   PCs <- colnames(scores)
+  PCs <- head(PCs, -1)
   print(PCs)
+  print(var_explained)
   q()
   
   scores <- merge(scores, pheno, by = 'Basename')
