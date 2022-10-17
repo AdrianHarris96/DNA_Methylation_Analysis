@@ -400,9 +400,17 @@ clustering <- function(pheno, condition1, condition2, betas) {
   #Create dataframe for variance explained
   PCs <- colnames(scores)
   PCs <- head(PCs, -1)
-  print(PCs)
-  print(var_explained)
+  PC_df <- data.frame(matrix(ncol=2, nrow=0))
+  for (i in 1:length(PCs)) {
+    PC_df[nrow(PC_df)+1,] <- c(PCs[i], var_explained[i])
+  }
+  rm(i)
+  colnames(PC_df) <- c("principal_components", "variance_explained")
+  print(PC_df)
+  
   q()
+  
+  
   
   scores <- merge(scores, pheno, by = 'Basename')
   title <- paste(output, "_betas", sep="")
