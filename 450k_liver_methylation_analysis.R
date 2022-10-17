@@ -252,17 +252,15 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 m_values <- m_values[, colnames(m_values) %in% colnames(beta_values_filtered)]
 
 #EpiDISH run with blood reference - Remove comment whenever EpiDISH is needed (perhaps, change to function)
-library(EpiDISH)
+# library(EpiDISH)
+# 
+# data(centBloodSub.m)
+# #output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
+# output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
+# output <- output$estF
+# output <- as.matrix(output)
+# write.csv(as.data.frame(output), file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
 
-data(centBloodSub.m)
-#output <-  epidish(beta_values_filtered, centBloodSub.m, method = c("RPC", "CBS", "CP"))
-output <-  epidish(beta_values_filtered, centBloodSub.m, method = "RPC")
-output <- output$estF
-output <- as.matrix(output)
-
-write.csv(as.data.frame(output), file = paste(output_dir, "epiDISH_deconv.csv", sep=""), row.names = TRUE)
-
-q()
 
 #Function to generate several dendrograms with different labels
 generate_dendro <- function(beta, pheno, timepoint){
@@ -429,7 +427,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
   return('Clustering done\n')
 }
 
-# clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
 # clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
 # clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
 # clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
@@ -438,6 +436,8 @@ clustering <- function(pheno, condition1, condition2, betas) {
 # clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
 # clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
 # clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
+
+q()
 
 #Copying of the betas dataframe
 newBeta_df <- beta_values_filtered
