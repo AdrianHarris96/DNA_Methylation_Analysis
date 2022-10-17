@@ -406,8 +406,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
   }
   rm(i)
   colnames(PC_df) <- c("principal_components", "variance_explained")
-  print(PC_df)
-  output_PCs <- paster(output, "_PCs.csv", sep = "")
+  output_PCs <- paste(output, "_PCs.csv", sep = "")
   write.csv(PC_df, file = paste(output_dir, output_PCs, sep=""), row.names=FALSE)
   return('Clustering done\n') #Comment out this return if you wish to generate visuals for the PCA plots
   
