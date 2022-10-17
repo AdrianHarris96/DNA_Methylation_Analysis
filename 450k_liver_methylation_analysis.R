@@ -392,7 +392,6 @@ clustering <- function(pheno, condition1, condition2, betas) {
   
   #Write resulting dataframe to CSV in output directory
   coordinates <- scores[, c(1, 2, ncol(scores))] #Only the first 2 principal components and last column, Basename
-  print(coordinates)
   coordinates <- merge(coordinates, pheno, by = 'Basename')
   output_coordinates <- paste(output, "_coordinates.csv", sep="")
   write.csv(coordinates, file = paste(output_dir, output_coordinates, sep=""), row.names = FALSE)
