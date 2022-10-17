@@ -394,7 +394,7 @@ clustering <- function(pheno, condition1, condition2, betas) {
   coordinates <- scores[, c(1, 2, ncol(scores))] #Only the first 2 principal components and last column, Basename
   print(coordinates)
   coordinates <- merge(coordinates, pheno, by = 'Basename')
-  output_coordinates <- paste(output, "_coordinates.csv")
+  output_coordinates <- paste(output, "_coordinates.csv", sep="")
   write.csv(coordinates, file = paste(output_dir, output_coordinates, sep=""), row.names = FALSE)
   
   #Create dataframe for variance explained
@@ -407,10 +407,9 @@ clustering <- function(pheno, condition1, condition2, betas) {
   rm(i)
   colnames(PC_df) <- c("principal_components", "variance_explained")
   print(PC_df)
-  
-  q()
-  
-  
+  output_PCs <- paster(output, "_PCs.csv", sep = "")
+  write.csv(PC_df, file = paste(output_dir, output_PCs, sep=""), row.names=FALSE)
+  return('Clustering done\n') #Comment out this return if you wish to generate visuals for the PCA plots
   
   scores <- merge(scores, pheno, by = 'Basename')
   title <- paste(output, "_betas", sep="")
@@ -451,14 +450,14 @@ clustering <- function(pheno, condition1, condition2, betas) {
 }
 
 clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
-# clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
-# clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
-# clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
-# clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
-# clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
-# clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
-# clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
-# clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
+clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
+clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
 
 q()
 
