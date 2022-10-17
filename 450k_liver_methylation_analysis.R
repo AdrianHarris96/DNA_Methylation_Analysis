@@ -388,14 +388,21 @@ clustering <- function(pheno, condition1, condition2, betas) {
   var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
   scores = as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
+  output <- paste(condition1, condition2, sep="-")
   
   #Write resulting dataframe to CSV in output directory
   coordinates <- scores[, c(1, 2, ncol(scores))] #Only the first 2 principal components and last column, Basename
   print(coordinates)
+  coordinates <- merge(coordinates, pheno, by = 'Basename')
+  output_coordinates <- paste(output, "_coordinates.csv")
+  write.csv(coordinates, file = paste(output_dir, output_coordinates, sep=""), row.names = FALSE)
+  
+  #Create dataframe for variance explained
+  PCs <- colnames(scores)
+  print(PCs)
   q()
   
   scores <- merge(scores, pheno, by = 'Basename')
-  output <- paste(condition1, condition2, sep="-")
   title <- paste(output, "_betas", sep="")
   output_path <- paste(output_dir, title, sep="")
   jpeg(paste(output_path, "_PCA.jpeg", sep=""), quality = 100)
