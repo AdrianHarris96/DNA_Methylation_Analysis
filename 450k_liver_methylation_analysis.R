@@ -388,6 +388,8 @@ clustering <- function(pheno, condition1, condition2, betas) {
   var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
   scores = as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
+  print(scores)
+  q()
   scores <- merge(scores, pheno, by = 'Basename')
   output <- paste(condition1, condition2, sep="-")
   title <- paste(output, "_betas", sep="")
