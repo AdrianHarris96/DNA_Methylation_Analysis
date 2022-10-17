@@ -378,13 +378,13 @@ clustering <- function(pheno, condition1, condition2, betas) {
   pheno <- rbind(pheno1, pheno2)
   
   #Filter beta dataframe using column names for the relevant comparison
-  beta <- beta[,(colnames(beta) %in% pheno$Basename)]
+  beta <- betas[,(colnames(betas) %in% pheno$Basename)]
   
   cat("PCA plots - Betas\n")
   #Transpose beta, run PCA clustering and incorporate phenotype data
-  transposed_beta <- t(beta)
-  transposed_beta <- data.frame(transposed_beta)
-  pca_general <- prcomp(transposed_beta, center=TRUE)
+  transposed_betas <- t(betas)
+  transposed_betas <- data.frame(transposed_betas)
+  pca_general <- prcomp(transposed_betas, center=TRUE)
   var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
   scores = as.data.frame(pca_general$x)
   scores['Basename'] <- row.names(scores)
