@@ -447,15 +447,42 @@ clustering <- function(pheno, condition1, condition2, betas) {
   return('Clustering done\n')
 }
 
-clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
-clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
-clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L1", "DD_HI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L1", "DD_LI_L1", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L1", "LD_LI_L1", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L2", "DD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_HI_L2", "LD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_LI_L1", "DD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "DD_LI_L1", "LD_LI_L1", beta_values_filtered)
+# clustering(pheno_df, "DD_LI_L2", "LD_LI_L2", beta_values_filtered)
+# clustering(pheno_df, "LD_LI_L1", "LD_LI_L2", beta_values_filtered)
+
+#Clustering of all samples together if necessary - writing coordinates and variance to CSV
+if (file.exists(paste(output_dir, "all_samples_coordinates.csv", sep=""))) {
+  cat("PCA plots - Betas - ALL SAMPLES\n")
+  transposed_betas <- t(beta_values_filtered)
+  transposed_betas <- data.frame(transposed_betas)
+  pca_general <- prcomp(transposed_betas, center=TRUE)
+  var_explained <- pca_general$sdev^2/sum(pca_general$sdev^2)
+  scores <- as.data.frame(pca_general$x)
+  scores['Basename'] <- row.names(scores)
+  
+  #Write resulting dataframe to CSV in output directory
+  coordinates <- scores[, c(1, 2, ncol(scores))] #Only the first 2 principal components and last column, Basename
+  coordinates <- merge(coordinates, pheno_df, by = 'Basename')
+  write.csv(coordinates, file = paste(output_dir, "all_samples_coordinates.csv", sep=""), row.names = FALSE)
+  
+  #Create dataframe for variance explained
+  PCs <- colnames(scores)
+  PCs <- head(PCs, -1)
+  PC_df <- data.frame(matrix(ncol=2, nrow=0))
+  for (i in 1:length(PCs)) {
+    PC_df[nrow(PC_df)+1,] <- c(PCs[i], var_explained[i])
+  }
+  rm(i)
+  colnames(PC_df) <- c("principal_components", "variance_explained")
+  write.csv(PC_df, file = paste(output_dir, "all_samples_PCs.csv", sep=""), row.names=FALSE)
+}
 
 q()
 
