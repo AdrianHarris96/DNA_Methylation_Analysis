@@ -459,6 +459,8 @@ clustering <- function(pheno, condition1, condition2, betas) {
 
 #Clustering of all samples together if necessary - writing coordinates and variance to CSV
 if (file.exists(paste(output_dir, "all_samples_coordinates.csv", sep=""))) {
+  cat('Skip clustering of all samples\n')
+} else {
   cat("PCA plots - Betas - ALL SAMPLES\n")
   transposed_betas <- t(beta_values_filtered)
   transposed_betas <- data.frame(transposed_betas)
