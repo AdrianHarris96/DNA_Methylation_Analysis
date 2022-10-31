@@ -561,7 +561,7 @@ design4 <- model.matrix(~0+condition+as.numeric(Horvath)+gender+race, data=pheno
 
 design5 <- model.matrix(~0+condition+as.numeric(Horvath)+race, data=pheno_df)
 
-#print(design1)
+# print(design1)
 # print(design2)
 # print(design3)
 # print(design4)
@@ -581,7 +581,7 @@ fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
 print(typeof(fit1))
 
-#Print the list object 
+#Print the list object - Check the object 
 print(fit1)
 
 q()
