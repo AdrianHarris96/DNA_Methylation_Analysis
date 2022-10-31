@@ -582,7 +582,8 @@ fit5 <- lmFit(m_values, design5)
 print(typeof(fit1))
 
 #Print the list object - attempt to extract AIC from base
-print(fitq.aic)
+print(fit1.aic)
+#Attempt to pull coefficients as well
 
 q()
 
