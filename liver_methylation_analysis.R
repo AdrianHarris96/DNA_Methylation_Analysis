@@ -581,8 +581,8 @@ fit4 <- lmFit(m_values, design4)
 fit5 <- lmFit(m_values, design5)
 print(typeof(fit1))
 
-#Print the list object - Check the object 
-print(fit1)
+#Print the list object - attempt to extract AIC from base
+print(fitq.aic)
 
 q()
 
