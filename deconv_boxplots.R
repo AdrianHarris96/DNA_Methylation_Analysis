@@ -119,8 +119,7 @@ generate_boxplot <- function(pheno, condition1, condition2) {
   
   #Write to a line in the CSV
   file_suffix <- paste(condition1, condition2, sep="_")
-  return(c(file_suffix, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5, t6, p6, t7, p7))
-  
+  #return(c(file_suffix, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5, t6, p6, t7, p7)) #Comment out this return to generate the boxplots with code below
   
   #(B, NK, CD4T, CD8T, Mono, Neutro, Eosino)
   p1 <-  ggplot(pheno, aes(x=condition, y=B, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "B") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t1), sep=""))
