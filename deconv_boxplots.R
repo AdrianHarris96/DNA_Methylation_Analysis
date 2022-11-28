@@ -88,47 +88,61 @@ generate_boxplot <- function(pheno, condition1, condition2) {
   pheno$condition <- as.factor(pheno$condition)
   
   #Assumption of equal variance is not exactly met for some comparisons 
-  #Addition of p-value - write to CSV instead of listing info on the plot
+  #Consider organizing this portion of the code to avoid redundancy similar to what is done in the RNA section
   t1 <- t.test(pheno$B~pheno$condition)
   p1 <- round(t1$p.value, 6)
   t1 <- round(as.numeric(t1[[1]]), 3)
+  t1_title <- paste("t-statistic: ", t1, sep = "")
+  p1_title <- paste("p-value: ", p1, sep = "")
   
   t2 <- t.test(pheno$NK~pheno$condition)
   p2 <- round(t2$p.value, 6)
   t2 <- round(as.numeric(t2[[1]]), 3)
+  t2_title <- paste("t-statistic: ", t2, sep = "")
+  p2_title <- paste("p-value: ", p2, sep = "")
   
   t3 <- t.test(pheno$CD4T~pheno$condition)
   p3 <- round(t3$p.value, 6)
   t3 <- round(as.numeric(t3[[1]]), 3)
+  t3_title <- paste("t-statistic: ", t3, sep = "")
+  p3_title <- paste("p-value: ", p3, sep = "")
   
   t4 <- t.test(pheno$CD8T~pheno$condition)
   p4 <- round(t4$p.value, 6)
   t4 <- round(as.numeric(t4[[1]]), 3)
+  t4_title <- paste("t-statistic: ", t4, sep = "")
+  p4_title <- paste("p-value: ", p4, sep = "")
   
   t5 <- t.test(pheno$Mono~pheno$condition)
   p5 <- round(t5$p.value, 6)
   t5 <- round(as.numeric(t5[[1]]), 3)
+  t5_title <- paste("t-statistic: ", t5, sep = "")
+  p5_title <- paste("p-value: ", p5, sep = "")
   
   t6 <- t.test(pheno$Neutro~pheno$condition)
   p6 <- round(t6$p.value, 6)
   t6 <- round(as.numeric(t6[[1]]), 3)
+  t6_title <- paste("t-statistic: ", t6, sep = "")
+  p6_title <- paste("p-value: ", p6, sep = "")
   
   t7 <- t.test(pheno$Eosino~pheno$condition)
   p7 <- round(t7$p.value, 6)
   t7 <- round(as.numeric(t7[[1]]), 3)
+  t7_title <- paste("t-statistic: ", t7, sep = "")
+  p7_title <- paste("p-value: ", p7, sep = "")
   
   #Write to a line in the CSV
   file_suffix <- paste(condition1, condition2, sep="_")
   #return(c(file_suffix, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5, t6, p6, t7, p7)) #Comment out this return to generate the boxplots with code below
   
   #(B, NK, CD4T, CD8T, Mono, Neutro, Eosino)
-  p1 <-  ggplot(pheno, aes(x=condition, y=B, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "B") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t1), sep=""))
-  p2 <-  ggplot(pheno, aes(x=condition, y=NK, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "NK") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t2), sep=""))
-  p3 <-  ggplot(pheno, aes(x=condition, y=CD4T, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "CD4T") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t3), sep=""))
-  p4 <-  ggplot(pheno, aes(x=condition, y=CD8T, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "CD8T") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t4), sep=""))
-  p5 <-  ggplot(pheno, aes(x=condition, y=Mono, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "Mono") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t5), sep=""))
-  p6 <-  ggplot(pheno, aes(x=condition, y=Neutro, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "Neutro") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t6), sep=""))
-  p7 <-  ggplot(pheno, aes(x=condition, y=Eosino, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "Eosino") + theme(legend.position="none") + ggtitle(paste("t-statistic: ", as.character(t7), sep=""))
+  p1 <-  ggplot(pheno, aes(x=condition, y=B, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "B") + theme(legend.position="none") + ggtitle(paste(t1_title, p1_title, sep = "\n"))
+  p2 <-  ggplot(pheno, aes(x=condition, y=NK, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "NK") + theme(legend.position="none") + ggtitle(paste(t2_title, p2_title, sep = "\n"))
+  p3 <-  ggplot(pheno, aes(x=condition, y=CD4T, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "CD4T") + theme(legend.position="none") + ggtitle(paste(t3_title, p3_title, sep = "\n"))
+  p4 <-  ggplot(pheno, aes(x=condition, y=CD8T, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "CD8T") + theme(legend.position="none") + ggtitle(paste(t4_title, p4_title, sep = "\n"))
+  p5 <-  ggplot(pheno, aes(x=condition, y=Mono, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "Mono") + theme(legend.position="none") + ggtitle(paste(t5_title, p5_title, sep = "\n"))
+  p6 <-  ggplot(pheno, aes(x=condition, y=Neutro, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "Neutro") + theme(legend.position="none") + ggtitle(paste(t6_title, p6_title, sep = "\n"))
+  p7 <-  ggplot(pheno, aes(x=condition, y=Eosino, fill=condition, alpha = 0.6)) + geom_violin(trim=FALSE) + theme_bw() + geom_boxplot(width=.1) + labs(x='condition', y= "Eosino") + theme(legend.position="none") + ggtitle(paste(t7_title, p7_title, sep = "\n"))
   
   g <- ggarrange(p1, p2, p3, p4, p5, p6, p7, ncol = 4, nrow=2)
   file_suffix <- paste(file_suffix, "_deconv_boxplot.jpeg", sep="")
@@ -158,7 +172,7 @@ write.csv(t_df, file='~/Desktop/450k_deconv.csv', row.names = FALSE)
 library(readxl)
 rm(list = ls())
 
-deconv_df <- read_excel("~/Downloads/liver_450k_immunecells.xlsx", sheet = 1)
+deconv_df <- read_excel("~/Desktop/Mas_lab/liver_450k_immunecells.xlsx", sheet = 1)
 
 #Rename first column to sample_name
 deconv_df <- deconv_df %>% rename("sample_name" = "...1")
