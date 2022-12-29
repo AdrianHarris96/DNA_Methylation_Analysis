@@ -242,7 +242,7 @@ beta_values_filtered <- beta_values_filtered[,(colnames(beta_values_filtered) %i
 
 #Exclude DCD samples - Kidney data -
 beta_values_filtered <- beta_values_filtered[,!(colnames(beta_values_filtered) %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01"))]
-Removing rows based on the sample_name column in phenotype dataframe
+#Removing rows based on the sample_name column in phenotype dataframe
 pheno_df <- pheno_df[!(pheno_df$Basename %in% c("201465900002_R04C01", "202259350016_R08C01", "202259340119_R05C01", "203504430032_R05C01", "203496240002_R03C01", "202259340119_R06C01", "203496240002_R04C01", "203504430032_R06C01")),]
 
 m_values <- beta2m(beta_values_filtered)
