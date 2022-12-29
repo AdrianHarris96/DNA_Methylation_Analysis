@@ -36,8 +36,8 @@ pheno_df <- import(pheno_file)
 nrow(subset(pheno_df, array_type == '450K'))
 nrow(subset(pheno_df, array_type == 'EPIC'))
 
-#Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01)
-pheno_df <- pheno_df[!(pheno_df$Basename == '203504430032_R01C01' | pheno_df$Basename == '203504430032_R02C01'),]
+#Must remove outlier sample, 203504430032_R01C01 (and its paired sample 203504430032-R02C01) - Comment out when using K3/K12
+#pheno_df <- pheno_df[!(pheno_df$Basename == '203504430032_R01C01' | pheno_df$Basename == '203504430032_R02C01'),]
 
 pheno_df <- pheno_df[(pheno_df$array_type == 'EPIC'),]
 
@@ -228,6 +228,8 @@ if (file.exists(paste(output_dir, "m_values.csv", sep=""))) {
 } else {
   write.csv(m_values, file = paste(output_dir, "m_values.csv", sep=""), row.names = TRUE)
 }
+
+q()
 
 #Loading in the paired file
 paired_pheno <- import(pheno_file2)
