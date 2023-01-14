@@ -1,4 +1,4 @@
-# dna_methylation_analysis
+
 DNA methylation analysis for kidney and liver datasets
 Liver Pipeline
 - `sort_liver_files.py`: Generate control, 450k and EPIC directories and fill with respective raw data.
