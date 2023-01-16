@@ -29,4 +29,3 @@ Other Scripts
 - `filter_DMPs.py`: Generates sig_DMPs.csv file, consisting of only CpG sites with an adjusted p-value of 0.05 or less. 
 - `48639-non-specific-probes-Illumina450k.csv`: Identified as non-specific probes, removed during the analysis. 
 - `HumanMethylation450_15017482_v.1.1_hg19_bowtie_multimap.txt`: Identified as probes with potential hybridization issues, removed during the analysis. 
-- 
