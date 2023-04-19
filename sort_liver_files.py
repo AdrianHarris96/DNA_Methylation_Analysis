@@ -27,6 +27,7 @@ file_list = []
 for direct in dir_list:
 	for data in os.listdir(direct):
 		if ".idat" in data:
+			#if the file is a raw intensity file, append to file_list
 			data = os.path.join(direct, data)
 			file_list.append(data)
 
@@ -34,6 +35,7 @@ for direct in dir_list:
 #print(file_list)
 os.chdir(args.out_dir)
 
+#Check and make directories if necessary
 if os.path.isdir(args.out_dir + 'control/') and os.path.isdir(args.out_dir + '450k_array/') and os.path.isdir(args.out_dir + 'EPIC_array/'):
 	print('Skip making directories')
 else:
@@ -46,18 +48,18 @@ for file in file_list:
 	src = file
 	if "450K" in src:
 		extension = file.split("/")
-		extension = extension[-1]
-		dst = args.out_dir + '450k_array/' + extension
-		shutil.copyfile(src, dst)
+		extension = extension[-1] #extension should really be thought of as the base filename
+		dst = '{0}450k_array/{1}'.format(args.out_dir, extension) #path of the destination
+		shutil.copyfile(src, dst) #copying from source to destination
 	elif "EPIC" in src:
 		extension = file.split("/")
 		extension = extension[-1]
-		dst = args.out_dir + 'EPIC_array/' + extension
+		dst = '{0}EPIC_array/{1}'.format(args.out_dir, extension)
 		shutil.copyfile(src, dst)
 	else:
 		extension = file.split("/")
 		extension = extension[-1]
-		dst = args.out_dir + 'control/' + extension
+		dst = '{0}control/{1}'.format(args.out_dir, extension)
 		shutil.copyfile(src, dst)
 	
 
