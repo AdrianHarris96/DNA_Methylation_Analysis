@@ -1,32 +1,37 @@
 #Calculation of biological age 
 rm(list = ls())
 dev.off()
-#BiocManager::install("methylclock")
+
 library(methylclock)
 library(rio)
 library(tidyverse)
 library(ggplot2)
 
-#MethylationData <- get_MethylationDataExample()
-#Kidney 
-betas <- import('/Users/adrianharris/Desktop/kidney_combined_beta_dir/beta_values.csv')
+#Kidney section for calculating biological age 
+betas_file <- '/Users/adrianharris/Desktop/Mas_lab/week_08262022/kidney_combined_beta_dir/beta_values.csv'
+metadata_file <- '/Users/adrianharris/Documents/GitHub/DNA_Methylation_Analysis/paired_kidney_sample_sheet.csv'
+betas <- import(betas_file)
+
+#Renaming a column and calculating age 
 betas <- betas %>% rename(ProbeID = V1)
 age <- DNAmAge(betas)
 
-pheno_df <- import('/Users/adrianharris/Documents/dna_methylation_analysis/paired_kidney_sample_sheet.csv')
+pheno_df <- import(metadata_file)
 
+#Formatting the age dataframe before merging with the metadata
 age <- age %>% rename(Basename = id)
-
 pheno_df <- merge(pheno_df, age, by = 'Basename')
-# pheno_df <- subset(pheno_df, time == 'K1')
 
 x1 <- pheno_df$donor_age
 y1 <- pheno_df$Horvath
 
+#Plotting via points 
 plot <- ggplot(data=pheno_df, mapping = aes(x = x1, y = y1, color=eGFR_1month)) + theme_bw() + geom_point(alpha=0.9) + labs(x='chronological age', y='biological age (DNAm)') + xlim(20, 80) + ylim(20, 80) + ggtitle('kidney - biological v. chronological age')
-plot <- ggplot(data=pheno_df, mapping = aes(x = x1, y = y1, color=eGFR_1month)) + theme_bw() + geom_text(aes(label = sample_id), size = 2.5) + labs(x='chronological age', y='biological age (DNAm)') + xlim(20, 80) + ylim(20, 80) + ggtitle('kidney - biological v. chronological age')
 plot + geom_abline(slope = 1, intercept=0)
-print(plot)
+
+#Plotting with labels 
+plot1 <- ggplot(data=pheno_df, mapping = aes(x = x1, y = y1, color=eGFR_1month)) + theme_bw() + geom_text(aes(label = sample_id), size = 2.5) + labs(x='chronological age', y='biological age (DNAm)') + xlim(20, 80) + ylim(20, 80) + ggtitle('kidney - biological v. chronological age')
+plot1 + geom_abline(slope = 1, intercept=0)
 
 #Consistency with sample_name
 for (row in 1:nrow(pheno_df)){
