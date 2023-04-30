@@ -5,12 +5,19 @@ library(rio)
 library(tidyverse)
 library(ggplot2)
 library(lumi)
-#Liver heatmaps 
-liver_betas <- import('/Users/adrianharris/Desktop/large_files_liver_combined/beta_values.csv')
+
+#Liver heatmaps
+#Liver file paths 
+liver_betas_file <- '/Users/adrianharris/Desktop/Mas_lab/week_08262022/large_files_liver_combined/beta_values.csv'
+liver_metadata <- '/Users/adrianharris/Documents/GitHub/DNA_Methylation_Analysis/liver_sample_sheet.csv'
+
+#Loading and slight formatting of liver betas 
+liver_betas <- import(liver_betas_file)
 liver_betas <- liver_betas %>% rename(ProbeID = V1)
 row.names(liver_betas) <- liver_betas$ProbeID
 
-liver_pheno <- import('/Users/adrianharris/Documents/dna_methylation_analysis/liver_sample_sheet.csv')
+#Loading df of phenotypes
+liver_pheno <- import(liver_metadata)
 
 #Removal of control samples 
 liver_pheno <- subset(liver_pheno, sample_group != 'control')
@@ -22,7 +29,7 @@ liver_pheno <- liver_pheno[!(liver_pheno$sample_name == 'V037L1'),]
 #Removal of samples not on server 
 liver_pheno <- liver_pheno[!(liver_pheno$Basename == '203751390020_R08C01' | liver_pheno$Basename == '203751390020_R01C01'),]
 
-#Drop DCD samples
+#Drop DCD (deceased donor) samples
 liver_pheno = liver_pheno[!(liver_pheno$donor_type == 'DCD'),]
 
 #Update sample_group column 
@@ -60,28 +67,31 @@ for (row in 1:nrow(liver_pheno)) {
 
 rm(row)
 
-probes1 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_HI_L1-DD_HI_L2_DMPs_sig.csv')
+#Consider encapsulating the steps below into single function
+
+#Loading the significant probes for each comparison
+probes1 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_HI_L1-DD_HI_L2_DMPs_sig.csv')
 probes1 <- probes1$Name
 
-probes2 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_HI_L1-DD_LI_L1_DMPs_sig.csv')
+probes2 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_HI_L1-DD_LI_L1_DMPs_sig.csv')
 probes2 <- probes2$Name
 
-probes3 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_HI_L1-LD_LI_L1_DMPs_sig.csv')
+probes3 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_HI_L1-LD_LI_L1_DMPs_sig.csv')
 probes3 <- probes3$Name
 
-probes4 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_HI_L2-LD_LI_L2_DMPs_sig.csv')
+probes4 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_HI_L2-LD_LI_L2_DMPs_sig.csv')
 probes4 <- probes4$Name
 
-probes5 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_LI_L1-DD_LI_L2_DMPs_sig.csv')
+probes5 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_LI_L1-DD_LI_L2_DMPs_sig.csv')
 probes5 <- probes5$Name
 
-probes6 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_LI_L1-LD_LI_L1_DMPs_sig.csv')
+probes6 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_LI_L1-LD_LI_L1_DMPs_sig.csv')
 probes6 <- probes6$Name
 
-probes7 <- import('/Users/adrianharris/Desktop/Mas_lab/meeting_07292022/liver_csvs_combat0728/DD_LI_L2-LD_LI_L2_DMPs_sig.csv')
+probes7 <- import('/Users/adrianharris/Desktop/Mas_lab/week_07292022/liver_csvs_combat0728/DD_LI_L2-LD_LI_L2_DMPs_sig.csv')
 probes7 <- probes7$Name
 
-#Filter down datasets 
+#Filter down the phenotype dataframes to correspond with each comparison 
 liver_pheno1 <- liver_pheno[(liver_pheno$condition == 'DD_HI_L1' | liver_pheno$condition == 'DD_HI_L2'),]
 liver_pheno1 <- liver_pheno1 %>% arrange(condition)
 
@@ -103,7 +113,7 @@ liver_pheno6 <- liver_pheno6 %>% arrange(condition)
 liver_pheno7 <- liver_pheno[(liver_pheno$condition == 'DD_LI_L2' | liver_pheno$condition == 'LD_LI_L2'),]
 liver_pheno7 <- liver_pheno7 %>% arrange(condition)
 
-#Filter down betas given the dataset and match order
+#Filter down betas given the dataset for each comparison and match order
 liver_betas1 <- liver_betas[,match(liver_pheno1$Basename, colnames(liver_betas))]
 colnames(liver_betas1) <- liver_pheno1$sample_name
 liver_betas2 <- liver_betas[,match(liver_pheno2$Basename, colnames(liver_betas))]
@@ -119,6 +129,7 @@ colnames(liver_betas6) <- liver_pheno6$sample_name
 liver_betas7 <- liver_betas[,match(liver_pheno7$Basename, colnames(liver_betas))]
 colnames(liver_betas7) <- liver_pheno7$sample_name
 
+#Further filter betas dataframes for each comparison to relevant significant probes for each comparison
 liver_betas1 <- liver_betas1[rownames(liver_betas1) %in% probes1,]
 liver_betas2 <- liver_betas2[rownames(liver_betas2) %in% probes2,]
 liver_betas3 <- liver_betas3[rownames(liver_betas3) %in% probes3,]
@@ -127,6 +138,8 @@ liver_betas5 <- liver_betas5[rownames(liver_betas5) %in% probes5,]
 liver_betas6 <- liver_betas6[rownames(liver_betas6) %in% probes6,]
 liver_betas7 <- liver_betas7[rownames(liver_betas7) %in% probes7,]
 
+#Generating and saving the heatmaps 
+#Sample() function used when the number of significant DMPs exceeds 1000
 #install.packages('gplots')
 library(gplots)
 pdf('/Users/adrianharris/Desktop/liver_heatmaps.pdf')
